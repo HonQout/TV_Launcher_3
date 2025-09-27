@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
-import com.android.tvlauncher3.view.button.RoundedRectButton
+import com.android.tvlauncher3.view.button.RoundRectButton
 
 @Composable
 fun LauncherRoute(context: Context, toDestination: () -> Unit, viewModel: MainViewModel) {
@@ -72,15 +72,14 @@ fun LauncherPage(
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(numColumns),
-                modifier = Modifier
-                    .focusGroup(),
+                modifier = Modifier,
                 state = lazyGridState,
                 contentPadding = PaddingValues(all = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 item {
-                    RoundedRectButton(
+                    RoundRectButton(
                         drawableRes = R.drawable.baseline_input_24,
                         contentDescription = stringResource(R.string.signal_source),
                         label = stringResource(R.string.signal_source),
@@ -91,7 +90,7 @@ fun LauncherPage(
                 }
 
                 item {
-                    RoundedRectButton(
+                    RoundRectButton(
                         drawableRes = R.drawable.baseline_apps_24,
                         contentDescription = stringResource(R.string.title_page_apps),
                         label = stringResource(R.string.title_page_apps),
@@ -102,7 +101,7 @@ fun LauncherPage(
                 }
 
                 item {
-                    RoundedRectButton(
+                    RoundRectButton(
                         drawableRes = R.drawable.baseline_settings_24,
                         contentDescription = stringResource(R.string.settings),
                         label = stringResource(R.string.settings),

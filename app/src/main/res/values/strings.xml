@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">TV Launcher 3</string>
-    <string name="unknown">Unknown</string>
 
     <!-- Title -->
     <string name="title_page_home">Home</string>
@@ -12,8 +11,8 @@
     <string name="run">Run</string>
     <string name="uninstall">Uninstall</string>
     <string name="info">Info</string>
-    <string name="uninstall_update">Uninstall update</string>
     <string name="settings">Settings</string>
+    <string name="tv_settings">TV settings</string>
     <string name="wifi">Wi-Fi</string>
     <string name="bluetooth">Bluetooth</string>
     <string name="sound">Sound</string>

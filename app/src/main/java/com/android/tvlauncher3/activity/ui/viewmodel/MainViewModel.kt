@@ -27,12 +27,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showAppActionDialog: StateFlow<Boolean> = _showAppActionDialog.asStateFlow()
 
     // data-related
+    private val _isLoading = MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
     private val _activityBeanList = mutableStateListOf<ActivityBean>()
     val activityBeanList: List<ActivityBean> = _activityBeanList
     private val _lastFocusedColumn = MutableStateFlow<Int>(0)
     val lastFocusedColumn: StateFlow<Int> = _lastFocusedColumn
-    private val _selectedIndex = MutableStateFlow<Int>(0)
-    val selectedIndex: StateFlow<Int> = _selectedIndex.asStateFlow()
+    private val _focusedItemIndex = MutableStateFlow<Int>(0)
+    val focusedItemIndex: StateFlow<Int> = _focusedItemIndex.asStateFlow()
     private val _selectedResolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val selectedResolveInfo: StateFlow<ResolveInfo?> = _selectedResolveInfo.asStateFlow()
 
@@ -41,16 +43,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        loadResolveInfos()
+        loadActivityBeanList()
     }
 
-    fun loadResolveInfos() {
+    fun loadActivityBeanList() {
         viewModelScope.launch {
+            _isLoading.value = true
             withContext(Dispatchers.IO) {
                 _activityBeanList.clear()
                 _activityBeanList.addAll(ApplicationUtils.getActivityBeanList(getApplication()))
                 sortActivityBeanList()
             }
+            _isLoading.value = false
         }
     }
 
@@ -114,8 +118,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val collator: Collator = Collator.getInstance(locale)
         _activityBeanList.sortWith { a, b ->
             collator.compare(
-                a.label.toString(),
-                b.label.toString()
+                a.label,
+                b.label
             )
         }
     }
@@ -132,8 +136,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setSelectedIndex(newValue: Int) {
-        _selectedIndex.update {
+    fun setFocusedItemIndex(newValue: Int) {
+        _focusedItemIndex.update {
             newValue
         }
     }

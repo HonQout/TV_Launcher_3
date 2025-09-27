@@ -200,6 +200,21 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.width(10.dp))
 
+                        TopBarActionButton(
+                            iconRes = R.drawable.baseline_settings_24,
+                            contentDescriptionRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.launchActivity(
+                                    baseContext,
+                                    "com.android.tv.settings",
+                                    ".MainSettings",
+                                    true
+                                )
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
                         Column(
                             modifier = Modifier
                                 .focusable(enabled = false)

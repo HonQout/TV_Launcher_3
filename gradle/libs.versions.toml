@@ -1,7 +1,7 @@
 [versions]
-agp = "8.9.2"
+agp = "8.13.0"
 foundation = "1.7.8"
-kotlin = "2.0.21"
+kotlin = "2.2.10"
 coreKtx = "1.13.1"
 appcompat = "1.6.1"
 composeBom = "2024.09.00"
@@ -9,6 +9,7 @@ kotlinxCoroutinesAndroid = "1.10.2"
 lifecycleViewmodelCompose = "2.8.7"
 navigationCompose = "2.8.9"
 pagingCompose = "3.3.6"
+pagingRuntime = "3.3.6"
 palette = "1.0.0"
 roomRuntime = "2.7.0"
 runtimeLivedata = "1.7.8"
@@ -31,6 +32,7 @@ androidx-navigation-dynamic-features-fragment = { module = "androidx.navigation:
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationCompose" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingCompose" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingRuntime" }
 androidx-palette = { module = "androidx.palette:palette", version.ref = "palette" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }

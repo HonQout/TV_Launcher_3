@@ -11,6 +11,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,14 +30,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
@@ -43,10 +43,12 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -56,57 +58,57 @@ import com.android.tvlauncher3.utils.DrawableUtils
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun RoundedRectButtonImpl(
+private fun RoundRectButtonImpl(
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
     label: String,
     backgroundColor: Color = colorScheme.primary,
-    onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {}
+    interactionSource: InteractionSource = remember { MutableInteractionSource() },
+    onShortClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
+    onSizeChanged: (intSize: IntSize) -> Unit = {}
 ) {
-    val focusRequester = remember { FocusRequester() }
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = interactionSource as MutableInteractionSource
     val focusState = interactionSource.collectIsFocusedAsState()
     val hoverState = interactionSource.collectIsHoveredAsState()
     val pressState = interactionSource.collectIsPressedAsState()
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.2f else 1f,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 250)
     )
     val textColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) Color.White else Color.Gray,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 250)
     )
+    var size by remember { mutableStateOf(IntSize.Zero) }
 
     LaunchedEffect(Unit) {
-
     }
 
     Surface(
         modifier = modifier
-            .size(width = 160.dp, height = 120.dp)
+            .onSizeChanged { intSize ->
+                size = intSize
+                onSizeChanged(intSize)
+            }
             .scale(scale)
+            .focusable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = null,
                 enabled = true,
                 role = Role.Button,
                 onClick = {
-                    onShortClickCallback()
+                    onShortClick()
                 },
                 onLongClick = {
-                    onLongClickCallback()
+                    onLongClick()
                 },
             )
-            .focusRequester(focusRequester)
-            .focusable(
-                enabled = true,
-                interactionSource = interactionSource
-            )
-            .onFocusChanged {
-
-            }
             .hoverable(
                 enabled = true,
                 interactionSource = interactionSource
@@ -118,12 +120,12 @@ private fun RoundedRectButtonImpl(
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
                     Key.Enter -> {
-                        onShortClickCallback()
+                        onShortClick()
                         true
                     }
 
                     Key.Menu -> {
-                        onLongClickCallback()
+                        onLongClick()
                         true
                     }
 
@@ -138,7 +140,7 @@ private fun RoundedRectButtonImpl(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .focusProperties { canFocus = false }
+                .padding(5.dp)
                 .indication(
                     interactionSource = interactionSource,
                     indication = null
@@ -170,14 +172,16 @@ private fun RoundedRectButtonImpl(
 }
 
 @Composable
-fun RoundedRectButton(
+fun RoundRectButton(
     modifier: Modifier = Modifier,
     iconType: IconType,
     icon: Drawable,
     contentDescription: String,
     label: String,
+    interactionSource: InteractionSource = remember { MutableInteractionSource() },
     onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {}
+    onLongClickCallback: () -> Unit = {},
+    onSizeChanged: (IntSize) -> Unit = {}
 ) {
     val backgroundColor = Color(DrawableUtils.getDominantColor(icon))
     val iconWidth = when (iconType) {
@@ -189,7 +193,7 @@ fun RoundedRectButton(
         IconType.Banner -> 90.dp
     }
 
-    RoundedRectButtonImpl(
+    RoundRectButtonImpl(
         modifier = modifier,
         icon = {
             Image(
@@ -201,23 +205,27 @@ fun RoundedRectButton(
             )
         },
         label = label,
+        interactionSource = interactionSource,
         backgroundColor = backgroundColor,
-        onShortClickCallback = onShortClickCallback,
-        onLongClickCallback = onLongClickCallback
+        onShortClick = onShortClickCallback,
+        onLongClick = onLongClickCallback,
+        onSizeChanged = onSizeChanged
     )
 }
 
 @Composable
-fun RoundedRectButton(
+fun RoundRectButton(
     modifier: Modifier = Modifier,
     @DrawableRes drawableRes: Int,
     contentDescription: String,
     label: String,
+    interactionSource: InteractionSource = remember { MutableInteractionSource() },
     backgroundColor: Color = colorScheme.primary,
     onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {}
+    onLongClickCallback: () -> Unit = {},
+    onSizeChanged: (IntSize) -> Unit = {}
 ) {
-    RoundedRectButtonImpl(
+    RoundRectButtonImpl(
         modifier = modifier,
         icon = {
             Image(
@@ -230,8 +238,10 @@ fun RoundedRectButton(
             )
         },
         label = label,
+        interactionSource = interactionSource,
         backgroundColor = backgroundColor,
-        onShortClickCallback = onShortClickCallback,
-        onLongClickCallback = onLongClickCallback
+        onShortClick = onShortClickCallback,
+        onLongClick = onLongClickCallback,
+        onSizeChanged = onSizeChanged
     )
 }

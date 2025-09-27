@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TV Launcher 3</string>
-    <string name="unknown">未知</string>
     <string name="title_page_apps">应用程序</string>
     <string name="hint_cannot_launch_app">无法启动应用。</string>
     <string name="title_page_home">主页</string>
@@ -9,8 +8,8 @@
     <string name="run">运行</string>
     <string name="uninstall">卸载</string>
     <string name="info">信息</string>
-    <string name="uninstall_update">卸载更新</string>
     <string name="settings">设置</string>
+    <string name="tv_settings">电视设置</string>
     <string name="wifi">Wi-Fi</string>
     <string name="bluetooth">蓝牙</string>
     <string name="sound">声音</string>

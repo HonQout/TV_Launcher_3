@@ -22,16 +22,21 @@ class IntentUtils {
                 context.packageManager,
                 PackageManager.MATCH_DEFAULT_ONLY
             )
-            if (activityInfo.exported && TextUtils.isEmpty(activityInfo.permission)) {
-                try {
-                    context.startActivity(intent)
-                    return true
-                } catch (e: ActivityNotFoundException) {
-                    Log.e(TAG, "Cannot find requested activity.", e)
+            if (activityInfo != null) {
+                if (activityInfo.exported && TextUtils.isEmpty(activityInfo.permission)) {
+                    try {
+                        context.startActivity(intent)
+                        return true
+                    } catch (e: ActivityNotFoundException) {
+                        Log.e(TAG, "Cannot find requested activity.", e)
+                        return false
+                    }
+                } else {
+                    Log.e(TAG, "Activity is not exported or needs extra permission to start.")
                     return false
                 }
             } else {
-                Log.e(TAG, "Activity is not exported or needs extra permission to start.")
+                Log.e(TAG, "ActivityInfo is null.")
                 return false
             }
         }
@@ -42,7 +47,7 @@ class IntentUtils {
             activityName: String,
             newTask: Boolean
         ): Boolean {
-            var intent = Intent().apply {
+            val intent = Intent().apply {
                 setClassName(packageName, activityName)
                 if (newTask) {
                     setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -53,14 +58,13 @@ class IntentUtils {
 
         fun launchApp(context: Context, packageName: String, newTask: Boolean): Boolean {
             val pm = context.packageManager
-            var intent = pm.getLaunchIntentForPackage(packageName)
+            val intent = pm.getLaunchIntentForPackage(packageName)
             if (intent == null) {
                 Log.e(TAG, "Intent is null.")
                 return false
             } else {
                 if (newTask) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
                 }
                 return launchActivity(context, intent)
             }
@@ -71,7 +75,7 @@ class IntentUtils {
                 Log.e(TAG, "Required activity is not a settings activity.")
                 return false
             }
-            var intent = Intent(activity).apply {
+            val intent = Intent(activity).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             if (intent.resolveActivity(context.packageManager) != null) {
