@@ -66,10 +66,10 @@ fun AppActionDialog(
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = Modifier
-            .background(color = bgColor, shape = RoundedCornerShape(16.dp))
-            .padding(20.dp)
             .height(IntrinsicSize.Max)
-            .width(IntrinsicSize.Max),
+            .width(IntrinsicSize.Max)
+            .background(color = bgColor, shape = RoundedCornerShape(16.dp))
+            .padding(20.dp),
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true,
@@ -159,7 +159,7 @@ fun AppActionDialog(
                         Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
-                            text = ApplicationUtils.getActivityName(resolveInfo).toString(),
+                            text = ApplicationUtils.getActivityName(resolveInfo),
                             modifier = Modifier,
                             color = Color.Black,
                             fontSize = 16.sp,
@@ -240,11 +240,31 @@ fun AppActionDialog(
                         iconRes = R.drawable.baseline_delete_24,
                         label = stringResource(R.string.uninstall),
                         onShortClick = {
-                            IntentUtils.requestUninstallApp(
-                                context,
-                                resolveInfo.activityInfo.packageName
-                            )
-                            onDismissRequest()
+                            when (applicationType) {
+                                ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.hint_cannot_uninstall_unknown_type,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+
+                                ApplicationUtils.Companion.ApplicationType.SYSTEM -> {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.hint_cannot_uninstall_system_app,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+
+                                ApplicationUtils.Companion.ApplicationType.UPDATED_SYSTEM, ApplicationUtils.Companion.ApplicationType.USER -> {
+                                    IntentUtils.requestUninstallApp(
+                                        context,
+                                        resolveInfo.activityInfo.packageName
+                                    )
+                                    onDismissRequest()
+                                }
+                            }
                         },
                     )
 

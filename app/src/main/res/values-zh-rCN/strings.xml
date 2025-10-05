@@ -15,4 +15,6 @@
     <string name="sound">声音</string>
     <string name="display">显示</string>
     <string name="signal_source">信号源</string>
+    <string name="hint_cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
+    <string name="hint_cannot_uninstall_system_app">无法卸载系统应用。</string>
 </resources>

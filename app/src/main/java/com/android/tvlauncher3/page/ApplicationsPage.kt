@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,13 +24,11 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -39,8 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,11 +50,7 @@ import com.android.tvlauncher3.utils.IntentUtils
 import com.android.tvlauncher3.view.button.RoundRectButton
 import com.android.tvlauncher3.view.dialog.AppActionDialog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import kotlin.math.max
-import kotlin.math.min
 
 @Composable
 fun ApplicationsRoute(context: Context, toDestination: () -> Unit, viewModel: MainViewModel) {
@@ -73,11 +66,6 @@ fun ApplicationsPage(
 ) {
     val tag = "ApplicationsPage"
     val numColumns = 5
-    val density = LocalDensity.current
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-    val screenHeightDp = LocalDensity.current.run {
-        LocalConfiguration.current.screenHeightDp.dp.toPx()
-    }
     val lazyGridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
@@ -91,28 +79,37 @@ fun ApplicationsPage(
         viewModel.activityBeanList.map { MutableInteractionSource() }
     }
 
-    LaunchedEffect(focusedItemIndex) {
-        snapshotFlow { focusedItemIndex }
-            .distinctUntilChanged()
-            .filter { it >= 0 && it < viewModel.activityBeanList.size }
-            .collect { index ->
-                val rowIndex = index / numColumns;
-
-                val layoutInfo = lazyGridState.layoutInfo
-                val visibleItems = layoutInfo.visibleItemsInfo
-                if (visibleItems.isNotEmpty()) {
-                    val firstVisibleRow = visibleItems.first().index / numColumns
-                    val lastVisibleRow = visibleItems.last().index / numColumns
-                    val visibleRowCount = lastVisibleRow - firstVisibleRow + 1
-                    val targetRow = max(0, rowIndex - visibleRowCount / 2)
-                    lazyGridState.animateScrollToItem(
-                        index = min(
-                            targetRow * numColumns,
-                            viewModel.activityBeanList.size - 1
+    val centerFocusedItem = {
+        if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
+            val layoutInfo = lazyGridState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isNotEmpty()) {
+                val firstVisibleItem = visibleItems.first()
+                val focusedItemIndexOffset = focusedItemIndex - firstVisibleItem.index
+                if (focusedItemIndexOffset in 0 until visibleItems.size) {
+                    val viewportCenter =
+                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2F
+                    val focusedItem =
+                        visibleItems[focusedItemIndexOffset]
+                    val focusedItemStartOffset = focusedItem.offset.y
+                    val focusedItemHeight = focusedItem.size.height
+                    val focusedItemCenterOffset =
+                        focusedItemStartOffset + focusedItemHeight / 2F
+                    Log.i(tag, "Focused item center offset is $focusedItemCenterOffset")
+                    val scrollOffset = focusedItemCenterOffset - viewportCenter
+                    Log.i(tag, "Prepare to scroll. Offset = 0")
+                    coroutineScope.launch {
+                        lazyGridState.animateScrollBy(scrollOffset)
+                    }
+                } else {
+                    coroutineScope.launch {
+                        lazyGridState.animateScrollToItem(
+                            focusedItemIndex
                         )
-                    )
+                    }
                 }
             }
+        }
     }
 
     Column(
@@ -181,7 +178,7 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionUp")
-
+                                    centerFocusedItem()
                                     false
                                 }
 
@@ -198,6 +195,7 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionDown")
+                                    centerFocusedItem()
                                     false
                                 }
 
@@ -214,6 +212,22 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionLeft")
+                                    if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+                                        val layoutInfo = lazyGridState.layoutInfo
+                                        val visibleItems = layoutInfo.visibleItemsInfo
+                                        if (visibleItems.isNotEmpty()) {
+                                            val firstVisibleItem = visibleItems.first()
+                                            val focusedItemIndexOffset =
+                                                focusedItemIndex - firstVisibleItem.index
+                                            if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
+                                                coroutineScope.launch {
+                                                    lazyGridState.animateScrollToItem(
+                                                        focusedItemIndex
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                     false
                                 }
 
@@ -230,6 +244,22 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionRight")
+                                    if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+                                        val layoutInfo = lazyGridState.layoutInfo
+                                        val visibleItems = layoutInfo.visibleItemsInfo
+                                        if (visibleItems.isNotEmpty()) {
+                                            val firstVisibleItem = visibleItems.first()
+                                            val focusedItemIndexOffset =
+                                                focusedItemIndex - firstVisibleItem.index
+                                            if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
+                                                coroutineScope.launch {
+                                                    lazyGridState.animateScrollToItem(
+                                                        focusedItemIndex
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                     false
                                 }
 
@@ -269,7 +299,6 @@ fun ApplicationsPage(
                     label = item.label,
                     interactionSource = interactionSources[index],
                     onShortClickCallback = {
-                        viewModel.setFocusedItemIndex(index)
                         val packageName = item.packageName
                         val result: Boolean =
                             IntentUtils.launchApp(context, packageName, true)
@@ -286,10 +315,9 @@ fun ApplicationsPage(
                         }
                     },
                     onLongClickCallback = {
-                        viewModel.setShowAppActionDialog(true)
+                        Log.i(tag, "Long clicked item #$index.")
                     },
                     onSizeChanged = { intSize ->
-                        Log.i(tag, "Width is ${intSize.width}, height is ${intSize.height}.")
                         itemWidth.intValue = intSize.width
                         itemHeight.intValue = intSize.height
                     }

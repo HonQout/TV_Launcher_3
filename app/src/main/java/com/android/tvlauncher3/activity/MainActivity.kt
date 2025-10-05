@@ -207,7 +207,7 @@ class MainActivity : ComponentActivity() {
                                 IntentUtils.launchActivity(
                                     baseContext,
                                     "com.android.tv.settings",
-                                    ".MainSettings",
+                                    "com.android.tv.settings.MainSettings",
                                     true
                                 )
                             }
@@ -284,8 +284,8 @@ class MainActivity : ComponentActivity() {
                             if (intent.data != null) {
                                 packageName = intent.data?.schemeSpecificPart ?: "null"
                             }
-                            Log.i(TAG, "Package $packageName has been added.")
                             viewModel.addItems(packageName)
+                            Log.i(TAG, "Package $packageName has been added.")
                         }
                     }
 

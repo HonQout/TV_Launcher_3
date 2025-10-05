@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.accompanist.insets.ui)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.compose.ui)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
