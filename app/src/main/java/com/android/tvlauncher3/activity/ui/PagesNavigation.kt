@@ -20,7 +20,7 @@ fun PagesNavigation(
     context: Context,
     modifier: Modifier,
     viewModel: MainViewModel
-): Unit {
+) {
     val navController = rememberNavController()
 
     NavHost(

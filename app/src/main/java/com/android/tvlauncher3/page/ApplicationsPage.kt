@@ -129,7 +129,7 @@ fun ApplicationsPage(
                 text = stringResource(R.string.title_page_apps),
                 color = Color.White,
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Bold
             )
 
             Text(

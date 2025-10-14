@@ -29,7 +29,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
@@ -49,6 +50,7 @@ import com.android.tvlauncher3.activity.ui.theme.TVLauncher3Theme
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.utils.DisplayUtils
 import com.android.tvlauncher3.utils.IntentUtils
+import com.android.tvlauncher3.view.SettingsPanel
 import com.android.tvlauncher3.view.button.TopBarActionButton
 
 class MainActivity : ComponentActivity() {
@@ -87,10 +89,7 @@ class MainActivity : ComponentActivity() {
         // 设置内容
         setContent {
             val viewModel: MainViewModel = viewModel()
-
-            LaunchedEffect(Unit) {
-
-            }
+            val showSettingsMenu by viewModel.showSettingsPanel.collectAsState()
 
             DisposableEffect(Unit) {
                 enableEdgeToEdge(
@@ -111,10 +110,6 @@ class MainActivity : ComponentActivity() {
             }
 
             TVLauncher3Theme {
-                LaunchedEffect(Unit) {
-
-                }
-
                 Box(
                     modifier = Modifier
                         .background(Color.Black)
@@ -136,84 +131,14 @@ class MainActivity : ComponentActivity() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TopBarActionButton(
-                            iconRes = R.drawable.baseline_wifi_24,
-                            contentDescriptionRes = R.string.wifi,
-                            onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    baseContext,
-                                    Settings.ACTION_WIFI_SETTINGS
-                                )
-                            },
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        TopBarActionButton(
-                            iconRes = R.drawable.baseline_bluetooth_24,
-                            contentDescriptionRes = R.string.bluetooth,
-                            onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    baseContext,
-                                    Settings.ACTION_BLUETOOTH_SETTINGS
-                                )
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        TopBarActionButton(
-                            iconRes = R.drawable.baseline_speaker_24,
-                            contentDescriptionRes = R.string.sound,
-                            onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    baseContext,
-                                    Settings.ACTION_SOUND_SETTINGS
-                                )
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        TopBarActionButton(
-                            iconRes = R.drawable.baseline_tv_24,
-                            contentDescriptionRes = R.string.display,
-                            onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    baseContext,
-                                    Settings.ACTION_DISPLAY_SETTINGS
-                                )
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        TopBarActionButton(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    baseContext,
-                                    Settings.ACTION_SETTINGS
-                                )
+                                viewModel.setShowSettingsPanel(true)
                             }
                         )
 
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        TopBarActionButton(
-                            iconRes = R.drawable.baseline_settings_24,
-                            contentDescriptionRes = R.string.tv_settings,
-                            onShortClick = {
-                                IntentUtils.launchActivity(
-                                    baseContext,
-                                    "com.android.tv.settings",
-                                    "com.android.tv.settings.MainSettings",
-                                    true
-                                )
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(20.dp))
 
                         Column(
                             modifier = Modifier
@@ -259,6 +184,16 @@ class MainActivity : ComponentActivity() {
                         viewModel = viewModel
                     )
                 }
+
+                if (showSettingsMenu) {
+                    SettingsPanel(
+                        context = baseContext,
+                        viewModel = viewModel,
+                        onDismissRequest = {
+                            viewModel.setShowSettingsPanel(false)
+                        }
+                    )
+                }
             }
         }
     }
@@ -272,7 +207,7 @@ class MainActivity : ComponentActivity() {
     inner class PackageBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent == null) {
-                Log.i(TAG, "Received null message.")
+                Log.i(TAG, "Received message is null.")
             } else {
                 val action: String = intent.action ?: "null"
                 Log.i(TAG, "Received message: $action")
@@ -296,8 +231,8 @@ class MainActivity : ComponentActivity() {
                             if (intent.data != null) {
                                 packageName = intent.data?.schemeSpecificPart ?: "null"
                             }
-                            Log.i(TAG, "Package $packageName has been removed.")
                             viewModel.removeItems(packageName)
+                            Log.i(TAG, "Package $packageName has been removed.")
                         }
                     }
 
@@ -306,8 +241,9 @@ class MainActivity : ComponentActivity() {
                         if (intent.data != null) {
                             packageName = intent.data?.schemeSpecificPart ?: "null"
                         }
-                        Log.i(TAG, "Package $packageName has been replaced.")
                         viewModel.replaceItems(packageName)
+                        Log.i(TAG, "Package $packageName has been replaced.")
+                        viewModel.setFocusedItemIndex(0)
                     }
 
                     else -> {
