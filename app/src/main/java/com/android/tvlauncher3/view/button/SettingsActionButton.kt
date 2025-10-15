@@ -43,6 +43,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -139,7 +140,9 @@ fun SettingsActionButton(
             Text(
                 text = stringResource(textRes),
                 color = Color.White,
-                fontSize = 24.sp
+                fontSize = 24.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2
             )
         }
     }

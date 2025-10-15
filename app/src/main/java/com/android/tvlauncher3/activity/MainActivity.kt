@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.widget.TextClock
 import androidx.activity.ComponentActivity
@@ -31,17 +30,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.android.tvlauncher3.R
@@ -49,7 +47,7 @@ import com.android.tvlauncher3.activity.ui.PagesNavigation
 import com.android.tvlauncher3.activity.ui.theme.TVLauncher3Theme
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.utils.DisplayUtils
-import com.android.tvlauncher3.utils.IntentUtils
+import com.android.tvlauncher3.utils.UIUtils
 import com.android.tvlauncher3.view.SettingsPanel
 import com.android.tvlauncher3.view.button.TopBarActionButton
 
@@ -67,10 +65,7 @@ class MainActivity : ComponentActivity() {
         // 设置主题
         setTheme(android.R.style.Theme_Material_Wallpaper_NoTitleBar)
         // 隐藏状态栏和导航栏
-        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        UIUtils.hideSystemBars(window)
         // 注册监听应用状态的广播接收器
         val intentFilter = IntentFilter().apply {
             addAction(Intent.ACTION_PACKAGE_ADDED)
@@ -86,10 +81,10 @@ class MainActivity : ComponentActivity() {
             receiverFlags
         )
 
-        // 设置内容
         setContent {
             val viewModel: MainViewModel = viewModel()
-            val showSettingsMenu by viewModel.showSettingsPanel.collectAsState()
+            val showSettingsPanel by viewModel.showSettingsPanel.collectAsState()
+            val focusRequester = remember { FocusRequester() }
 
             DisposableEffect(Unit) {
                 enableEdgeToEdge(
@@ -180,12 +175,13 @@ class MainActivity : ComponentActivity() {
 
                     PagesNavigation(
                         context = baseContext,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize(),
                         viewModel = viewModel
                     )
                 }
 
-                if (showSettingsMenu) {
+                if (showSettingsPanel) {
                     SettingsPanel(
                         context = baseContext,
                         viewModel = viewModel,
