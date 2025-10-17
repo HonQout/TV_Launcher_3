@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -41,10 +42,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppListDialog(
-    context: Context,
     onDismissRequest: () -> Unit = {},
     viewModel: MainViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val bgColor = MaterialTheme.colorScheme.primaryContainer
     val itemsPerPage = 20
     val numRows = 4

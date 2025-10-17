@@ -183,7 +183,6 @@ class MainActivity : ComponentActivity() {
 
                 if (showSettingsPanel) {
                     SettingsPanel(
-                        context = baseContext,
                         viewModel = viewModel,
                         onDismissRequest = {
                             viewModel.setShowSettingsPanel(false)

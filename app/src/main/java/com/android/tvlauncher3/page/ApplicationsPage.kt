@@ -328,7 +328,6 @@ fun ApplicationsPage(
 
     if (showAppActionDialog && resolveInfo != null) {
         AppActionDialog(
-            context = context,
             resolveInfo = resolveInfo!!,
             onDismissRequest = {
                 viewModel.setShowAppActionDialog(false)

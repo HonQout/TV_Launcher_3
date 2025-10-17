@@ -1,6 +1,10 @@
 package com.android.tvlauncher3.activity.ui.viewmodel
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ResolveInfo
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
@@ -29,6 +33,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showAppActionDialog: StateFlow<Boolean> = _showAppActionDialog.asStateFlow()
 
     // data-related
+    private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
+    val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     private val _activityBeanList = mutableStateListOf<ActivityBean>()
@@ -38,12 +44,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedResolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val selectedResolveInfo: StateFlow<ResolveInfo?> = _selectedResolveInfo.asStateFlow()
 
+    // broadcastReceiver
+    private var timeBroadcastReceiver: BroadcastReceiver? = null
+
     companion object {
         const val TAG: String = "MainViewModel"
     }
 
     init {
+        registerTimeUpdate(getApplication<Application>())
         loadActivityBeanList()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        unregisterTimeUpdate(getApplication<Application>())
+    }
+
+    fun registerTimeUpdate(context: Context) {
+        if (timeBroadcastReceiver != null) {
+            return
+        }
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+            addAction(Intent.ACTION_DATE_CHANGED)
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+        }
+
+        timeBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                _currentTime.value = System.currentTimeMillis()
+            }
+        }
+
+        context.registerReceiver(timeBroadcastReceiver, filter)
+    }
+
+    fun unregisterTimeUpdate(context: Context) {
+        timeBroadcastReceiver?.let {
+            context.unregisterReceiver(it)
+            timeBroadcastReceiver = null
+        }
     }
 
     fun loadActivityBeanList() {

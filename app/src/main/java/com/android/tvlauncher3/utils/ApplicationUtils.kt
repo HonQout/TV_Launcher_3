@@ -62,19 +62,12 @@ class ApplicationUtils {
         }
 
         /**
-         * Get the banner of an application. If the banner is null, the activity icon will be
-         * returned.
+         * Get the banner of the application.
+         * @return Pair(PackageManager.defaultActivityIcon, IconType.Icon) if the packageName of
+         * the application cannot be obtained, Pair(banner,IconType.Banner) if the application has
+         * a banner, or Pair(icon or PackageManager.defaultActivityIcon,IconType.Icon) if the
+         * application doesn't have a banner.
          */
-        fun getApplicationBanner(context: Context, packageName: String): Drawable {
-            val pm: PackageManager = context.packageManager
-            try {
-                return pm.getApplicationBanner(packageName) ?: pm.getApplicationIcon(packageName)
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.e(TAG, "Cannot find a package with specified packageName.", e)
-                return pm.defaultActivityIcon
-            }
-        }
-
         fun getApplicationBanner(
             context: Context,
             resolveInfo: ResolveInfo?

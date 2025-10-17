@@ -1,6 +1,5 @@
 package com.android.tvlauncher3.view
 
-import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,21 +19,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -42,15 +41,17 @@ import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.utils.IntentUtils
 import com.android.tvlauncher3.view.button.SettingsActionButton
+import com.android.tvlauncher3.view.text.DateAndWeekdayText
+import com.android.tvlauncher3.view.text.TimeText
 
 @Composable
 fun SettingsPanel(
-    context: Context,
     viewModel: MainViewModel,
     onDismissRequest: () -> Unit = {}
 ) {
     val tag = "SettingsPanel"
     val numColumns = 2
+    val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
 
@@ -92,13 +93,20 @@ fun SettingsPanel(
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.settings),
+                    TimeText(
+                        viewModel = viewModel,
                         modifier = Modifier,
                         color = Color.White,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1
+                        fontSize = 30.sp
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    DateAndWeekdayText(
+                        viewModel = viewModel,
+                        modifier = Modifier,
+                        color = Color.White,
+                        fontSize = 20.sp
                     )
                 }
 

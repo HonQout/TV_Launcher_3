@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,10 +55,10 @@ import com.android.tvlauncher3.view.button.AppActionButton
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppActionDialog(
-    context: Context,
     resolveInfo: ResolveInfo,
     onDismissRequest: () -> Unit = {},
 ) {
+    val context = LocalContext.current
     val bgColor = MaterialTheme.colorScheme.primaryContainer
     val shouldShowBelongToHint =
         remember { ApplicationUtils.shouldShowBelongToHint(context, resolveInfo) }
@@ -282,7 +283,7 @@ fun AppActionDialog(
                         iconRes = R.drawable.baseline_info_24,
                         label = stringResource(R.string.info),
                         onShortClick = {
-                            IntentUtils.openApplicationSettingsPage(
+                            IntentUtils.openApplicationDetailsPage(
                                 context,
                                 resolveInfo.activityInfo.packageName
                             )

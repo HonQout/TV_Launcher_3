@@ -14,6 +14,10 @@ class IntentUtils {
     companion object {
         private const val TAG: String = "IntentUtils"
 
+        /**
+         * Launch the specified activity.
+         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
         fun launchActivity(
             context: Context,
             intent: Intent
@@ -41,6 +45,10 @@ class IntentUtils {
             }
         }
 
+        /**
+         * Launch the specified activity.
+         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
         fun launchActivity(
             context: Context,
             packageName: String,
@@ -56,6 +64,10 @@ class IntentUtils {
             return launchActivity(context, intent)
         }
 
+        /**
+         * Launch an app's launch activity.
+         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
         fun launchApp(context: Context, packageName: String, newTask: Boolean): Boolean {
             val pm = context.packageManager
             val intent = pm.getLaunchIntentForPackage(packageName)
@@ -70,6 +82,10 @@ class IntentUtils {
             }
         }
 
+        /**
+         * Launch an activity of Settings (com.android.settings).
+         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
         fun launchSettingsActivity(context: Context, activity: String): Boolean {
             if (!activity.startsWith("android.settings.")) {
                 Log.e(TAG, "Required activity is not a settings activity.")
@@ -88,6 +104,10 @@ class IntentUtils {
             }
         }
 
+        /**
+         * Request to uninstall an application.
+         * @return True if and only if the request is successfully requested, false otherwise.
+         */
         fun requestUninstallApp(context: Context, packageName: String): Boolean {
             if (TextUtils.isEmpty(packageName)) {
                 return false
@@ -105,7 +125,11 @@ class IntentUtils {
             }
         }
 
-        fun openApplicationSettingsPage(context: Context, packageName: String): Boolean {
+        /**
+         * Open the Application Details Page of the given application in Settings (com.android.settings).
+         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
+        fun openApplicationDetailsPage(context: Context, packageName: String): Boolean {
             if (TextUtils.isEmpty(packageName)) {
                 return false
             }
