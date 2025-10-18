@@ -1,11 +1,10 @@
 package com.android.tvlauncher3.page
 
-import android.content.Context
 import android.content.pm.ResolveInfo
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -38,8 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -53,28 +55,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun ApplicationsRoute(context: Context, toDestination: () -> Unit, viewModel: MainViewModel) {
-    ApplicationsPage(context = context, toDestination = toDestination, viewModel = viewModel)
+fun ApplicationsRoute(viewModel: MainViewModel, toDestination: () -> Unit) {
+    ApplicationsPage(viewModel = viewModel, toDestination = toDestination)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ApplicationsPage(
-    context: Context,
-    toDestination: () -> Unit = {},
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    toDestination: () -> Unit = {}
 ) {
     val tag = "ApplicationsPage"
     val numColumns = 5
+    val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
     val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
     val resolveInfo: ResolveInfo? by viewModel.selectedResolveInfo.collectAsState()
-    val focusRequesters = remember(viewModel.activityBeanList.size) {
-        List(viewModel.activityBeanList.size) { FocusRequester() }
-    }
     val interactionSources = remember(viewModel.activityBeanList.size) {
         viewModel.activityBeanList.map { MutableInteractionSource() }
     }
@@ -112,6 +110,11 @@ fun ApplicationsPage(
         }
     }
 
+    BackHandler {
+        Log.i(tag, "Pressed back button.")
+        toDestination()
+    }
+
     Column(
         modifier = Modifier
             .background(color = Color.Transparent)
@@ -120,8 +123,8 @@ fun ApplicationsPage(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(topBarHeight.dp),
+                .height(topBarHeight.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -129,14 +132,17 @@ fun ApplicationsPage(
                 text = stringResource(R.string.title_page_apps),
                 color = Color.White,
                 fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.width(10.dp))
 
             Text(
                 text = viewModel.activityBeanList.size.toString(),
-                modifier = Modifier.padding(start = 10.dp),
                 color = Color.White,
                 fontSize = 30.sp,
+                textAlign = TextAlign.Center
             )
         }
 

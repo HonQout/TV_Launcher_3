@@ -1,14 +1,13 @@
 package com.android.tvlauncher3.page
 
-import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,24 +31,24 @@ import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.view.button.RoundRectButton
 
 @Composable
-fun LauncherRoute(context: Context, toDestination: () -> Unit, viewModel: MainViewModel) {
-    LauncherPage(context = context, toDestination = toDestination, viewModel = viewModel)
+fun LauncherRoute(viewModel: MainViewModel, toDestination: () -> Unit) {
+    LauncherPage(viewModel = viewModel, toDestination = toDestination)
 }
 
 @Composable
 fun LauncherPage(
-    context: Context,
-    toDestination: () -> Unit = {},
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    toDestination: () -> Unit = {}
 ) {
+    val tag = "LauncherPage"
     val numColumns = 5
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
 
     Box(
         modifier = Modifier
-            .background(color = Color.Transparent)
             .fillMaxSize()
+            .background(color = Color.Transparent)
             .padding(20.dp)
     ) {
         Column(
@@ -58,7 +58,8 @@ fun LauncherPage(
         ) {
             Row(
                 modifier = Modifier
-                    .height(topBarHeight.dp),
+                    .height(topBarHeight.dp)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -66,7 +67,8 @@ fun LauncherPage(
                     text = stringResource(R.string.title_page_home),
                     color = Color.White,
                     fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
             }
 
@@ -80,34 +82,12 @@ fun LauncherPage(
             ) {
                 item {
                     RoundRectButton(
-                        drawableRes = R.drawable.baseline_input_24,
-                        contentDescription = stringResource(R.string.signal_source),
-                        label = stringResource(R.string.signal_source),
-                        onShortClickCallback = {
-
-                        }
-                    )
-                }
-
-                item {
-                    RoundRectButton(
                         drawableRes = R.drawable.baseline_apps_24,
                         contentDescription = stringResource(R.string.title_page_apps),
                         label = stringResource(R.string.title_page_apps),
                         onShortClickCallback = {
                             toDestination()
                         }
-                    )
-                }
-
-                item {
-                    RoundRectButton(
-                        drawableRes = R.drawable.baseline_settings_24,
-                        contentDescription = stringResource(R.string.settings),
-                        label = stringResource(R.string.settings),
-                        onShortClickCallback = {
-
-                        },
                     )
                 }
             }

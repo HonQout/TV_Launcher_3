@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -64,7 +63,7 @@ fun AppActionButton(
     val hoverState = interactionSource.collectIsHoveredAsState()
     val pressState = interactionSource.collectIsPressedAsState()
 
-    var bgColor: Color = colorScheme.primary
+    val bgColor: Color = colorScheme.primary
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.15f else 1f,

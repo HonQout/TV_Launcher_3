@@ -1,11 +1,6 @@
 package com.android.tvlauncher3.activity
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.util.Log
 import android.widget.TextClock
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -39,8 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.PagesNavigation
@@ -57,7 +50,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private val viewModel: MainViewModel by viewModels()
-    private val packageBroadcastReceiver: PackageBroadcastReceiver = PackageBroadcastReceiver()
 
     @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,23 +58,8 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_Material_Wallpaper_NoTitleBar)
         // 隐藏状态栏和导航栏
         UIUtils.hideSystemBars(window)
-        // 注册监听应用状态的广播接收器
-        val intentFilter = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REPLACED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addDataScheme("package")
-        }
-        val receiverFlags = ContextCompat.RECEIVER_EXPORTED
-        ContextCompat.registerReceiver(
-            baseContext,
-            packageBroadcastReceiver,
-            intentFilter,
-            receiverFlags
-        )
 
         setContent {
-            val viewModel: MainViewModel = viewModel()
             val showSettingsPanel by viewModel.showSettingsPanel.collectAsState()
             val focusRequester = remember { FocusRequester() }
 
@@ -174,7 +151,6 @@ class MainActivity : ComponentActivity() {
                     }
 
                     PagesNavigation(
-                        context = baseContext,
                         modifier = Modifier
                             .fillMaxSize(),
                         viewModel = viewModel
@@ -195,57 +171,5 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 反注册广播接收器
-        this.unregisterReceiver(packageBroadcastReceiver)
-    }
-
-    inner class PackageBroadcastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent == null) {
-                Log.i(TAG, "Received message is null.")
-            } else {
-                val action: String = intent.action ?: "null"
-                Log.i(TAG, "Received message: $action")
-                when (action) {
-                    Intent.ACTION_PACKAGE_ADDED -> {
-                        val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                        if (!isReplacing) {
-                            var packageName = "null"
-                            if (intent.data != null) {
-                                packageName = intent.data?.schemeSpecificPart ?: "null"
-                            }
-                            viewModel.addItems(packageName)
-                            Log.i(TAG, "Package $packageName has been added.")
-                        }
-                    }
-
-                    Intent.ACTION_PACKAGE_REMOVED -> {
-                        val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                        if (!isReplacing) {
-                            var packageName = "null"
-                            if (intent.data != null) {
-                                packageName = intent.data?.schemeSpecificPart ?: "null"
-                            }
-                            viewModel.removeItems(packageName)
-                            Log.i(TAG, "Package $packageName has been removed.")
-                        }
-                    }
-
-                    Intent.ACTION_PACKAGE_REPLACED -> {
-                        var packageName = "null"
-                        if (intent.data != null) {
-                            packageName = intent.data?.schemeSpecificPart ?: "null"
-                        }
-                        viewModel.replaceItems(packageName)
-                        Log.i(TAG, "Package $packageName has been replaced.")
-                        viewModel.setFocusedItemIndex(0)
-                    }
-
-                    else -> {
-                        Log.e(TAG, "Received irrelevant message.")
-                    }
-                }
-            }
-        }
     }
 }

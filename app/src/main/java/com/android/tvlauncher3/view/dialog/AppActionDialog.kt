@@ -1,6 +1,5 @@
 package com.android.tvlauncher3.view.dialog
 
-import android.content.Context
 import android.content.pm.ResolveInfo
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility

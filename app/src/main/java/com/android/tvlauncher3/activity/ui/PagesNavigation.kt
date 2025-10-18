@@ -1,6 +1,5 @@
 package com.android.tvlauncher3.activity.ui
 
-import android.content.Context
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -17,7 +16,6 @@ import com.android.tvlauncher3.page.LauncherRoute
 
 @Composable
 fun PagesNavigation(
-    context: Context,
     modifier: Modifier,
     viewModel: MainViewModel
 ) {
@@ -31,7 +29,6 @@ fun PagesNavigation(
     ) {
         composable(route = "Launcher") {
             LauncherRoute(
-                context = context,
                 viewModel = viewModel,
                 toDestination = {
                     navController.navigate("Applications")
@@ -59,7 +56,6 @@ fun PagesNavigation(
             }
         ) {
             ApplicationsRoute(
-                context = context,
                 viewModel = viewModel,
                 toDestination = {
                     navController.popBackStack()

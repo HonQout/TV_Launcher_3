@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.content.pm.ResolveInfo
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.tvlauncher3.bean.ActivityBean
@@ -46,22 +47,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // broadcastReceiver
     private var timeBroadcastReceiver: BroadcastReceiver? = null
+    private var packageBroadcastReceiver: BroadcastReceiver? = null
 
     companion object {
         const val TAG: String = "MainViewModel"
     }
 
     init {
-        registerTimeUpdate(getApplication<Application>())
+        registerTimeBR(getApplication())
+        registerPackageBR(getApplication())
         loadActivityBeanList()
     }
 
     override fun onCleared() {
         super.onCleared()
-        unregisterTimeUpdate(getApplication<Application>())
+        unregisterTimeBR(getApplication())
+        unregisterPackageBR(getApplication())
     }
 
-    fun registerTimeUpdate(context: Context) {
+    fun registerTimeBR(context: Context) {
         if (timeBroadcastReceiver != null) {
             return
         }
@@ -82,10 +86,84 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         context.registerReceiver(timeBroadcastReceiver, filter)
     }
 
-    fun unregisterTimeUpdate(context: Context) {
+    fun unregisterTimeBR(context: Context) {
         timeBroadcastReceiver?.let {
             context.unregisterReceiver(it)
             timeBroadcastReceiver = null
+        }
+    }
+
+    fun registerPackageBR(context: Context) {
+        if (packageBroadcastReceiver != null) {
+            return
+        }
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        }
+
+        val receiverFlags = ContextCompat.RECEIVER_EXPORTED
+
+        packageBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent == null) {
+                    Log.i(TAG, "Received message is null.")
+                } else {
+                    val action: String = intent.action ?: "null"
+                    Log.i(TAG, "Received message: $action")
+                    when (action) {
+                        Intent.ACTION_PACKAGE_ADDED -> {
+                            val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                            if (!isReplacing) {
+                                var packageName = "null"
+                                if (intent.data != null) {
+                                    packageName = intent.data?.schemeSpecificPart ?: "null"
+                                }
+                                addItems(packageName)
+                                Log.i(TAG, "Package $packageName has been added.")
+                            }
+                        }
+
+                        Intent.ACTION_PACKAGE_REMOVED -> {
+                            val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                            if (!isReplacing) {
+                                var packageName = "null"
+                                if (intent.data != null) {
+                                    packageName = intent.data?.schemeSpecificPart ?: "null"
+                                }
+                                removeItems(packageName)
+                                Log.i(TAG, "Package $packageName has been removed.")
+                            }
+                        }
+
+                        Intent.ACTION_PACKAGE_REPLACED -> {
+                            var packageName = "null"
+                            if (intent.data != null) {
+                                packageName = intent.data?.schemeSpecificPart ?: "null"
+                            }
+                            replaceItems(packageName)
+                            Log.i(TAG, "Package $packageName has been replaced.")
+                            setFocusedItemIndex(0)
+                        }
+
+                        else -> {
+                            Log.e(TAG, "Received irrelevant message.")
+                        }
+                    }
+                }
+            }
+        }
+
+        ContextCompat.registerReceiver(context, packageBroadcastReceiver, filter, receiverFlags)
+    }
+
+    fun unregisterPackageBR(context: Context) {
+        packageBroadcastReceiver?.let {
+            context.unregisterReceiver(it)
+            packageBroadcastReceiver = null
         }
     }
 
