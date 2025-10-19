@@ -20,12 +20,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +49,7 @@ fun SettingsPanel(
 ) {
     val tag = "SettingsPanel"
     val numColumns = 2
+    val bgColor = Color.Black.copy(alpha = 0.5f)
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
@@ -71,19 +70,15 @@ fun SettingsPanel(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(bgColor)
+                .padding(20.dp)
                 .windowInsetsPadding(WindowInsets.systemBars)
         ) {
             Column(
                 modifier = Modifier
-                    .widthIn(max = 1000.dp)
                     .fillMaxHeight()
-                    .fillMaxWidth(0.5f)
-                    .background(
-                        color = Color.Transparent,
-                        shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
-                    )
-                    .padding(20.dp)
+                    .fillMaxWidth(0.4f)
+                    .background(color = Color.Transparent)
                     .align(Alignment.TopEnd)
                     .focusable(enabled = false)
             ) {

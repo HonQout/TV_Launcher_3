@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -72,9 +71,6 @@ private fun RoundRectButtonImpl(
         targetValue = if (focusState.value || hoverState.value) Color.White else Color.Gray,
         animationSpec = tween(durationMillis = 250)
     )
-
-    LaunchedEffect(Unit) {
-    }
 
     Surface(
         modifier = modifier

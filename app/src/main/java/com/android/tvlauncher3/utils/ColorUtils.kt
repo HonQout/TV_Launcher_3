@@ -54,7 +54,7 @@ class ColorUtils {
         }
 
         fun isLightColor(color: Color, threshold: Double = 0.5): Boolean {
-            var hsl = FloatArray(3)
+            val hsl = FloatArray(3)
             ColorUtils.RGBToHSL(color.red.toInt(), color.blue.toInt(), color.green.toInt(), hsl)
             Log.i("HSL", "HSL = ${hsl[2]}")
             return hsl[2] > threshold
