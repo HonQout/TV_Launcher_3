@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -72,7 +71,7 @@ fun ApplicationsPage(
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
     val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
-    val resolveInfo: ResolveInfo? by viewModel.selectedResolveInfo.collectAsState()
+    val resolveInfo: ResolveInfo? by viewModel.resolveInfo.collectAsState()
     val interactionSources = remember(viewModel.activityBeanList.size) {
         viewModel.activityBeanList.map { MutableInteractionSource() }
     }
@@ -166,6 +165,7 @@ fun ApplicationsPage(
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: Menu")
                                     coroutineScope.launch(Dispatchers.IO) {
+                                        viewModel.setResolveInfo(viewModel.focusedItemResolveInfo.value)
                                         viewModel.setShowAppActionDialog(true)
                                     }
                                     false
@@ -285,8 +285,6 @@ fun ApplicationsPage(
             itemsIndexed(
                 viewModel.activityBeanList
             ) { index, item ->
-                val itemWidth = remember { mutableIntStateOf(160) }
-                val itemHeight = remember { mutableIntStateOf(120) }
                 val focusRequester = remember { FocusRequester() }
 
                 RoundRectButton(
@@ -296,7 +294,7 @@ fun ApplicationsPage(
                             if (focusState.isFocused) {
                                 Log.i(tag, "FocusedItemIndex: $index")
                                 viewModel.setFocusedItemIndex(index)
-                                viewModel.setSelectedResolveInfo(item.resolveInfo)
+                                viewModel.setFocusedItemResolveInfo(item.resolveInfo)
                             }
                         },
                     icon = item.getIcon(context),
@@ -321,11 +319,9 @@ fun ApplicationsPage(
                         }
                     },
                     onLongClickCallback = {
-                        Log.i(tag, "Long clicked item #$index.")
-                    },
-                    onSizeChanged = { intSize ->
-                        itemWidth.intValue = intSize.width
-                        itemHeight.intValue = intSize.height
+                        viewModel.setPressedItemResolveInfo(item.resolveInfo)
+                        viewModel.setResolveInfo(item.resolveInfo)
+                        viewModel.setShowAppActionDialog(true)
                     }
                 )
             }

@@ -42,8 +42,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val activityBeanList: List<ActivityBean> = _activityBeanList
     private val _focusedItemIndex = MutableStateFlow<Int>(0)
     val focusedItemIndex: StateFlow<Int> = _focusedItemIndex.asStateFlow()
-    private val _selectedResolveInfo = MutableStateFlow<ResolveInfo?>(null)
-    val selectedResolveInfo: StateFlow<ResolveInfo?> = _selectedResolveInfo.asStateFlow()
+    private val _focusedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
+    val focusedItemResolveInfo: StateFlow<ResolveInfo?> = _focusedItemResolveInfo.asStateFlow()
+    private val _pressedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
+    val pressedItemResolveInfo: StateFlow<ResolveInfo?> = _pressedItemResolveInfo.asStateFlow()
+    private val _resolveInfo = MutableStateFlow<ResolveInfo?>(null)
+    val resolveInfo: StateFlow<ResolveInfo?> = _resolveInfo.asStateFlow()
 
     // broadcastReceiver
     private var timeBroadcastReceiver: BroadcastReceiver? = null
@@ -333,8 +337,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setSelectedResolveInfo(newValue: ResolveInfo?) {
-        _selectedResolveInfo.update {
+    fun setFocusedItemResolveInfo(newValue: ResolveInfo?) {
+        _focusedItemResolveInfo.update {
+            newValue
+        }
+    }
+
+    fun setPressedItemResolveInfo(newValue: ResolveInfo?) {
+        _pressedItemResolveInfo.update {
+            newValue
+        }
+    }
+
+    fun setResolveInfo(newValue: ResolveInfo?) {
+        _resolveInfo.update {
             newValue
         }
     }

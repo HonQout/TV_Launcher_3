@@ -153,8 +153,8 @@ fun SettingsPanel(
                     item {
                         SettingsActionButton(
                             iconRes = R.drawable.baseline_wifi_24,
-                            contentDescriptionRes = R.string.wifi,
-                            titleRes = R.string.wifi,
+                            contentDescriptionRes = R.string.wlan,
+                            titleRes = R.string.wlan,
                             descriptionRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(

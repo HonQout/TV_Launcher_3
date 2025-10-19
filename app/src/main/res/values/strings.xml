@@ -16,7 +16,7 @@
     <string name="info">Info</string>
     <string name="settings">Settings</string>
     <string name="tv_settings">TV settings</string>
-    <string name="wifi">Wi-Fi</string>
+    <string name="wlan">WLAN</string>
     <string name="bluetooth">Bluetooth</string>
     <string name="internet">Internet</string>
     <string name="accessory">Accessory</string>

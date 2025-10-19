@@ -15,7 +15,6 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,9 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -43,12 +40,10 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.tv.material3.Text
@@ -63,13 +58,11 @@ private fun RoundRectButtonImpl(
     backgroundColor: Color = colorScheme.primary,
     interactionSource: InteractionSource = remember { MutableInteractionSource() },
     onShortClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
-    onSizeChanged: (intSize: IntSize) -> Unit = {}
+    onLongClick: () -> Unit = {}
 ) {
     val interactionSource = interactionSource as MutableInteractionSource
     val focusState = interactionSource.collectIsFocusedAsState()
     val hoverState = interactionSource.collectIsHoveredAsState()
-    val pressState = interactionSource.collectIsPressedAsState()
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.2f else 1f,
@@ -79,17 +72,12 @@ private fun RoundRectButtonImpl(
         targetValue = if (focusState.value || hoverState.value) Color.White else Color.Gray,
         animationSpec = tween(durationMillis = 250)
     )
-    var size by remember { mutableStateOf(IntSize.Zero) }
 
     LaunchedEffect(Unit) {
     }
 
     Surface(
         modifier = modifier
-            .onSizeChanged { intSize ->
-                size = intSize
-                onSizeChanged(intSize)
-            }
             .scale(scale)
             .focusable(
                 enabled = true,
@@ -188,8 +176,7 @@ fun RoundRectButton(
     label: String,
     interactionSource: InteractionSource = remember { MutableInteractionSource() },
     onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {},
-    onSizeChanged: (IntSize) -> Unit = {}
+    onLongClickCallback: () -> Unit = {}
 ) {
     val backgroundColor = Color(DrawableUtils.getDominantColor(icon))
     val iconWidth = when (iconType) {
@@ -216,8 +203,7 @@ fun RoundRectButton(
         interactionSource = interactionSource,
         backgroundColor = backgroundColor,
         onShortClick = onShortClickCallback,
-        onLongClick = onLongClickCallback,
-        onSizeChanged = onSizeChanged
+        onLongClick = onLongClickCallback
     )
 }
 
@@ -230,8 +216,7 @@ fun RoundRectButton(
     interactionSource: InteractionSource = remember { MutableInteractionSource() },
     backgroundColor: Color = colorScheme.primary,
     onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {},
-    onSizeChanged: (IntSize) -> Unit = {}
+    onLongClickCallback: () -> Unit = {}
 ) {
     RoundRectButtonImpl(
         modifier = modifier,
@@ -249,7 +234,6 @@ fun RoundRectButton(
         interactionSource = interactionSource,
         backgroundColor = backgroundColor,
         onShortClick = onShortClickCallback,
-        onLongClick = onLongClickCallback,
-        onSizeChanged = onSizeChanged
+        onLongClick = onLongClickCallback
     )
 }

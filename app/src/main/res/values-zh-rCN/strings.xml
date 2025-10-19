@@ -10,7 +10,7 @@
     <string name="info">信息</string>
     <string name="settings">设置</string>
     <string name="tv_settings">电视设置</string>
-    <string name="wifi">Wi-Fi</string>
+    <string name="wlan">无线局域网</string>
     <string name="bluetooth">蓝牙</string>
     <string name="internet">互联网</string>
     <string name="accessory">配件</string>
