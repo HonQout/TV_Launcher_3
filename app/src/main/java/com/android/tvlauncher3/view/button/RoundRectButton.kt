@@ -1,11 +1,11 @@
 package com.android.tvlauncher3.view.button
 
 import android.graphics.drawable.Drawable
+import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
@@ -51,12 +51,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import com.android.tvlauncher3.utils.ApplicationUtils.Companion.IconType
 import com.android.tvlauncher3.utils.DrawableUtils
 
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun RoundRectButtonImpl(
     modifier: Modifier = Modifier,
@@ -120,18 +118,28 @@ private fun RoundRectButtonImpl(
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
                     Key.Enter -> {
-                        onShortClick()
-                        true
+                        when (keyEvent.nativeKeyEvent.action) {
+                            KeyEvent.ACTION_UP -> {
+                                onShortClick()
+                                true
+                            }
+
+                            else -> false
+                        }
                     }
 
                     Key.Menu -> {
-                        onLongClick()
-                        true
+                        when (keyEvent.nativeKeyEvent.action) {
+                            KeyEvent.ACTION_UP -> {
+                                onLongClick()
+                                true
+                            }
+
+                            else -> false
+                        }
                     }
 
-                    else -> {
-                        false
-                    }
+                    else -> false
                 }
             },
         shape = RoundedCornerShape(16.dp),

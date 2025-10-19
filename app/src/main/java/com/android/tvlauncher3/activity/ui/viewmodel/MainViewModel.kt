@@ -47,6 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // broadcastReceiver
     private var timeBroadcastReceiver: BroadcastReceiver? = null
+    private var localeBroadcastReceiver: BroadcastReceiver? = null
     private var packageBroadcastReceiver: BroadcastReceiver? = null
 
     companion object {
@@ -55,6 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         registerTimeBR(getApplication())
+        registerLocaleBR(getApplication())
         registerPackageBR(getApplication())
         loadActivityBeanList()
     }
@@ -62,6 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         unregisterTimeBR(getApplication())
+        unregisterLocaleBR(getApplication())
         unregisterPackageBR(getApplication())
     }
 
@@ -90,6 +93,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         timeBroadcastReceiver?.let {
             context.unregisterReceiver(it)
             timeBroadcastReceiver = null
+        }
+    }
+
+    fun registerLocaleBR(context: Context) {
+        if (localeBroadcastReceiver != null) {
+            return
+        }
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_LOCALE_CHANGED)
+        }
+
+        localeBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                loadActivityBeanList()
+            }
+        }
+
+        context.registerReceiver(localeBroadcastReceiver, filter)
+    }
+
+    fun unregisterLocaleBR(context: Context) {
+        localeBroadcastReceiver?.let {
+            context.unregisterReceiver(it)
+            localeBroadcastReceiver = null
         }
     }
 

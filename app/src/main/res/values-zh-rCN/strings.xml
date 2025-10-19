@@ -12,8 +12,11 @@
     <string name="tv_settings">电视设置</string>
     <string name="wifi">Wi-Fi</string>
     <string name="bluetooth">蓝牙</string>
+    <string name="internet">互联网</string>
+    <string name="accessory">配件</string>
     <string name="sound">声音</string>
     <string name="display">显示</string>
     <string name="hint_cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
     <string name="hint_cannot_uninstall_system_app">无法卸载系统应用。</string>
+    <string name="screen_saver">屏保</string>
 </resources>

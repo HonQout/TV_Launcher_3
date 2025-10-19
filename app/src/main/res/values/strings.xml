@@ -18,6 +18,9 @@
     <string name="tv_settings">TV settings</string>
     <string name="wifi">Wi-Fi</string>
     <string name="bluetooth">Bluetooth</string>
+    <string name="internet">Internet</string>
+    <string name="accessory">Accessory</string>
     <string name="sound">Sound</string>
     <string name="display">Display</string>
+    <string name="screen_saver">Screen saver</string>
 </resources>

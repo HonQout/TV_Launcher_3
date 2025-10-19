@@ -39,11 +39,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppListDialog(
-    onDismissRequest: () -> Unit = {},
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = viewModel(),
+    onDismissRequest: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val bgColor = MaterialTheme.colorScheme.primaryContainer

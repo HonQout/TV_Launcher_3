@@ -124,7 +124,7 @@ fun SettingsPanel(
                         SettingsActionButton(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.settings,
-                            textRes = R.string.settings,
+                            titleRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(
                                     context,
@@ -138,7 +138,7 @@ fun SettingsPanel(
                         SettingsActionButton(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.tv_settings,
-                            textRes = R.string.tv_settings,
+                            titleRes = R.string.tv_settings,
                             onShortClick = {
                                 IntentUtils.launchActivity(
                                     context,
@@ -154,7 +154,8 @@ fun SettingsPanel(
                         SettingsActionButton(
                             iconRes = R.drawable.baseline_wifi_24,
                             contentDescriptionRes = R.string.wifi,
-                            textRes = R.string.wifi,
+                            titleRes = R.string.wifi,
+                            descriptionRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(
                                     context,
@@ -168,7 +169,8 @@ fun SettingsPanel(
                         SettingsActionButton(
                             iconRes = R.drawable.baseline_bluetooth_24,
                             contentDescriptionRes = R.string.bluetooth,
-                            textRes = R.string.bluetooth,
+                            titleRes = R.string.bluetooth,
+                            descriptionRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(
                                     context,
@@ -180,9 +182,44 @@ fun SettingsPanel(
 
                     item {
                         SettingsActionButton(
+                            iconRes = R.drawable.baseline_web_24,
+                            contentDescriptionRes = R.string.internet,
+                            titleRes = R.string.internet,
+                            descriptionRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.launchActivity(
+                                    context,
+                                    "com.android.tv.settings",
+                                    "com.android.tv.settings.connectivity.NetworkActivity",
+                                    true
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButton(
+                            iconRes = R.drawable.baseline_settings_remote_24,
+                            contentDescriptionRes = R.string.accessory,
+                            titleRes = R.string.accessory,
+                            descriptionRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.launchActivity(
+                                    context,
+                                    "com.android.tv.settings",
+                                    "com.android.tv.settings.accessories.AddAccessoryActivity",
+                                    true
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButton(
                             iconRes = R.drawable.baseline_speaker_24,
                             contentDescriptionRes = R.string.sound,
-                            textRes = R.string.sound,
+                            titleRes = R.string.sound,
+                            descriptionRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(
                                     context,
@@ -194,13 +231,48 @@ fun SettingsPanel(
 
                     item {
                         SettingsActionButton(
+                            iconRes = R.drawable.baseline_speaker_24,
+                            contentDescriptionRes = R.string.sound,
+                            titleRes = R.string.sound,
+                            descriptionRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.launchActivity(
+                                    context,
+                                    "com.android.tv.settings",
+                                    "com.android.tv.settings.device.sound.SoundActivity",
+                                    true
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButton(
                             iconRes = R.drawable.baseline_tv_24,
                             contentDescriptionRes = R.string.display,
-                            textRes = R.string.display,
+                            titleRes = R.string.display,
+                            descriptionRes = R.string.settings,
                             onShortClick = {
                                 IntentUtils.launchSettingsActivity(
                                     context,
                                     Settings.ACTION_DISPLAY_SETTINGS
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButton(
+                            iconRes = R.drawable.baseline_settings_system_daydream_24,
+                            contentDescriptionRes = R.string.screen_saver,
+                            titleRes = R.string.screen_saver,
+                            descriptionRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.launchActivity(
+                                    context,
+                                    "com.android.tv.settings",
+                                    "com.android.tv.settings.device.display.daydream.DaydreamActivity",
+                                    true
                                 )
                             }
                         )
