@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -72,9 +71,6 @@ fun ApplicationsPage(
     val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
     val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
     val resolveInfo: ResolveInfo? by viewModel.resolveInfo.collectAsState()
-    val interactionSources = remember(viewModel.activityBeanList.size) {
-        viewModel.activityBeanList.map { MutableInteractionSource() }
-    }
 
     val centerFocusedItem = {
         if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
@@ -299,9 +295,7 @@ fun ApplicationsPage(
                         },
                     icon = item.getIcon(context),
                     iconType = item.iconType,
-                    contentDescription = item.label,
                     label = item.label,
-                    interactionSource = interactionSources[index],
                     onShortClickCallback = {
                         val packageName = item.packageName
                         val result: Boolean =

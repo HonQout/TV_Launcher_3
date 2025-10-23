@@ -11,7 +11,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -35,6 +34,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -55,11 +55,10 @@ private fun RoundRectButtonImpl(
     icon: @Composable () -> Unit,
     label: String,
     backgroundColor: Color = colorScheme.primary,
-    interactionSource: InteractionSource = remember { MutableInteractionSource() },
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
-    val interactionSource = interactionSource as MutableInteractionSource
+    val interactionSource = remember { MutableInteractionSource() }
     val focusState = interactionSource.collectIsFocusedAsState()
     val hoverState = interactionSource.collectIsHoveredAsState()
 
@@ -168,13 +167,13 @@ fun RoundRectButton(
     modifier: Modifier = Modifier,
     iconType: IconType,
     icon: Drawable,
-    contentDescription: String,
     label: String,
-    interactionSource: InteractionSource = remember { MutableInteractionSource() },
+    contentDescription: String = label,
     onShortClickCallback: () -> Unit = {},
     onLongClickCallback: () -> Unit = {}
 ) {
-    val backgroundColor = Color(DrawableUtils.getDominantColor(icon))
+    val backgroundColor =
+        Color(DrawableUtils.getBackgroundColorFromAppIcon(icon, Color.White.toArgb()))
     val iconWidth = when (iconType) {
         IconType.Icon -> 75.dp
         IconType.Banner -> 160.dp
@@ -196,7 +195,6 @@ fun RoundRectButton(
             )
         },
         label = label,
-        interactionSource = interactionSource,
         backgroundColor = backgroundColor,
         onShortClick = onShortClickCallback,
         onLongClick = onLongClickCallback
@@ -209,7 +207,6 @@ fun RoundRectButton(
     @DrawableRes drawableRes: Int,
     contentDescription: String,
     label: String,
-    interactionSource: InteractionSource = remember { MutableInteractionSource() },
     backgroundColor: Color = colorScheme.primary,
     onShortClickCallback: () -> Unit = {},
     onLongClickCallback: () -> Unit = {}
@@ -227,7 +224,6 @@ fun RoundRectButton(
             )
         },
         label = label,
-        interactionSource = interactionSource,
         backgroundColor = backgroundColor,
         onShortClick = onShortClickCallback,
         onLongClick = onLongClickCallback

@@ -110,7 +110,8 @@ fun AppActionDialog(
                                     .fillMaxWidth(),
                                 color = Color.LightGray,
                                 fontSize = 16.sp,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
