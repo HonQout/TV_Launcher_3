@@ -146,5 +146,22 @@ class IntentUtils {
                 return false
             }
         }
+
+        fun openAppInMarket(context: Context, packageName: String): Boolean {
+            if (TextUtils.isEmpty(packageName)) {
+                return false
+            }
+            val intent = Intent().apply {
+                setAction(Intent.ACTION_VIEW)
+                setData(("market://details?id=$packageName").toUri())
+            }
+            try {
+                context.startActivity(intent)
+                return true
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, "Failed to find app market.", e)
+                return false
+            }
+        }
     }
 }

@@ -4,6 +4,8 @@
     <string name="title_page_apps">应用程序</string>
     <string name="hint_cannot_launch_app">无法启动应用。</string>
     <string name="title_page_home">主页</string>
+    <string name="hint_cannot_launch_settings">无法启动设置。</string>
+    <string name="hint_no_app_market_installed">未安装应用市场。</string>
     <string name="activity_belongs_to">“%s”属于以下应用：</string>
     <string name="run">运行</string>
     <string name="uninstall">卸载</string>
@@ -19,4 +21,6 @@
     <string name="hint_cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
     <string name="hint_cannot_uninstall_system_app">无法卸载系统应用。</string>
     <string name="screen_saver">屏保</string>
+    <string name="application_market">应用市场</string>
+    <string name="hint_uninstall_request_failed">请求卸载失败。</string>
 </resources>

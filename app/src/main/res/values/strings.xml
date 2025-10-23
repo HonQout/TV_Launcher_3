@@ -9,13 +9,11 @@
     <string name="hint_cannot_launch_app">Cannot launch app.</string>
     <string name="hint_cannot_uninstall_unknown_type">Cannot uninstall an app whose type is unknown.</string>
     <string name="hint_cannot_uninstall_system_app">Cannot uninstall system app.</string>
+    <string name="hint_uninstall_request_failed">Failed to request uninstallation.</string>
+    <string name="hint_cannot_launch_settings">Cannot launch settings.</string>
+    <string name="hint_no_app_market_installed">No app market installed.</string>
 
-    <string name="activity_belongs_to">\"%s\" belongs to the following app:</string>
-    <string name="run">Run</string>
-    <string name="uninstall">Uninstall</string>
-    <string name="info">Info</string>
-    <string name="settings">Settings</string>
-    <string name="tv_settings">TV settings</string>
+    <!-- Settings item -->
     <string name="wlan">WLAN</string>
     <string name="bluetooth">Bluetooth</string>
     <string name="internet">Internet</string>
@@ -23,4 +21,13 @@
     <string name="sound">Sound</string>
     <string name="display">Display</string>
     <string name="screen_saver">Screen saver</string>
+
+    <!-- Others -->
+    <string name="activity_belongs_to">\"%s\" belongs to the following app:</string>
+    <string name="run">Run</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="info">Info</string>
+    <string name="settings">Settings</string>
+    <string name="tv_settings">TV settings</string>
+    <string name="application_market">Application market</string>
 </resources>

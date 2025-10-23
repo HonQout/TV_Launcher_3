@@ -3,13 +3,30 @@ package com.android.tvlauncher3.view.button
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -17,8 +34,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 
 @Composable
 fun TopBarActionButton(
@@ -27,10 +42,42 @@ fun TopBarActionButton(
     @StringRes contentDescriptionRes: Int,
     onShortClick: () -> Unit = {}
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusState = interactionSource.collectIsFocusedAsState()
+    val hoverState = interactionSource.collectIsHoveredAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val containerColor by animateColorAsState(
+        targetValue = if (focusState.value || hoverState.value) Color.LightGray else Color.DarkGray,
+        animationSpec = tween(durationMillis = 300)
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (focusState.value || hoverState.value) Color.Black else Color.White,
+        animationSpec = tween(durationMillis = 300)
+    )
+
     Button(
         onClick = onShortClick,
         modifier = modifier
             .wrapContentSize(align = Alignment.Center)
+            .scale(scale)
+            .focusRequester(focusRequester)
+            .focusable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .hoverable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .indication(
+                interactionSource = interactionSource,
+                indication = null
+            )
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
                     Key.Enter -> {
@@ -44,30 +91,24 @@ fun TopBarActionButton(
                         }
                     }
 
-                    else -> {
-                        false
-                    }
+                    else -> false
                 }
             },
-        onLongClick = {},
         enabled = true,
-        scale = ButtonDefaults.scale(),
-        shape = ButtonDefaults.shape(shape = CircleShape),
-        colors = ButtonDefaults.colors(
-            containerColor = Color.DarkGray.copy(alpha = 0.5f),
-            contentColor = Color.White,
-            focusedContainerColor = Color.Gray.copy(alpha = 0.5f),
-            focusedContentColor = Color.Black
+        shape = CircleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
         ),
-        tonalElevation = 12.dp,
-        border = ButtonDefaults.border()
+        elevation = ButtonDefaults.buttonElevation(),
+        contentPadding = PaddingValues(1.dp),
+        interactionSource = interactionSource
     ) {
         Icon(
             painter = painterResource(iconRes),
             contentDescription = stringResource(contentDescriptionRes),
             modifier = Modifier
-                .size(size = 24.dp),
-            tint = Color.White
+                .size(size = 24.dp)
         )
     }
 }

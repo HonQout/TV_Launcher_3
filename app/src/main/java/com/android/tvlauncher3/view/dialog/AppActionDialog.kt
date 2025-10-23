@@ -31,8 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -180,21 +178,16 @@ fun AppActionDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     AppActionButton(
-                        modifier = Modifier
-                            .onKeyEvent { keyEvent ->
-                                when (keyEvent.key) {
-                                    else -> false
-                                }
-                            },
+                        modifier = Modifier,
                         iconRes = R.drawable.baseline_play_circle_filled_24,
-                        label = stringResource(R.string.run),
+                        labelRes = R.string.run,
                         onShortClick = {
-                            val launchResult = IntentUtils.launchApp(
+                            val result = IntentUtils.launchApp(
                                 context,
                                 resolveInfo.activityInfo.packageName,
                                 true
                             )
-                            if (launchResult) {
+                            if (result) {
                                 onDismissRequest()
                             } else {
                                 Toast.makeText(
@@ -209,14 +202,9 @@ fun AppActionDialog(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     AppActionButton(
-                        modifier = Modifier
-                            .onKeyEvent { keyEvent ->
-                                when (keyEvent.key) {
-                                    else -> false
-                                }
-                            },
+                        modifier = Modifier,
                         iconRes = R.drawable.baseline_delete_24,
-                        label = stringResource(R.string.uninstall),
+                        labelRes = R.string.uninstall,
                         onShortClick = {
                             when (applicationType) {
                                 ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
@@ -236,11 +224,19 @@ fun AppActionDialog(
                                 }
 
                                 ApplicationUtils.Companion.ApplicationType.UPDATED_SYSTEM, ApplicationUtils.Companion.ApplicationType.USER -> {
-                                    IntentUtils.requestUninstallApp(
+                                    val result = IntentUtils.requestUninstallApp(
                                         context,
                                         resolveInfo.activityInfo.packageName
                                     )
-                                    onDismissRequest()
+                                    if (result) {
+                                        onDismissRequest()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.hint_uninstall_request_failed,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             }
                         },
@@ -249,20 +245,46 @@ fun AppActionDialog(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     AppActionButton(
-                        modifier = Modifier
-                            .onKeyEvent { keyEvent ->
-                                when (keyEvent.key) {
-                                    else -> false
-                                }
-                            },
+                        modifier = Modifier,
                         iconRes = R.drawable.baseline_info_24,
-                        label = stringResource(R.string.info),
+                        labelRes = R.string.info,
                         onShortClick = {
-                            IntentUtils.openApplicationDetailsPage(
+                            val result = IntentUtils.openApplicationDetailsPage(
                                 context,
                                 resolveInfo.activityInfo.packageName
                             )
-                            onDismissRequest()
+                            if (result) {
+                                onDismissRequest()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    R.string.hint_cannot_launch_settings,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    AppActionButton(
+                        modifier = Modifier,
+                        iconRes = R.drawable.baseline_store_24,
+                        labelRes = R.string.application_market,
+                        onShortClick = {
+                            val result = IntentUtils.openAppInMarket(
+                                context,
+                                resolveInfo.activityInfo.packageName
+                            )
+                            if (result) {
+                                onDismissRequest()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    R.string.hint_no_app_market_installed,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         },
                     )
                 }
