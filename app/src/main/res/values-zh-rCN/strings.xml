@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TV Launcher 3</string>
-    <string name="title_page_apps">应用程序</string>
     <string name="hint_cannot_launch_app">无法启动应用。</string>
-    <string name="title_page_home">主页</string>
+    <string name="home">主页</string>
     <string name="hint_cannot_launch_settings">无法启动设置。</string>
     <string name="hint_no_app_market_installed">未安装应用市场。</string>
     <string name="activity_belongs_to">“%s”属于以下应用：</string>
@@ -21,6 +20,14 @@
     <string name="hint_cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
     <string name="hint_cannot_uninstall_system_app">无法卸载系统应用。</string>
     <string name="screen_saver">屏保</string>
-    <string name="application_market">应用市场</string>
+    <string name="app_market">应用市场</string>
     <string name="hint_uninstall_request_failed">请求卸载失败。</string>
+    <string name="add_app">添加应用</string>
+    <string name="signal_source">信号源</string>
+    <string name="input">输入</string>
+    <string name="apps">应用</string>
+    <string name="all_apps">所有应用</string>
+    <string name="choose_an_app">选择一个应用</string>
+    <string name="delete">删除</string>
+    <string name="remove">移除</string>
 </resources>

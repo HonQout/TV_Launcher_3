@@ -271,7 +271,7 @@ fun AppActionDialog(
                     AppActionButton(
                         modifier = Modifier,
                         iconRes = R.drawable.baseline_store_24,
-                        labelRes = R.string.application_market,
+                        labelRes = R.string.app_market,
                         onShortClick = {
                             val result = IntentUtils.openAppInMarket(
                                 context,

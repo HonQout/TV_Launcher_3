@@ -89,8 +89,8 @@ fun SettingsPanel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TimeText(
-                        viewModel = viewModel,
                         modifier = Modifier,
+                        viewModel = viewModel,
                         color = Color.White,
                         fontSize = 30.sp
                     )
@@ -98,8 +98,8 @@ fun SettingsPanel(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     DateAndWeekdayText(
-                        viewModel = viewModel,
                         modifier = Modifier,
+                        viewModel = viewModel,
                         color = Color.White,
                         fontSize = 20.sp
                     )

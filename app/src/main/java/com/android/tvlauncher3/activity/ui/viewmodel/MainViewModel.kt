@@ -6,14 +6,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ResolveInfo
+import android.media.tv.TvInputInfo
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.tvlauncher3.R
 import com.android.tvlauncher3.bean.ActivityBean
+import com.android.tvlauncher3.bean.ActivityRecord
+import com.android.tvlauncher3.persistence.SettingsRepository
 import com.android.tvlauncher3.utils.ApplicationUtils
+import com.android.tvlauncher3.utils.TvUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,29 +31,55 @@ import java.text.Collator
 import java.util.Locale
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+    // constant
+    val numFixedActivity = 5
+
+    // persistence
+    val settingsRepository = SettingsRepository(getApplication())
+
     // UI-related
+    val tabs = listOf(
+        Pair(R.drawable.baseline_home_24, R.string.home),
+        Pair(R.drawable.baseline_apps_24, R.string.apps),
+        Pair(R.drawable.baseline_input_24, R.string.input)
+    )
     private val _topBarHeight = MutableStateFlow<Int>(0)
     val topBarHeight: StateFlow<Int> = _topBarHeight.asStateFlow()
+    private val _selectedTabIndex = MutableStateFlow<Int>(0)
+    val selectedTabIndex: StateFlow<Int> = _selectedTabIndex.asStateFlow()
     private val _showSettingsPanel = MutableStateFlow<Boolean>(false)
     val showSettingsPanel: StateFlow<Boolean> = _showSettingsPanel.asStateFlow()
     private val _showAppActionDialog = MutableStateFlow<Boolean>(false)
     val showAppActionDialog: StateFlow<Boolean> = _showAppActionDialog.asStateFlow()
+    private val _showAppListDialog = MutableStateFlow<Boolean>(false)
+    val showAppListDialog: StateFlow<Boolean> = _showAppListDialog.asStateFlow()
 
     // data-related
     private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
     val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
-    private val _isLoading = MutableStateFlow<Boolean>(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _isInitializing = MutableStateFlow<Boolean>(false)
+    val isInitializing: StateFlow<Boolean> = _isInitializing.asStateFlow()
     private val _activityBeanList = mutableStateListOf<ActivityBean>()
     val activityBeanList: List<ActivityBean> = _activityBeanList
-    private val _focusedItemIndex = MutableStateFlow<Int>(0)
-    val focusedItemIndex: StateFlow<Int> = _focusedItemIndex.asStateFlow()
+    private val _fixedActivityRecordList = mutableStateListOf<ActivityRecord?>().apply {
+        addAll(List(numFixedActivity) { null })
+    }
+    private val _fixedActivityBeanList = mutableStateListOf<ActivityBean?>().apply {
+        addAll(List(numFixedActivity) { null })
+    }
+    val fixedActivityBeanList: List<ActivityBean?> = _fixedActivityBeanList
+    private val _focusedItemIndex1 = MutableStateFlow<Int>(0)
+    val focusedItemIndex1: StateFlow<Int> = _focusedItemIndex1.asStateFlow()
+    private val _focusedItemIndex2 = MutableStateFlow<Int>(0)
+    val focusedItemIndex2: StateFlow<Int> = _focusedItemIndex2.asStateFlow()
     private val _focusedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val focusedItemResolveInfo: StateFlow<ResolveInfo?> = _focusedItemResolveInfo.asStateFlow()
     private val _pressedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val pressedItemResolveInfo: StateFlow<ResolveInfo?> = _pressedItemResolveInfo.asStateFlow()
     private val _resolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val resolveInfo: StateFlow<ResolveInfo?> = _resolveInfo.asStateFlow()
+    private val _tvInputList = mutableStateListOf<TvInputInfo>()
+    val tvInputList: List<TvInputInfo> = _tvInputList
 
     // broadcastReceiver
     private var timeBroadcastReceiver: BroadcastReceiver? = null
@@ -59,17 +91,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
+        _isInitializing.value = true
         registerTimeBR(getApplication())
         registerLocaleBR(getApplication())
         registerPackageBR(getApplication())
+        loadFixedActivityList()
         loadActivityBeanList()
+        loadTvInputList()
+        _isInitializing.value = false
     }
 
     override fun onCleared() {
-        super.onCleared()
+        viewModelScope.cancel()
         unregisterTimeBR(getApplication())
         unregisterLocaleBR(getApplication())
         unregisterPackageBR(getApplication())
+        super.onCleared()
     }
 
     fun registerTimeBR(context: Context) {
@@ -178,7 +215,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             }
                             replaceItems(packageName)
                             Log.i(TAG, "Package $packageName has been replaced.")
-                            setFocusedItemIndex(0)
+                            setFocusedItemIndex2(0)
                         }
 
                         else -> {
@@ -199,15 +236,49 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loadFixedActivityList() {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                settingsRepository.fixedActivityRecordFlow.collect { list ->
+                    _fixedActivityRecordList.clear()
+                    _fixedActivityRecordList.addAll(list)
+                    _fixedActivityBeanList.clear()
+                    list.forEach { activityRecord ->
+                        if (activityRecord == null) {
+                            _fixedActivityBeanList.add(null)
+                        } else {
+                            val resolveInfo = ApplicationUtils.getIntentActivity(
+                                getApplication(),
+                                activityRecord.packageName,
+                                activityRecord.activityName
+                            )
+                            _fixedActivityBeanList.add(
+                                if (resolveInfo == null) null
+                                else ActivityBean(getApplication(), resolveInfo)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun loadActivityBeanList() {
         viewModelScope.launch {
-            _isLoading.value = true
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Default) {
                 _activityBeanList.clear()
                 _activityBeanList.addAll(ApplicationUtils.getActivityBeanList(getApplication()))
                 sortActivityBeanList()
             }
-            _isLoading.value = false
+        }
+    }
+
+    fun loadTvInputList() {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                _tvInputList.clear()
+                _tvInputList.addAll(TvUtils.getTvInputList(getApplication()))
+            }
         }
     }
 
@@ -216,8 +287,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             withContext(Dispatchers.IO) {
                 delay(5000)
                 val focusedItem =
-                    if (_focusedItemIndex.value in 0 until _activityBeanList.size) {
-                        _activityBeanList[_focusedItemIndex.value]
+                    if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
+                        _activityBeanList[_focusedItemIndex2.value]
                     } else {
                         _activityBeanList[0]
                     }
@@ -237,9 +308,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 sortActivityBeanList()
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
-                    setFocusedItemIndex(currentIndex)
+                    setFocusedItemIndex2(currentIndex)
                 } else {
-                    setFocusedItemIndex(0)
+                    setFocusedItemIndex2(0)
                 }
             }
         }
@@ -249,8 +320,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val focusedItem =
-                    if (_focusedItemIndex.value in 0 until _activityBeanList.size) {
-                        _activityBeanList[_focusedItemIndex.value]
+                    if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
+                        _activityBeanList[_focusedItemIndex2.value]
                     } else {
                         _activityBeanList[0]
                     }
@@ -260,9 +331,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 Log.i(TAG, "Removed items from list: $removeResult")
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
-                    setFocusedItemIndex(currentIndex)
+                    setFocusedItemIndex2(currentIndex)
                 } else {
-                    setFocusedItemIndex(0)
+                    setFocusedItemIndex2(0)
                 }
             }
         }
@@ -272,8 +343,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val focusedItem =
-                    if (_focusedItemIndex.value in 0 until _activityBeanList.size) {
-                        _activityBeanList[_focusedItemIndex.value]
+                    if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
+                        _activityBeanList[_focusedItemIndex2.value]
                     } else {
                         _activityBeanList[0]
                     }
@@ -293,9 +364,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 sortActivityBeanList()
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
-                    setFocusedItemIndex(currentIndex)
+                    setFocusedItemIndex2(currentIndex)
                 } else {
-                    setFocusedItemIndex(0)
+                    setFocusedItemIndex2(0)
                 }
             }
         }
@@ -313,8 +384,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateFixedActivityList(index: Int?, item: ActivityBean?) {
+        val targetIndex = index ?: _focusedItemIndex1.value
+        if (targetIndex in 0..<5) {
+            _fixedActivityBeanList[_focusedItemIndex1.value] = item
+            _fixedActivityRecordList[_focusedItemIndex1.value] = if (item == null) {
+                null
+            } else {
+                ActivityRecord(item.packageName, item.activityName)
+            }
+            viewModelScope.launch {
+                settingsRepository.saveFixedActivityRecord(_fixedActivityRecordList)
+            }
+        }
+    }
+
     fun setTopBarHeight(newValue: Int) {
         _topBarHeight.update {
+            newValue
+        }
+    }
+
+    fun setSelectedTabIndex(newValue: Int) {
+        _selectedTabIndex.update {
             newValue
         }
     }
@@ -331,8 +423,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setFocusedItemIndex(newValue: Int) {
-        _focusedItemIndex.update {
+    fun setShowAppListDialog(newValue: Boolean) {
+        _showAppListDialog.update {
+            newValue
+        }
+    }
+
+    fun setFocusedItemIndex1(newValue: Int) {
+        _focusedItemIndex1.update {
+            newValue
+        }
+    }
+
+    fun setFocusedItemIndex2(newValue: Int) {
+        _focusedItemIndex2.update {
             newValue
         }
     }

@@ -195,6 +195,17 @@ class ApplicationUtils {
             return pm.queryIntentActivities(intent, 0)
         }
 
+        fun getIntentActivity(
+            context: Context,
+            packageName: String,
+            activityName: String
+        ): ResolveInfo? {
+            val intentActivities = getIntentActivityList(context, packageName)
+            return intentActivities.find { resolveInfo ->
+                getActivityName(resolveInfo) == activityName
+            }
+        }
+
         /**
          * The implementation of function getActivityBeanList.
          */

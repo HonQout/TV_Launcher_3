@@ -13,12 +13,15 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -33,13 +36,16 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
-fun TopBarActionButton(
+fun IconTextButton(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
-    @StringRes contentDescriptionRes: Int,
+    @StringRes titleRes: Int,
+    @StringRes contentDescriptionRes: Int = titleRes,
     onShortClick: () -> Unit = {}
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -49,15 +55,15 @@ fun TopBarActionButton(
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 250)
     )
     val containerColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) Color.LightGray else Color.DarkGray,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 250)
     )
     val contentColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) Color.Black else Color.White,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 250)
     )
 
     Button(
@@ -101,14 +107,23 @@ fun TopBarActionButton(
             contentColor = contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(),
-        contentPadding = PaddingValues(1.dp),
+        contentPadding = PaddingValues(start = 12.dp, top = 10.dp, end = 16.dp, bottom = 10.dp),
         interactionSource = interactionSource
     ) {
         Icon(
             painter = painterResource(iconRes),
             contentDescription = stringResource(contentDescriptionRes),
             modifier = Modifier
-                .size(size = 24.dp)
+                .size(size = 20.dp)
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(
+            text = stringResource(titleRes),
+            fontSize = 16.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
         )
     }
 }

@@ -1,32 +1,28 @@
-package com.android.tvlauncher3.view.dialog
+package com.android.tvlauncher3.screen
 
+import android.content.pm.ResolveInfo
 import android.util.Log
 import android.view.KeyEvent
-import androidx.activity.compose.BackHandler
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -36,34 +32,30 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
-import com.android.tvlauncher3.bean.ActivityBean
+import com.android.tvlauncher3.utils.IntentUtils
 import com.android.tvlauncher3.view.button.RoundRectButton
+import com.android.tvlauncher3.view.dialog.AppActionDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun AppListDialog(
-    viewModel: MainViewModel = viewModel(),
-    backgroundColor: Color = Color.Black,
-    contentColor: Color = Color.White,
-    onItemChosen: (index: Int, activityBean: ActivityBean) -> Unit = { _, _ -> },
-    onDismissRequest: () -> Unit = {}
+fun AppsScreen(
+    viewModel: MainViewModel = viewModel()
 ) {
-    val tag = "AppListDialog"
+    val tag = "AppsScreen"
     val numColumns = 5
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
-    var focusedItemIndex by remember { mutableIntStateOf(0) }
+    val topBarHeight by viewModel.topBarHeight.collectAsState()
+    val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
+    val focusedItemIndex by viewModel.focusedItemIndex2.collectAsState()
+    val resolveInfo: ResolveInfo? by viewModel.resolveInfo.collectAsState()
 
     val centerFocusedItem = {
         if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
@@ -98,33 +90,35 @@ fun AppListDialog(
         }
     }
 
-    BackHandler {
-        Log.i(tag, "Pressed back button.")
-        onDismissRequest()
+    val horizontalScrollToFocusedItem = {
+        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+            val layoutInfo = lazyGridState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isNotEmpty()) {
+                val firstVisibleItem = visibleItems.first()
+                val focusedItemIndexOffset =
+                    focusedItemIndex - firstVisibleItem.index
+                if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
+                    coroutineScope.launch {
+                        lazyGridState.animateScrollToItem(
+                            focusedItemIndex
+                        )
+                    }
+                }
+            }
+        }
     }
 
-    Dialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-            usePlatformDefaultWidth = false
-        )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Transparent)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundColor)
-                .padding(20.dp)
-                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
-            Text(
-                text = stringResource(R.string.choose_an_app),
-                color = contentColor,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Start
-            )
+            Spacer(modifier = Modifier.height(topBarHeight.dp))
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -136,6 +130,26 @@ fun AppListDialog(
                     .weight(weight = 1.0f)
                     .onKeyEvent { keyEvent ->
                         when (keyEvent.key) {
+                            Key.Menu -> {
+                                when (keyEvent.nativeKeyEvent.action) {
+                                    KeyEvent.ACTION_DOWN -> {
+                                        Log.i(tag, "Pressed key: Menu")
+                                        false
+                                    }
+
+                                    KeyEvent.ACTION_UP -> {
+                                        Log.i(tag, "Released key: Menu")
+                                        coroutineScope.launch(Dispatchers.IO) {
+                                            viewModel.setResolveInfo(viewModel.focusedItemResolveInfo.value)
+                                            viewModel.setShowAppActionDialog(true)
+                                        }
+                                        true
+                                    }
+
+                                    else -> false
+                                }
+                            }
+
                             Key.DirectionUp -> {
                                 when (keyEvent.nativeKeyEvent.action) {
                                     KeyEvent.ACTION_DOWN -> {
@@ -146,7 +160,7 @@ fun AppListDialog(
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionUp")
                                         centerFocusedItem()
-                                        false
+                                        true
                                     }
 
                                     else -> false
@@ -163,7 +177,7 @@ fun AppListDialog(
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionDown")
                                         centerFocusedItem()
-                                        false
+                                        true
                                     }
 
                                     else -> false
@@ -179,23 +193,8 @@ fun AppListDialog(
 
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionLeft")
-                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
-                                            val layoutInfo = lazyGridState.layoutInfo
-                                            val visibleItems = layoutInfo.visibleItemsInfo
-                                            if (visibleItems.isNotEmpty()) {
-                                                val firstVisibleItem = visibleItems.first()
-                                                val focusedItemIndexOffset =
-                                                    focusedItemIndex - firstVisibleItem.index
-                                                if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
-                                                    coroutineScope.launch {
-                                                        lazyGridState.animateScrollToItem(
-                                                            focusedItemIndex
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        false
+                                        horizontalScrollToFocusedItem()
+                                        true
                                     }
 
                                     else -> false
@@ -211,23 +210,8 @@ fun AppListDialog(
 
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionRight")
-                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
-                                            val layoutInfo = lazyGridState.layoutInfo
-                                            val visibleItems = layoutInfo.visibleItemsInfo
-                                            if (visibleItems.isNotEmpty()) {
-                                                val firstVisibleItem = visibleItems.first()
-                                                val focusedItemIndexOffset =
-                                                    focusedItemIndex - firstVisibleItem.index
-                                                if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
-                                                    coroutineScope.launch {
-                                                        lazyGridState.animateScrollToItem(
-                                                            focusedItemIndex
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        false
+                                        horizontalScrollToFocusedItem()
+                                        true
                                     }
 
                                     else -> false
@@ -254,19 +238,46 @@ fun AppListDialog(
                             .onFocusChanged { focusState ->
                                 if (focusState.isFocused) {
                                     Log.i(tag, "FocusedItemIndex: $index")
-                                    focusedItemIndex = index
+                                    viewModel.setFocusedItemIndex2(index)
+                                    viewModel.setFocusedItemResolveInfo(item.resolveInfo)
                                 }
                             },
                         icon = item.getIcon(context),
                         iconType = item.iconType,
                         label = item.label,
                         onShortClickCallback = {
-                            onItemChosen(index, item)
-                            onDismissRequest()
+                            val packageName = item.packageName
+                            val result: Boolean =
+                                IntentUtils.launchApp(context, packageName, true)
+                            if (!result) {
+                                Toast.makeText(
+                                    context,
+                                    ContextCompat.getString(
+                                        context,
+                                        R.string.hint_cannot_launch_app
+                                    ),
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        },
+                        onLongClickCallback = {
+                            viewModel.setPressedItemResolveInfo(item.resolveInfo)
+                            viewModel.setResolveInfo(item.resolveInfo)
+                            viewModel.setShowAppActionDialog(true)
                         }
                     )
                 }
             }
+        }
+
+        if (showAppActionDialog && resolveInfo != null) {
+            AppActionDialog(
+                resolveInfo = resolveInfo!!,
+                onDismissRequest = {
+                    viewModel.setShowAppActionDialog(false)
+                },
+            )
         }
     }
 }

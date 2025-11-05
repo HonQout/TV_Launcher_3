@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.tv.material3.Text
 import com.android.tvlauncher3.utils.ApplicationUtils.Companion.IconType
 import com.android.tvlauncher3.utils.DrawableUtils
 
@@ -83,12 +83,8 @@ private fun RoundRectButtonImpl(
                 indication = null,
                 enabled = true,
                 role = Role.Button,
-                onClick = {
-                    onShortClick()
-                },
-                onLongClick = {
-                    onLongClick()
-                },
+                onClick = onShortClick,
+                onLongClick = onLongClick,
             )
             .hoverable(
                 enabled = true,
@@ -205,8 +201,8 @@ fun RoundRectButton(
 fun RoundRectButton(
     modifier: Modifier = Modifier,
     @DrawableRes drawableRes: Int,
-    contentDescription: String,
     label: String,
+    contentDescription: String = label,
     backgroundColor: Color = colorScheme.primary,
     onShortClickCallback: () -> Unit = {},
     onLongClickCallback: () -> Unit = {}

@@ -16,8 +16,8 @@ import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 
 @Composable
 fun DateAndWeekdayText(
-    viewModel: MainViewModel,
     modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
     color: Color = MaterialTheme.colorScheme.primary,
     fontSize: TextUnit = 12.sp
 ) {

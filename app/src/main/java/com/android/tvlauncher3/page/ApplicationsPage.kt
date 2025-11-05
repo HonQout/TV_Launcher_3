@@ -65,11 +65,11 @@ fun ApplicationsPage(
     val tag = "ApplicationsPage"
     val numColumns = 5
     val context = LocalContext.current
-    val lazyGridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
+    val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
-    val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
+    val focusedItemIndex by viewModel.focusedItemIndex2.collectAsState()
     val resolveInfo: ResolveInfo? by viewModel.resolveInfo.collectAsState()
 
     val centerFocusedItem = {
@@ -112,9 +112,9 @@ fun ApplicationsPage(
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .background(color = Color.Transparent)
             .padding(20.dp)
-            .fillMaxSize()
     ) {
         Row(
             modifier = Modifier
@@ -124,7 +124,7 @@ fun ApplicationsPage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.title_page_apps),
+                text = stringResource(R.string.apps),
                 color = Color.White,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
@@ -289,7 +289,7 @@ fun ApplicationsPage(
                         .onFocusChanged { focusState ->
                             if (focusState.isFocused) {
                                 Log.i(tag, "FocusedItemIndex: $index")
-                                viewModel.setFocusedItemIndex(index)
+                                viewModel.setFocusedItemIndex2(index)
                                 viewModel.setFocusedItemResolveInfo(item.resolveInfo)
                             }
                         },
