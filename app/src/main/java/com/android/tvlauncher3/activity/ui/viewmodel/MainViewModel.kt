@@ -61,12 +61,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val isInitializing: StateFlow<Boolean> = _isInitializing.asStateFlow()
     private val _activityBeanList = mutableStateListOf<ActivityBean>()
     val activityBeanList: List<ActivityBean> = _activityBeanList
-    private val _fixedActivityRecordList = mutableStateListOf<ActivityRecord?>().apply {
-        addAll(List(numFixedActivity) { null })
-    }
-    private val _fixedActivityBeanList = mutableStateListOf<ActivityBean?>().apply {
-        addAll(List(numFixedActivity) { null })
-    }
+    private val _fixedActivityRecordList = mutableStateListOf<ActivityRecord?>()
+    private val _fixedActivityBeanList = mutableStateListOf<ActivityBean?>()
     val fixedActivityBeanList: List<ActivityBean?> = _fixedActivityBeanList
     private val _focusedItemIndex1 = MutableStateFlow<Int>(0)
     val focusedItemIndex1: StateFlow<Int> = _focusedItemIndex1.asStateFlow()
@@ -238,25 +234,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadFixedActivityList() {
         viewModelScope.launch {
-            withContext(Dispatchers.Default) {
-                settingsRepository.fixedActivityRecordFlow.collect { list ->
-                    _fixedActivityRecordList.clear()
+            settingsRepository.fixedActivityRecordFlow.collect { list ->
+                _fixedActivityRecordList.clear()
+                _fixedActivityBeanList.clear()
+                if (list.size != numFixedActivity) {
+                    _fixedActivityRecordList.addAll(List(5) { null })
+                    _fixedActivityBeanList.addAll(List(5) { null })
+                    updateFixedActivityList(0, null)
+                } else {
                     _fixedActivityRecordList.addAll(list)
-                    _fixedActivityBeanList.clear()
                     list.forEach { activityRecord ->
-                        if (activityRecord == null) {
-                            _fixedActivityBeanList.add(null)
-                        } else {
-                            val resolveInfo = ApplicationUtils.getIntentActivity(
-                                getApplication(),
-                                activityRecord.packageName,
-                                activityRecord.activityName
-                            )
-                            _fixedActivityBeanList.add(
-                                if (resolveInfo == null) null
-                                else ActivityBean(getApplication(), resolveInfo)
-                            )
-                        }
+                        _fixedActivityBeanList.add(
+                            if (activityRecord == null) {
+                                null
+                            } else {
+                                val resolveInfo = ApplicationUtils.getIntentActivity(
+                                    getApplication(),
+                                    activityRecord.packageName,
+                                    activityRecord.activityName
+                                )
+                                if (resolveInfo == null) {
+                                    null
+                                } else {
+                                    ActivityBean(getApplication(), resolveInfo)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -386,9 +389,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateFixedActivityList(index: Int?, item: ActivityBean?) {
         val targetIndex = index ?: _focusedItemIndex1.value
-        if (targetIndex in 0..<5) {
-            _fixedActivityBeanList[_focusedItemIndex1.value] = item
-            _fixedActivityRecordList[_focusedItemIndex1.value] = if (item == null) {
+        if (targetIndex in 0..<numFixedActivity) {
+            _fixedActivityBeanList[targetIndex] = item
+            _fixedActivityRecordList[targetIndex] = if (item == null) {
                 null
             } else {
                 ActivityRecord(item.packageName, item.activityName)

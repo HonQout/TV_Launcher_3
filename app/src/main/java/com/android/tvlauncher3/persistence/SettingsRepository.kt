@@ -19,6 +19,7 @@ class SettingsRepository(context: Context) {
     companion object {
         private const val TAG: String = "SettingsRepository"
         private val FIXED_ACTIVITY_RECORD = stringPreferencesKey("fixed_activity_record")
+        private const val NUM_FIXED_ACTIVITY = 5
     }
 
     private val dataStore = context.applicationContext.dataStore
@@ -38,13 +39,15 @@ class SettingsRepository(context: Context) {
 
     val fixedActivityRecordFlow: Flow<List<ActivityRecord?>> =
         dataStore.data.map { preferences ->
-            val json = preferences[FIXED_ACTIVITY_RECORD] ?: return@map List(5) { null }
+            val json =
+                preferences[FIXED_ACTIVITY_RECORD] ?: return@map List(NUM_FIXED_ACTIVITY) { null }
             try {
                 val type = object : TypeToken<List<ActivityRecord?>>() {}.type
-                Gson().fromJson<List<ActivityRecord?>>(json, type) ?: List(5) { null }
+                Gson().fromJson<List<ActivityRecord?>>(json, type)
+                    ?: List(NUM_FIXED_ACTIVITY) { null }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse fixed activity bean by JSON.", e)
-                List(5) { null }
+                List(NUM_FIXED_ACTIVITY) { null }
             }
         }
 }
