@@ -4,6 +4,11 @@
     <!-- Title -->
     <string name="home">Home</string>
 
+    <!-- Common operation -->
+    <string name="delete">Delete</string>
+    <string name="remove">Remove</string>
+    <string name="replace">Replace</string>
+
     <!-- Hint -->
     <string name="hint_cannot_launch_app">Cannot launch app.</string>
     <string name="hint_cannot_uninstall_unknown_type">Cannot uninstall an app whose type is unknown.</string>
@@ -35,6 +40,4 @@
     <string name="apps">Apps</string>
     <string name="all_apps">All apps</string>
     <string name="choose_an_app">Choose an app</string>
-    <string name="delete">Delete</string>
-    <string name="remove">Remove</string>
 </resources>

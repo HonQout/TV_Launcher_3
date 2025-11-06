@@ -3,7 +3,6 @@ package com.android.tvlauncher3.page
 import android.content.pm.ResolveInfo
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -25,31 +24,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
-import com.android.tvlauncher3.utils.IntentUtils
-import com.android.tvlauncher3.view.button.RoundRectButton
+import com.android.tvlauncher3.view.button.AppButton
 import com.android.tvlauncher3.view.dialog.AppActionDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -64,7 +55,6 @@ fun ApplicationsPage(
 ) {
     val tag = "ApplicationsPage"
     val numColumns = 5
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
@@ -95,6 +85,25 @@ fun ApplicationsPage(
                         lazyGridState.animateScrollBy(scrollOffset)
                     }
                 } else {
+                    coroutineScope.launch {
+                        lazyGridState.animateScrollToItem(
+                            focusedItemIndex
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    val horizontalScrollToFocusedItem = {
+        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+            val layoutInfo = lazyGridState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isNotEmpty()) {
+                val firstVisibleItem = visibleItems.first()
+                val focusedItemIndexOffset =
+                    focusedItemIndex - firstVisibleItem.index
+                if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
                     coroutineScope.launch {
                         lazyGridState.animateScrollToItem(
                             focusedItemIndex
@@ -151,26 +160,6 @@ fun ApplicationsPage(
                 .weight(weight = 1.0f)
                 .onKeyEvent { keyEvent ->
                     when (keyEvent.key) {
-                        Key.Menu -> {
-                            when (keyEvent.nativeKeyEvent.action) {
-                                KeyEvent.ACTION_DOWN -> {
-                                    Log.i(tag, "Pressed key: Menu")
-                                    false
-                                }
-
-                                KeyEvent.ACTION_UP -> {
-                                    Log.i(tag, "Released key: Menu")
-                                    coroutineScope.launch(Dispatchers.IO) {
-                                        viewModel.setResolveInfo(viewModel.focusedItemResolveInfo.value)
-                                        viewModel.setShowAppActionDialog(true)
-                                    }
-                                    false
-                                }
-
-                                else -> false
-                            }
-                        }
-
                         Key.DirectionUp -> {
                             when (keyEvent.nativeKeyEvent.action) {
                                 KeyEvent.ACTION_DOWN -> {
@@ -214,22 +203,7 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionLeft")
-                                    if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
-                                        val layoutInfo = lazyGridState.layoutInfo
-                                        val visibleItems = layoutInfo.visibleItemsInfo
-                                        if (visibleItems.isNotEmpty()) {
-                                            val firstVisibleItem = visibleItems.first()
-                                            val focusedItemIndexOffset =
-                                                focusedItemIndex - firstVisibleItem.index
-                                            if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
-                                                coroutineScope.launch {
-                                                    lazyGridState.animateScrollToItem(
-                                                        focusedItemIndex
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
+                                    horizontalScrollToFocusedItem()
                                     false
                                 }
 
@@ -246,22 +220,7 @@ fun ApplicationsPage(
 
                                 KeyEvent.ACTION_UP -> {
                                     Log.i(tag, "Released key: DirectionRight")
-                                    if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
-                                        val layoutInfo = lazyGridState.layoutInfo
-                                        val visibleItems = layoutInfo.visibleItemsInfo
-                                        if (visibleItems.isNotEmpty()) {
-                                            val firstVisibleItem = visibleItems.first()
-                                            val focusedItemIndexOffset =
-                                                focusedItemIndex - firstVisibleItem.index
-                                            if (focusedItemIndexOffset < 0 || focusedItemIndexOffset >= visibleItems.size) {
-                                                coroutineScope.launch {
-                                                    lazyGridState.animateScrollToItem(
-                                                        focusedItemIndex
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
+                                    horizontalScrollToFocusedItem()
                                     false
                                 }
 
@@ -281,42 +240,11 @@ fun ApplicationsPage(
             itemsIndexed(
                 viewModel.activityBeanList
             ) { index, item ->
-                val focusRequester = remember { FocusRequester() }
-
-                RoundRectButton(
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused) {
-                                Log.i(tag, "FocusedItemIndex: $index")
-                                viewModel.setFocusedItemIndex2(index)
-                                viewModel.setFocusedItemResolveInfo(item.resolveInfo)
-                            }
-                        },
-                    icon = item.getIcon(context),
-                    iconType = item.iconType,
-                    label = item.label,
-                    onShortClickCallback = {
-                        val packageName = item.packageName
-                        val result: Boolean =
-                            IntentUtils.launchApp(context, packageName, true)
-                        if (!result) {
-                            Toast.makeText(
-                                context,
-                                ContextCompat.getString(
-                                    context,
-                                    R.string.hint_cannot_launch_app
-                                ),
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
-                    },
-                    onLongClickCallback = {
-                        viewModel.setPressedItemResolveInfo(item.resolveInfo)
-                        viewModel.setResolveInfo(item.resolveInfo)
-                        viewModel.setShowAppActionDialog(true)
-                    }
+                AppButton(
+                    modifier = Modifier,
+                    viewModel = viewModel,
+                    index = index,
+                    item = item
                 )
             }
         }

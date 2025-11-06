@@ -144,7 +144,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                loadFixedActivityList()
                 loadActivityBeanList()
+                loadTvInputList()
             }
         }
 
@@ -287,8 +289,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addItems(packageName: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                delay(5000)
+            withContext(Dispatchers.Default) {
+                delay(1000)
                 val focusedItem =
                     if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
                         _activityBeanList[_focusedItemIndex2.value]
@@ -321,7 +323,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeItems(packageName: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Default) {
                 val focusedItem =
                     if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
                         _activityBeanList[_focusedItemIndex2.value]
@@ -344,7 +346,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun replaceItems(packageName: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Default) {
                 val focusedItem =
                     if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
                         _activityBeanList[_focusedItemIndex2.value]
@@ -397,7 +399,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 ActivityRecord(item.packageName, item.activityName)
             }
             viewModelScope.launch {
-                settingsRepository.saveFixedActivityRecord(_fixedActivityRecordList)
+                withContext(Dispatchers.IO) {
+                    settingsRepository.saveFixedActivityRecord(_fixedActivityRecordList)
+                }
             }
         }
     }

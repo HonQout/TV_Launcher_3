@@ -63,22 +63,6 @@ fun HomeScreen(
                     )
                     .onKeyEvent { keyEvent ->
                         when (keyEvent.key) {
-                            Key.Menu -> {
-                                when (keyEvent.nativeKeyEvent.action) {
-                                    KeyEvent.ACTION_DOWN -> {
-                                        Log.i(tag, "Pressed key: Menu")
-                                        false
-                                    }
-
-                                    KeyEvent.ACTION_UP -> {
-                                        Log.i(tag, "Released key: Menu")
-                                        false
-                                    }
-
-                                    else -> false
-                                }
-                            }
-
                             Key.DirectionLeft -> {
                                 when (keyEvent.nativeKeyEvent.action) {
                                     KeyEvent.ACTION_DOWN -> {

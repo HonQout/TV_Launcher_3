@@ -32,6 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
@@ -59,6 +61,7 @@ private fun RoundRectButtonImpl(
     onLongClick: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
     val focusState = interactionSource.collectIsFocusedAsState()
     val hoverState = interactionSource.collectIsHoveredAsState()
 
@@ -74,25 +77,10 @@ private fun RoundRectButtonImpl(
     Surface(
         modifier = modifier
             .scale(scale)
+            .focusRequester(focusRequester)
             .focusable(
                 enabled = true,
                 interactionSource = interactionSource
-            )
-            .combinedClickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = true,
-                role = Role.Button,
-                onClick = onShortClick,
-                onLongClick = onLongClick,
-            )
-            .hoverable(
-                enabled = true,
-                interactionSource = interactionSource
-            )
-            .indication(
-                interactionSource = interactionSource,
-                indication = null
             )
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
@@ -120,7 +108,23 @@ private fun RoundRectButtonImpl(
 
                     else -> false
                 }
-            },
+            }
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = true,
+                role = Role.Button,
+                onClick = onShortClick,
+                onLongClick = onLongClick,
+            )
+            .hoverable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .indication(
+                interactionSource = interactionSource,
+                indication = null
+            ),
         shape = RoundedCornerShape(16.dp),
         color = Color.Transparent,
     ) {
@@ -165,8 +169,8 @@ fun RoundRectButton(
     icon: Drawable,
     label: String,
     contentDescription: String = label,
-    onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {}
+    onShortClick: () -> Unit = {},
+    onLongClick: () -> Unit = {}
 ) {
     val backgroundColor =
         Color(DrawableUtils.getBackgroundColorFromAppIcon(icon, Color.White.toArgb()))
@@ -192,8 +196,8 @@ fun RoundRectButton(
         },
         label = label,
         backgroundColor = backgroundColor,
-        onShortClick = onShortClickCallback,
-        onLongClick = onLongClickCallback
+        onShortClick = onShortClick,
+        onLongClick = onLongClick
     )
 }
 
@@ -204,8 +208,8 @@ fun RoundRectButton(
     label: String,
     contentDescription: String = label,
     backgroundColor: Color = colorScheme.primary,
-    onShortClickCallback: () -> Unit = {},
-    onLongClickCallback: () -> Unit = {}
+    onShortClick: () -> Unit = {},
+    onLongClick: () -> Unit = {}
 ) {
     RoundRectButtonImpl(
         modifier = modifier,
@@ -221,7 +225,7 @@ fun RoundRectButton(
         },
         label = label,
         backgroundColor = backgroundColor,
-        onShortClick = onShortClickCallback,
-        onLongClick = onLongClickCallback
+        onShortClick = onShortClick,
+        onLongClick = onLongClick
     )
 }

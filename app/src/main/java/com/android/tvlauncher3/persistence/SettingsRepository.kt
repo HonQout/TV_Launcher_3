@@ -34,7 +34,6 @@ class SettingsRepository(context: Context) {
             Log.e(TAG, "Failed to save fixed activity bean.", e)
             throw e
         }
-
     }
 
     val fixedActivityRecordFlow: Flow<List<ActivityRecord?>> =

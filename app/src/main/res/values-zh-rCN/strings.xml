@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TV Launcher 3</string>
+    <string name="replace">替换</string>
     <string name="hint_cannot_launch_app">无法启动应用。</string>
     <string name="home">主页</string>
     <string name="hint_cannot_launch_settings">无法启动设置。</string>

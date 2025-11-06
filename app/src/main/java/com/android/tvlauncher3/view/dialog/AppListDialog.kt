@@ -260,7 +260,7 @@ fun AppListDialog(
                         icon = item.getIcon(context),
                         iconType = item.iconType,
                         label = item.label,
-                        onShortClickCallback = {
+                        onShortClick = {
                             onItemChosen(index, item)
                             onDismissRequest()
                         }
