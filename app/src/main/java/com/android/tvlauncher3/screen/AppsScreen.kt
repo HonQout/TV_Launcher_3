@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -107,15 +108,16 @@ fun AppsScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(topBarHeight.dp))
-
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height((topBarHeight + 10).dp))
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(numColumns),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = Color.Transparent)
+                    .background(
+                        color = Color.DarkGray.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     .weight(weight = 1.0f)
                     .onKeyEvent { keyEvent ->
                         when (keyEvent.key) {
@@ -196,9 +198,7 @@ fun AppsScreen(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 userScrollEnabled = true
             ) {
-                itemsIndexed(
-                    viewModel.activityBeanList
-                ) { index, item ->
+                itemsIndexed(viewModel.activityBeanList) { index, item ->
                     AppButton(
                         modifier = Modifier,
                         viewModel = viewModel,

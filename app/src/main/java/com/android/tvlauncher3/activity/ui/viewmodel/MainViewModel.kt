@@ -68,6 +68,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val focusedItemIndex1: StateFlow<Int> = _focusedItemIndex1.asStateFlow()
     private val _focusedItemIndex2 = MutableStateFlow<Int>(0)
     val focusedItemIndex2: StateFlow<Int> = _focusedItemIndex2.asStateFlow()
+    private val _focusedItemIndex3 = MutableStateFlow<Int>(0)
+    val focusedItemIndex3: StateFlow<Int> = _focusedItemIndex3.asStateFlow()
     private val _focusedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
     val focusedItemResolveInfo: StateFlow<ResolveInfo?> = _focusedItemResolveInfo.asStateFlow()
     private val _pressedItemResolveInfo = MutableStateFlow<ResolveInfo?>(null)
@@ -448,6 +450,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setFocusedItemIndex3(newValue: Int) {
+        _focusedItemIndex3.update {
+            newValue
+        }
+    }
+
     fun setFocusedItemResolveInfo(newValue: ResolveInfo?) {
         _focusedItemResolveInfo.update {
             newValue
@@ -463,6 +471,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setResolveInfo(newValue: ResolveInfo?) {
         _resolveInfo.update {
             newValue
+        }
+    }
+
+    fun getSelectedTvInputInfo(): TvInputInfo? {
+        return if (_focusedItemIndex3.value >= 0 && _focusedItemIndex3.value < _tvInputList.size) {
+            _tvInputList[_focusedItemIndex3.value]
+        } else {
+            null
         }
     }
 }

@@ -41,7 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
@@ -224,8 +223,7 @@ class MainActivity : ComponentActivity() {
 
                         Column(
                             modifier = Modifier
-                                .focusable(enabled = false)
-                                .focusProperties { canFocus = false },
+                                .focusable(enabled = false),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             AndroidView(
@@ -240,7 +238,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 modifier = Modifier
                                     .focusable(enabled = false)
-                                    .focusProperties { canFocus = false }
                             )
 
                             AndroidView(
@@ -255,7 +252,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 modifier = Modifier
                                     .focusable(enabled = false)
-                                    .focusProperties { canFocus = false }
                             )
                         }
                     }

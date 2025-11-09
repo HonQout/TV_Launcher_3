@@ -1,8 +1,8 @@
 package com.android.tvlauncher3.view.button
 
+import android.media.tv.TvInputInfo
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,7 +36,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -45,17 +45,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.android.tvlauncher3.R
 
 @Composable
-fun AppActionButton(
+fun TvInputButton(
     modifier: Modifier = Modifier,
-    @DrawableRes iconRes: Int,
-    @StringRes labelRes: Int,
-    @StringRes contentDescriptionRes: Int = labelRes,
+    index: Int,
+    item: TvInputInfo,
     onShortClick: () -> Unit = {}
 ) {
-    val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
     val focusState = interactionSource.collectIsFocusedAsState()
     val hoverState = interactionSource.collectIsHoveredAsState()
 
@@ -64,7 +64,8 @@ fun AppActionButton(
         animationSpec = tween(durationMillis = 250)
     )
     val containerColor by animateColorAsState(
-        targetValue = if (focusState.value || hoverState.value) Color.LightGray else Color.DarkGray,
+        targetValue = if (focusState.value || hoverState.value) Color.Gray.copy(alpha = 0.5f)
+        else Color.DarkGray.copy(alpha = 0.5f),
         animationSpec = tween(durationMillis = 250)
     )
     val contentColor by animateColorAsState(
@@ -75,8 +76,7 @@ fun AppActionButton(
     Button(
         onClick = onShortClick,
         modifier = modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
+            .wrapContentSize()
             .scale(scale)
             .focusRequester(focusRequester)
             .focusable(
@@ -120,33 +120,73 @@ fun AppActionButton(
         Row(
             modifier = Modifier
                 .wrapContentHeight()
-                .fillMaxWidth()
-                .focusable(enabled = false),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(iconRes),
-                contentDescription = stringResource(contentDescriptionRes),
+                painter = painterResource(getTVInputIcon(item)),
+                contentDescription = stringResource(R.string.input),
                 modifier = Modifier
-                    .size(30.dp)
-                    .graphicsLayer {
-                        cameraDistance = 12f
-                    },
+                    .size(24.dp),
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(contentColor)
+                colorFilter = ColorFilter.tint(Color.White)
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             Text(
-                text = stringResource(labelRes),
-                modifier = Modifier,
-                color = contentColor,
-                fontSize = 18.sp,
+                text = item.id,
+                color = Color.White,
+                fontSize = 20.sp,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
+        }
+    }
+}
+
+@DrawableRes
+fun getTVInputIcon(tvInputInfo: TvInputInfo): Int {
+    return when (tvInputInfo.type) {
+        TvInputInfo.TYPE_TUNER -> {
+            R.drawable.baseline_television_classic_24
+        }
+
+        TvInputInfo.TYPE_COMPOSITE -> {
+            R.drawable.baseline_video_input_component_24
+        }
+
+        TvInputInfo.TYPE_SVIDEO -> {
+            R.drawable.baseline_video_input_svideo_24
+        }
+
+        TvInputInfo.TYPE_SCART -> {
+            R.drawable.baseline_video_input_scart_24
+        }
+
+        TvInputInfo.TYPE_COMPONENT -> {
+            R.drawable.baseline_video_input_component_24
+        }
+
+        TvInputInfo.TYPE_VGA -> {
+            R.drawable.baseline_serial_port_24
+        }
+
+        TvInputInfo.TYPE_DVI -> {
+            R.drawable.baseline_tv_24
+        }
+
+        TvInputInfo.TYPE_HDMI -> {
+            R.drawable.baseline_hdmi_port_24
+        }
+
+        TvInputInfo.TYPE_DISPLAY_PORT -> {
+            R.drawable.baseline_tv_24
+        }
+
+        else -> {
+            R.drawable.baseline_tv_24
         }
     }
 }

@@ -41,7 +41,7 @@ fun AppShortcutButton(
 
     Box(
         modifier = modifier
-            .wrapContentSize(Alignment.Center),
+            .wrapContentSize(Alignment.TopCenter),
         contentAlignment = Alignment.TopCenter
     ) {
         if (item == null) {

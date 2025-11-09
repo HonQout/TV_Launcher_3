@@ -66,7 +66,7 @@ private fun RoundRectButtonImpl(
     val hoverState = interactionSource.collectIsHoveredAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (focusState.value || hoverState.value) 1.2f else 1f,
+        targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
         animationSpec = tween(durationMillis = 250)
     )
     val textColor by animateColorAsState(
