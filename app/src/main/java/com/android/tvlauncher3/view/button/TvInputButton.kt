@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.tvlauncher3.R
+import com.android.tvlauncher3.constants.NumberConstants
 
 @Composable
 fun TvInputButton(
@@ -61,16 +62,16 @@ fun TvInputButton(
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val containerColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) Color.Gray.copy(alpha = 0.5f)
         else Color.DarkGray.copy(alpha = 0.5f),
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val contentColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) Color.Black else Color.White,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
 
     Button(

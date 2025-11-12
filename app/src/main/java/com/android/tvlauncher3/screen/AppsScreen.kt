@@ -30,6 +30,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.android.tvlauncher3.constants.ColorConstants
 import com.android.tvlauncher3.view.button.AppButton
 import com.android.tvlauncher3.view.dialog.AppActionDialog
 import kotlinx.coroutines.launch
@@ -115,7 +116,7 @@ fun AppsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Color.DarkGray.copy(alpha = 0.7f),
+                        color = ColorConstants.ListBackground,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .weight(weight = 1.0f)

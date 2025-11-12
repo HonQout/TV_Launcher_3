@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.tvlauncher3.constants.NumberConstants
 import com.android.tvlauncher3.utils.ApplicationUtils.Companion.IconType
 import com.android.tvlauncher3.utils.DrawableUtils
 
@@ -57,6 +58,8 @@ private fun RoundRectButtonImpl(
     icon: @Composable () -> Unit,
     label: String,
     backgroundColor: Color = colorScheme.primary,
+    contentDefaultColor: Color = colorScheme.secondary,
+    contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
@@ -67,11 +70,12 @@ private fun RoundRectButtonImpl(
 
     val scale by animateFloatAsState(
         targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
-        animationSpec = tween(durationMillis = 250)
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val textColor by animateColorAsState(
-        targetValue = if (focusState.value || hoverState.value) Color.White else Color.Gray,
-        animationSpec = tween(durationMillis = 250)
+        targetValue = if (focusState.value || hoverState.value) contentFocusedColor
+        else contentDefaultColor,
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
 
     Surface(
@@ -81,6 +85,14 @@ private fun RoundRectButtonImpl(
             .focusable(
                 enabled = true,
                 interactionSource = interactionSource
+            )
+            .hoverable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .indication(
+                interactionSource = interactionSource,
+                indication = null
             )
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
@@ -116,17 +128,9 @@ private fun RoundRectButtonImpl(
                 role = Role.Button,
                 onClick = onShortClick,
                 onLongClick = onLongClick,
-            )
-            .hoverable(
-                enabled = true,
-                interactionSource = interactionSource
-            )
-            .indication(
-                interactionSource = interactionSource,
-                indication = null
             ),
         shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent,
+        color = Color.Transparent
     ) {
         Column(
             modifier = Modifier
@@ -169,6 +173,8 @@ fun RoundRectButton(
     icon: Drawable,
     label: String,
     contentDescription: String = label,
+    contentDefaultColor: Color = colorScheme.secondary,
+    contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
@@ -196,6 +202,8 @@ fun RoundRectButton(
         },
         label = label,
         backgroundColor = backgroundColor,
+        contentDefaultColor = contentDefaultColor,
+        contentFocusedColor = contentFocusedColor,
         onShortClick = onShortClick,
         onLongClick = onLongClick
     )
@@ -208,6 +216,8 @@ fun RoundRectButton(
     label: String,
     contentDescription: String = label,
     backgroundColor: Color = colorScheme.primary,
+    contentDefaultColor: Color = colorScheme.secondary,
+    contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
@@ -225,6 +235,8 @@ fun RoundRectButton(
         },
         label = label,
         backgroundColor = backgroundColor,
+        contentDefaultColor = contentDefaultColor,
+        contentFocusedColor = contentFocusedColor,
         onShortClick = onShortClick,
         onLongClick = onLongClick
     )

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -35,6 +36,7 @@ import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.android.tvlauncher3.constants.ColorConstants
 import com.android.tvlauncher3.databinding.TvViewLayoutBinding
 import com.android.tvlauncher3.view.button.TvInputButton
 import kotlinx.coroutines.launch
@@ -108,7 +110,7 @@ fun InputScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.2f)
                         .background(
-                            color = Color.DarkGray.copy(0.7f),
+                            color = ColorConstants.ListBackground,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .onKeyEvent { keyEvent ->
@@ -168,7 +170,7 @@ fun InputScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(20.dp))
 
                 AndroidViewBinding(
                     factory = TvViewLayoutBinding::inflate,

@@ -18,7 +18,6 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +29,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
@@ -58,6 +58,8 @@ import androidx.tv.material3.TabRowDefaults
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.theme.TVLauncher3Theme
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.android.tvlauncher3.constants.ColorConstants
+import com.android.tvlauncher3.constants.NumberConstants
 import com.android.tvlauncher3.screen.AppsScreen
 import com.android.tvlauncher3.screen.HomeScreen
 import com.android.tvlauncher3.screen.InputScreen
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
                 Box(
                     modifier = Modifier
-                        .background(Color.Black)
+                        .background(Color.Transparent)
                         .fillMaxSize()
                         .safeDrawingPadding()
                         .statusBarsPadding()
@@ -133,14 +135,15 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .focusRestorer()
                                 .focusRequester(focusRequester),
-                            containerColor = Color.Transparent,
+                            containerColor = ColorConstants.TabContainerColorDefault,
                             contentColor = Color.White,
                             indicator = { tabPositions, doesTabRowHaveFocus ->
                                 TabRowDefaults.PillIndicator(
                                     currentTabPosition = tabPositions[selectedTabIndex],
                                     doesTabRowHaveFocus = doesTabRowHaveFocus,
-                                    activeColor = Color.White.copy(alpha = 0.5f),
-                                    inactiveColor = Color.LightGray.copy(alpha = 0.5f)
+                                    modifier = Modifier,
+                                    activeColor = ColorConstants.TabBackgroundColorActive,
+                                    inactiveColor = ColorConstants.TabBackgroundColorInactive
                                 )
                             }
                         ) {
@@ -149,10 +152,15 @@ class MainActivity : ComponentActivity() {
                                 val focusState = interactionSource.collectIsFocusedAsState()
                                 val hoverState = interactionSource.collectIsHoveredAsState()
                                 val bgColor by animateColorAsState(
-                                    targetValue = if (focusState.value || hoverState.value) Color.White.copy(
-                                        alpha = 0.25f
-                                    ) else Color.Transparent,
-                                    animationSpec = tween(durationMillis = 250)
+                                    targetValue = if (focusState.value || hoverState.value)
+                                        ColorConstants.TabBackgroundColorActive
+                                    else Color.Transparent,
+                                    animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
+                                )
+                                val contentColor by animateColorAsState(
+                                    targetValue = if (selectedTabIndex == index)
+                                        ColorConstants.TabContentColorActive
+                                    else ColorConstants.TabContentColorInactive
                                 )
 
                                 key(index) {
@@ -178,11 +186,11 @@ class MainActivity : ComponentActivity() {
                                             viewModel.setSelectedTabIndex(index)
                                         },
                                         colors = TabDefaults.pillIndicatorTabColors(
-                                            contentColor = Color.White.copy(alpha = 0.75f),
+                                            contentColor = Color.White.copy(alpha = 0.7f),
                                             inactiveContentColor = Color.White.copy(alpha = 0.5f),
-                                            selectedContentColor = Color.Black,
-                                            focusedContentColor = Color.Black,
-                                            focusedSelectedContentColor = Color.Black,
+                                            selectedContentColor = Color.Green,
+                                            focusedContentColor = Color.Red,
+                                            focusedSelectedContentColor = Color.Yellow,
                                         )
                                     ) {
                                         Row(
@@ -193,14 +201,14 @@ class MainActivity : ComponentActivity() {
                                             Icon(
                                                 painterResource(tab.first),
                                                 contentDescription = stringResource(tab.second),
-                                                tint = Color.White
+                                                tint = contentColor
                                             )
 
                                             Spacer(modifier = Modifier.width(10.dp))
 
                                             Text(
                                                 text = stringResource(tab.second),
-                                                color = Color.White,
+                                                color = contentColor,
                                                 fontSize = 16.sp
                                             )
                                         }
@@ -221,39 +229,24 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.width(20.dp))
 
-                        Column(
+                        AndroidView(
+                            factory = { context ->
+                                TextClock(context).apply {
+                                    format12Hour = "hh:mm:ss"
+                                    format24Hour = "HH:mm:ss"
+                                    textSize = 22F
+                                    setEnabled(false)
+                                    setTextColor(android.graphics.Color.WHITE)
+                                }
+                            },
                             modifier = Modifier
-                                .focusable(enabled = false),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            AndroidView(
-                                factory = { context ->
-                                    TextClock(context).apply {
-                                        format12Hour = "yyyy-MM-dd"
-                                        format24Hour = "yyyy-MM-dd"
-                                        textSize = 18F
-                                        setEnabled(false)
-                                        setTextColor(android.graphics.Color.WHITE)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .focusable(enabled = false)
-                            )
-
-                            AndroidView(
-                                factory = { context ->
-                                    TextClock(context).apply {
-                                        format12Hour = "hh:mm:ss"
-                                        format24Hour = "HH:mm:ss"
-                                        textSize = 24F
-                                        setEnabled(false)
-                                        setTextColor(android.graphics.Color.WHITE)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .focusable(enabled = false)
-                            )
-                        }
+                                .background(
+                                    color = Color.LightGray.copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .padding(10.dp)
+                                .focusable(enabled = false)
+                        )
                     }
 
                     Box(

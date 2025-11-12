@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.bean.ActivityBean
+import com.android.tvlauncher3.constants.ColorConstants
 import com.android.tvlauncher3.utils.IntentUtils
 
 @Composable
@@ -34,6 +35,8 @@ fun AppButton(
         icon = item.getIcon(context),
         iconType = item.iconType,
         label = item.label,
+        contentDefaultColor = ColorConstants.ButtonContentDefault,
+        contentFocusedColor = ColorConstants.ButtonContentFocused,
         onShortClick = {
             val packageName = item.packageName
             val result: Boolean =

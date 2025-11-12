@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.tvlauncher3.R
 import com.android.tvlauncher3.activity.ui.viewmodel.MainViewModel
 import com.android.tvlauncher3.bean.ActivityBean
+import com.android.tvlauncher3.constants.ColorConstants
 import com.android.tvlauncher3.view.button.RoundRectButton
 import kotlinx.coroutines.launch
 
@@ -260,6 +261,8 @@ fun AppListDialog(
                         icon = item.getIcon(context),
                         iconType = item.iconType,
                         label = item.label,
+                        contentDefaultColor = ColorConstants.ButtonContentDefault,
+                        contentFocusedColor = ColorConstants.ButtonContentFocused,
                         onShortClick = {
                             onItemChosen(index, item)
                             onDismissRequest()
