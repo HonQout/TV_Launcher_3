@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.android.tvlauncher3"
+    namespace = "com.github.honqout.tvlauncher3"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.android.tvlauncher3"
+        applicationId = "com.github.honqout.tvlauncher3"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
