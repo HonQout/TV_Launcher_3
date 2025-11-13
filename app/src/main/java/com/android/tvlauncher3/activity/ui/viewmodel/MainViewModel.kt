@@ -17,6 +17,7 @@ import com.android.tvlauncher3.bean.ActivityBean
 import com.android.tvlauncher3.bean.ActivityRecord
 import com.android.tvlauncher3.persistence.SettingsRepository
 import com.android.tvlauncher3.utils.ApplicationUtils
+import com.android.tvlauncher3.utils.LocaleUtils
 import com.android.tvlauncher3.utils.TvUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -37,6 +38,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // persistence
     val settingsRepository = SettingsRepository(getApplication())
 
+    // system-provided
+    private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
+    val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
+    private val _currentLocale = MutableStateFlow<Locale>(Locale.getDefault())
+
     // UI-related
     val tabs = listOf(
         Pair(R.drawable.baseline_home_24, R.string.home),
@@ -55,8 +61,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val showAppListDialog: StateFlow<Boolean> = _showAppListDialog.asStateFlow()
 
     // data-related
-    private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
-    val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
     private val _isInitializing = MutableStateFlow<Boolean>(false)
     val isInitializing: StateFlow<Boolean> = _isInitializing.asStateFlow()
     private val _activityBeanList = mutableStateListOf<ActivityBean>()
@@ -93,8 +97,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         registerTimeBR(getApplication())
         registerLocaleBR(getApplication())
         registerPackageBR(getApplication())
+        _currentLocale.value = LocaleUtils.getPrimaryLocale(getApplication())
         loadFixedActivityList()
-        loadActivityBeanList()
+        loadActivityBeanList(_currentLocale.value)
         loadTvInputList()
         _isInitializing.value = false
     }
@@ -146,8 +151,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                _currentLocale.value = LocaleUtils.getPrimaryLocale(context)
                 loadFixedActivityList()
-                loadActivityBeanList()
+                loadActivityBeanList(_currentLocale.value)
                 loadTvInputList()
             }
         }
@@ -191,8 +197,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 if (intent.data != null) {
                                     packageName = intent.data?.schemeSpecificPart ?: "null"
                                 }
-                                addItems(packageName)
-                                Log.i(TAG, "Package $packageName has been added.")
+                                addActivityBeans(packageName)
                             }
                         }
 
@@ -203,8 +208,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 if (intent.data != null) {
                                     packageName = intent.data?.schemeSpecificPart ?: "null"
                                 }
-                                removeItems(packageName)
-                                Log.i(TAG, "Package $packageName has been removed.")
+                                removeActivityBeans(packageName)
+                                Log.i(
+                                    TAG,
+                                    "ResolveInfos of package $packageName has been removed from activityBeanList."
+                                )
                             }
                         }
 
@@ -213,7 +221,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             if (intent.data != null) {
                                 packageName = intent.data?.schemeSpecificPart ?: "null"
                             }
-                            replaceItems(packageName)
+                            replaceActivityBeans(packageName)
                             Log.i(TAG, "Package $packageName has been replaced.")
                             setFocusedItemIndex2(0)
                         }
@@ -270,12 +278,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadActivityBeanList() {
+    fun loadActivityBeanList(locale: Locale = Locale.getDefault()) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
                 _activityBeanList.clear()
                 _activityBeanList.addAll(ApplicationUtils.getActivityBeanList(getApplication()))
-                sortActivityBeanList()
+                sortActivityBeanList(locale)
             }
         }
     }
@@ -289,7 +297,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addItems(packageName: String) {
+    fun updateFixedActivities(context: Context, packageName: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                for (i in 0..<numFixedActivity) {
+                    val oldActivityBean = _fixedActivityBeanList[i]
+                    if (oldActivityBean != null) {
+                        if (packageName == oldActivityBean.packageName) {
+                            val newResolveInfo = ApplicationUtils.getIntentActivity(
+                                context,
+                                oldActivityBean.packageName,
+                                oldActivityBean.activityName
+                            )
+                            if (newResolveInfo == null) {
+                                _fixedActivityBeanList[i] = null
+                                _fixedActivityRecordList[i] = null
+                            } else {
+                                val newActivityBean = ActivityBean(context, newResolveInfo)
+                                val newActivityRecord = ActivityRecord(
+                                    newActivityBean.packageName,
+                                    newActivityBean.activityName
+                                )
+                                _fixedActivityBeanList[i] = newActivityBean
+                                _fixedActivityRecordList[i] = newActivityRecord
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                settingsRepository.saveFixedActivityRecord(_fixedActivityRecordList)
+            }
+        }
+    }
+
+    fun addActivityBeans(packageName: String) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
                 delay(1000)
@@ -302,7 +346,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val removeResult = _activityBeanList.removeAll { activityBean ->
                     activityBean.packageName == packageName
                 }
-                Log.i(TAG, "Removed items from list: $removeResult")
+                Log.i(TAG, "Removed items from resolveInfoList: $removeResult")
                 val application = getApplication<Application>()
                 val addResult = _activityBeanList.addAll(
                     ApplicationUtils.getActivityBeanList(
@@ -310,9 +354,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         packageName
                     ).toMutableList()
                 )
-                Log.i(TAG, "Added items to list: $addResult")
-                Log.i(TAG, "New size of resolve info list is ${_activityBeanList.size}.")
                 sortActivityBeanList()
+                Log.i(TAG, "Added items to resolveInfoList: $addResult")
+                Log.i(TAG, "New size of resolveInfoList is ${_activityBeanList.size}.")
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
                     setFocusedItemIndex2(currentIndex)
@@ -323,7 +367,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun removeItems(packageName: String) {
+    fun removeActivityBeans(packageName: String) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
                 val focusedItem =
@@ -335,7 +379,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val removeResult = _activityBeanList.removeAll { activityBean ->
                     activityBean.packageName == packageName
                 }
-                Log.i(TAG, "Removed items from list: $removeResult")
+                Log.i(TAG, "Removed items from resolveInfoList: $removeResult")
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
                     setFocusedItemIndex2(currentIndex)
@@ -344,9 +388,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+        updateFixedActivities(getApplication(), packageName)
     }
 
-    fun replaceItems(packageName: String) {
+    fun replaceActivityBeans(packageName: String) {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
                 val focusedItem =
@@ -358,7 +403,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 val removeResult = _activityBeanList.removeAll { activityBean ->
                     activityBean.packageName == packageName
                 }
-                Log.i(TAG, "Removed items from list: $removeResult")
+                Log.i(TAG, "Removed items from resolveInfoList: $removeResult")
                 val application = getApplication<Application>()
                 val addResult = _activityBeanList.addAll(
                     ApplicationUtils.getActivityBeanList(
@@ -366,8 +411,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         packageName
                     ).toMutableList()
                 )
-                Log.i(TAG, "Added items to list: $addResult")
-                Log.i(TAG, "New size of resolve info list is ${_activityBeanList.size}.")
+                Log.i(TAG, "Added items to resolveInfoList: $addResult")
+                Log.i(TAG, "New size of resolveInfoList is ${_activityBeanList.size}.")
                 sortActivityBeanList()
                 val currentIndex = _activityBeanList.indexOf(focusedItem)
                 if (currentIndex in 0 until _activityBeanList.size) {
@@ -377,17 +422,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+        updateFixedActivities(getApplication(), packageName)
     }
 
-    fun sortActivityBeanList(
-        locale: Locale = Locale.CHINA
-    ) {
+    fun sortActivityBeanList(locale: Locale = Locale.getDefault()) {
         val collator: Collator = Collator.getInstance(locale)
         _activityBeanList.sortWith { a, b ->
-            collator.compare(
-                a.label,
-                b.label
-            )
+            collator.compare(a.label, b.label)
         }
     }
 
