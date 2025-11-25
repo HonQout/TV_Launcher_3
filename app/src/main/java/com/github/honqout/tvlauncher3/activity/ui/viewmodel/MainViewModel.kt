@@ -188,42 +188,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     Log.i(TAG, "Received message is null.")
                 } else {
                     val action: String = intent.action ?: "null"
-                    Log.i(TAG, "Received message: $action")
+                    Log.i(TAG, "Received intent action: $action")
                     when (action) {
                         Intent.ACTION_PACKAGE_ADDED -> {
-                            val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                            if (!isReplacing) {
-                                var packageName = "null"
-                                if (intent.data != null) {
-                                    packageName = intent.data?.schemeSpecificPart ?: "null"
+                            val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                            Log.i(TAG, "Extra: replacing = $replacing")
+                            if (!replacing) {
+                                val packageName = intent.data?.schemeSpecificPart ?: ""
+                                if (packageName != "") {
+                                    addActivityBeans(packageName)
                                 }
-                                addActivityBeans(packageName)
                             }
                         }
 
                         Intent.ACTION_PACKAGE_REMOVED -> {
-                            val isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                            if (!isReplacing) {
-                                var packageName = "null"
-                                if (intent.data != null) {
-                                    packageName = intent.data?.schemeSpecificPart ?: "null"
-                                }
+                            val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                            val dataRemoved =
+                                intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false)
+                            Log.i(TAG, "Extra: replacing = $replacing, data_removed = $dataRemoved")
+                            if (!replacing) {
+                                val packageName = intent.data?.schemeSpecificPart ?: ""
                                 removeActivityBeans(packageName)
-                                Log.i(
-                                    TAG,
-                                    "ResolveInfos of package $packageName has been removed from activityBeanList."
-                                )
+                                if (packageName != "") {
+                                    removeActivityBeans(packageName)
+                                }
                             }
                         }
 
                         Intent.ACTION_PACKAGE_REPLACED -> {
-                            var packageName = "null"
-                            if (intent.data != null) {
-                                packageName = intent.data?.schemeSpecificPart ?: "null"
+                            val packageName = intent.data?.schemeSpecificPart ?: ""
+                            if (packageName != "") {
+                                replaceActivityBeans(packageName)
+                                setFocusedItemIndex2(0)
                             }
-                            replaceActivityBeans(packageName)
-                            Log.i(TAG, "Package $packageName has been replaced.")
-                            setFocusedItemIndex2(0)
                         }
 
                         else -> {
