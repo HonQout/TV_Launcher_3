@@ -83,7 +83,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _tvInputList = mutableStateListOf<TvInputInfo>()
     val tvInputList: List<TvInputInfo> = _tvInputList
 
-    // broadcastReceiver
+    // broadcast receiver
     private var timeBroadcastReceiver: BroadcastReceiver? = null
     private var localeBroadcastReceiver: BroadcastReceiver? = null
     private var packageBroadcastReceiver: BroadcastReceiver? = null
@@ -124,13 +124,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             addAction(Intent.ACTION_TIME_CHANGED)
         }
 
+        val receiverFlags = ContextCompat.RECEIVER_NOT_EXPORTED
+
         timeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 _currentTime.value = System.currentTimeMillis()
             }
         }
 
-        context.registerReceiver(timeBroadcastReceiver, filter)
+        ContextCompat.registerReceiver(context, timeBroadcastReceiver, filter, receiverFlags)
     }
 
     fun unregisterTimeBR(context: Context) {
@@ -149,6 +151,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             addAction(Intent.ACTION_LOCALE_CHANGED)
         }
 
+        val receiverFlags = ContextCompat.RECEIVER_NOT_EXPORTED
+
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 _currentLocale.value = LocaleUtils.getPrimaryLocale(context)
@@ -158,7 +162,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        context.registerReceiver(localeBroadcastReceiver, filter)
+        ContextCompat.registerReceiver(context, localeBroadcastReceiver, filter, receiverFlags)
     }
 
     fun unregisterLocaleBR(context: Context) {
@@ -180,51 +184,50 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             addDataScheme("package")
         }
 
-        val receiverFlags = ContextCompat.RECEIVER_EXPORTED
+        val receiverFlags = ContextCompat.RECEIVER_NOT_EXPORTED
 
         packageBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent == null) {
-                    Log.i(TAG, "Received message is null.")
-                } else {
-                    val action: String = intent.action ?: "null"
-                    Log.i(TAG, "Received intent action: $action")
-                    when (action) {
-                        Intent.ACTION_PACKAGE_ADDED -> {
-                            val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                            Log.i(TAG, "Extra: replacing = $replacing")
-                            if (!replacing) {
-                                val packageName = intent.data?.schemeSpecificPart ?: ""
-                                if (packageName != "") {
-                                    addActivityBeans(packageName)
-                                }
+                    Log.i(TAG, "Received intent is null.")
+                    return
+                }
+                val action: String = intent.action ?: return
+                Log.i(TAG, "Received intent action: $action")
+                when (action) {
+                    Intent.ACTION_PACKAGE_ADDED -> {
+                        val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                        Log.i(TAG, "Extra: replacing = $replacing")
+                        if (!replacing) {
+                            val packageName = intent.data?.schemeSpecificPart
+                            if (packageName != null) {
+                                addActivityBeans(packageName)
+                            } else {
+                                Log.e(TAG, "Failed to get packageName.");
                             }
                         }
+                    }
 
-                        Intent.ACTION_PACKAGE_REMOVED -> {
-                            val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                            val dataRemoved =
-                                intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false)
-                            Log.i(TAG, "Extra: replacing = $replacing, data_removed = $dataRemoved")
-                            if (!replacing) {
-                                val packageName = intent.data?.schemeSpecificPart ?: ""
+                    Intent.ACTION_PACKAGE_REMOVED -> {
+                        val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+                        val dataRemoved =
+                            intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false)
+                        Log.i(TAG, "Extra: replacing = $replacing, data_removed = $dataRemoved")
+                        if (!replacing) {
+                            val packageName = intent.data?.schemeSpecificPart
+                            if (packageName != null) {
                                 removeActivityBeans(packageName)
-                                if (packageName != "") {
-                                    removeActivityBeans(packageName)
-                                }
+                            } else {
+                                Log.e(TAG, "Failed to get packageName.")
                             }
                         }
+                    }
 
-                        Intent.ACTION_PACKAGE_REPLACED -> {
-                            val packageName = intent.data?.schemeSpecificPart ?: ""
-                            if (packageName != "") {
-                                replaceActivityBeans(packageName)
-                                setFocusedItemIndex2(0)
-                            }
-                        }
-
-                        else -> {
-                            Log.e(TAG, "Received irrelevant message.")
+                    Intent.ACTION_PACKAGE_REPLACED -> {
+                        val packageName = intent.data?.schemeSpecificPart ?: ""
+                        if (packageName != "") {
+                            replaceActivityBeans(packageName)
+                            setFocusedItemIndex2(0)
                         }
                     }
                 }
@@ -340,10 +343,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     } else {
                         _activityBeanList[0]
                     }
-                val removeResult = _activityBeanList.removeAll { activityBean ->
-                    activityBean.packageName == packageName
-                }
-                Log.i(TAG, "Removed items from resolveInfoList: $removeResult")
                 val application = getApplication<Application>()
                 val addResult = _activityBeanList.addAll(
                     ApplicationUtils.getActivityBeanList(
