@@ -181,24 +181,19 @@ class ApplicationUtils {
         }
 
         /**
-         * Get a list of resolveInfos of all applications installed.
+         * Get a list of intent activities.
+         *
+         * @param packageName Specify which package should these activities belong to. Simply passing
+         *                    null or empty string ("") to get all activities of all installed
+         *                    packages.
          */
-        fun getIntentActivityList(context: Context): List<ResolveInfo> {
+        fun getIntentActivityList(context: Context, packageName: String?): List<ResolveInfo> {
             val pm: PackageManager = context.packageManager
             val intent: Intent = Intent(Intent.ACTION_MAIN).apply {
                 addCategory(Intent.CATEGORY_LAUNCHER)
-            }
-            return pm.queryIntentActivities(intent, 0)
-        }
-
-        /**
-         * Get a list of resolveInfos of the application corresponds to the given packageName.
-         */
-        fun getIntentActivityList(context: Context, packageName: String): List<ResolveInfo> {
-            val pm: PackageManager = context.packageManager
-            val intent: Intent = Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
-                setPackage(packageName)
+                if (packageName != null && !TextUtils.isEmpty(packageName)) {
+                    setPackage(packageName)
+                }
             }
             return pm.queryIntentActivities(intent, 0)
         }
@@ -217,7 +212,7 @@ class ApplicationUtils {
         /**
          * The implementation of function getActivityBeanList.
          */
-        fun getActivityBeanList(
+        private fun getActivityBeanList(
             context: Context,
             intentActivityList: List<ResolveInfo>
         ): List<ActivityBean> {
@@ -230,17 +225,13 @@ class ApplicationUtils {
         }
 
         /**
-         * Get a list of ActivityBean of all launchable activity of all installed applications.
+         * Get a list of ActivityBean of all launchable activity of certain application(s).
+         *
+         * @param packageName Specify which package should these ActivityBeans belong to. Simply
+         *                    passing null or empty string ("") to get all ActivityBeans of all
+         *                    installed packages.
          */
-        fun getActivityBeanList(context: Context): List<ActivityBean> {
-            val intentActivityList = getIntentActivityList(context)
-            return getActivityBeanList(context, intentActivityList)
-        }
-
-        /**
-         * Get a list of ActivityBean of all launchable activity of the specified application.
-         */
-        fun getActivityBeanList(context: Context, packageName: String): List<ActivityBean> {
+        fun getActivityBeanList(context: Context, packageName: String?): List<ActivityBean> {
             val intentActivityList = getIntentActivityList(context, packageName)
             return getActivityBeanList(context, intentActivityList)
         }

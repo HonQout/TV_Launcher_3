@@ -17,7 +17,6 @@ import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.bean.ActivityRecord
 import com.github.honqout.tvlauncher3.persistence.SettingsRepository
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
-import com.github.honqout.tvlauncher3.utils.LocaleUtils
 import com.github.honqout.tvlauncher3.utils.TvUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.Collator
-import java.util.Locale
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     // constant
@@ -41,7 +39,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // system-provided
     private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
     val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
-    private val _currentLocale = MutableStateFlow<Locale>(Locale.getDefault())
 
     // UI-related
     val tabs = listOf(
@@ -97,9 +94,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         registerTimeBR(getApplication())
         registerLocaleBR(getApplication())
         registerPackageBR(getApplication())
-        _currentLocale.value = LocaleUtils.getPrimaryLocale(getApplication())
         loadFixedActivityList()
-        loadActivityBeanList(_currentLocale.value)
+        loadActivityBeanList()
         loadTvInputList()
         _isInitializing.value = false
     }
@@ -155,9 +151,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                _currentLocale.value = LocaleUtils.getPrimaryLocale(context)
                 loadFixedActivityList()
-                loadActivityBeanList(_currentLocale.value)
+                loadActivityBeanList()
                 loadTvInputList()
             }
         }
@@ -203,7 +198,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             if (packageName != null) {
                                 addActivityBeans(packageName)
                             } else {
-                                Log.e(TAG, "Failed to get packageName.");
+                                Log.e(TAG, "Failed to get packageName.")
                             }
                         }
                     }
@@ -278,12 +273,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadActivityBeanList(locale: Locale = Locale.getDefault()) {
+    fun loadActivityBeanList() {
         viewModelScope.launch {
             withContext(Dispatchers.Default) {
                 _activityBeanList.clear()
-                _activityBeanList.addAll(ApplicationUtils.getActivityBeanList(getApplication()))
-                sortActivityBeanList(locale)
+                _activityBeanList.addAll(
+                    ApplicationUtils.getActivityBeanList(
+                        getApplication(),
+                        null
+                    )
+                )
+                sortActivityBeanList()
             }
         }
     }
@@ -421,8 +421,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateFixedActivities(getApplication(), packageName)
     }
 
-    fun sortActivityBeanList(locale: Locale = Locale.getDefault()) {
-        val collator: Collator = Collator.getInstance(locale)
+    fun sortActivityBeanList() {
+        val collator: Collator = Collator.getInstance()
         _activityBeanList.sortWith { a, b ->
             collator.compare(a.label, b.label)
         }
