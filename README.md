@@ -1,9 +1,9 @@
 # TV Launcher 3
 ## Basic information
 This is a launcher application designed for Android TV by using Kotlin and Jetpack Compose.
-## Last updated: 2025-11-29
+## Last updated: 2025-11-30
 ### Changes and improvements:
-1. Fixed the issue that this app may perform unnecessary acts of adding, removing or replacing apps.
+1. Removed some duplicate implementations in ApplicationUtils.kt.
 ## Function
 1. Direct access to your favourite applications on home screen by simply fix them on it.
 2. Displays all launchable applications on your device and provides entrances to manage them.

@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.pm.PackageInfoCompat
@@ -22,6 +23,77 @@ class ApplicationUtils {
 
         enum class IconType {
             Icon, Banner
+        }
+
+        fun getPackageName(resolveInfo: ResolveInfo?): String? {
+            return resolveInfo?.activityInfo?.packageName
+        }
+
+        fun getPackageInfo(context: Context, packageName: String?): PackageInfo? {
+            val pm: PackageManager = context.packageManager
+            return if (packageName == null || TextUtils.isEmpty(packageName)) {
+                Log.e(TAG, "Cannot get packageInfo because the given packageName is null or empty.")
+                null
+            } else {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+                    } else {
+                        pm.getPackageInfo(packageName, 0)
+                    }
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.e(
+                        TAG,
+                        "Cannot get packageInfo because package $packageName doesn't exist.",
+                        e
+                    )
+                    null
+                }
+            }
+        }
+
+        fun getPackageInfo(context: Context, resolveInfo: ResolveInfo?): PackageInfo? {
+            val packageName = getPackageName(resolveInfo)
+            return getPackageInfo(context, packageName)
+        }
+
+        fun getApplicationIcon(context: Context, packageName: String?): Drawable {
+            val pm: PackageManager = context.packageManager
+            return if (packageName == null || TextUtils.isEmpty(packageName)) {
+                Log.e(
+                    TAG,
+                    "Cannot get application icon because the given packageName is null or empty."
+                )
+                pm.defaultActivityIcon
+            } else {
+                try {
+                    pm.getApplicationIcon(packageName)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    Log.e(
+                        TAG,
+                        "Cannot get application icon because package $packageName doesn't exist.",
+                        e
+                    )
+                    pm.defaultActivityIcon
+                }
+            }
+        }
+
+        fun getApplicationIcon(context: Context, resolveInfo: ResolveInfo?): Drawable {
+            val packageName = getPackageName(resolveInfo)
+            return getApplicationIcon(context, packageName)
+        }
+
+        fun getApplicationLabel(context: Context, packageName: String): String? {
+            val pm: PackageManager = context.packageManager
+            val packageInfo = getPackageInfo(context, packageName)
+            return packageInfo?.applicationInfo?.loadLabel(pm)?.toString()
+        }
+
+        fun getApplicationLabel(context: Context, resolveInfo: ResolveInfo?): String {
+            val pm: PackageManager = context.packageManager
+            val applicationInfo = resolveInfo?.activityInfo?.applicationInfo
+            return applicationInfo?.loadLabel(pm).toString()
         }
 
         fun getActivityIcon(context: Context, resolveInfo: ResolveInfo?): Drawable {
@@ -41,25 +113,6 @@ class ApplicationUtils {
             }
         }
 
-        fun getApplicationIcon(context: Context, packageName: String): Drawable {
-            val pm: PackageManager = context.packageManager
-            try {
-                return pm.getApplicationIcon(packageName)
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.e(TAG, "Cannot find a package with specified packageName.", e)
-                return pm.defaultActivityIcon
-            }
-        }
-
-        fun getApplicationIcon(context: Context, resolveInfo: ResolveInfo?): Drawable {
-            val pm: PackageManager = context.packageManager
-            val packageName = getPackageName(resolveInfo)
-            return if (packageName == null || TextUtils.isEmpty(packageName)) {
-                pm.defaultActivityIcon
-            } else {
-                getApplicationIcon(context, packageName)
-            }
-        }
 
         /**
          * Get the banner of the application.
@@ -92,51 +145,6 @@ class ApplicationUtils {
         fun getActivityLabel(context: Context, resolveInfo: ResolveInfo?): String {
             val pm: PackageManager = context.packageManager
             return resolveInfo?.loadLabel(pm)?.toString() ?: ""
-        }
-
-        fun getApplicationLabel(context: Context, packageName: String): String {
-            val pm: PackageManager = context.packageManager
-            try {
-                val pi = pm.getPackageInfo(packageName, 0)
-                return if (pi.applicationInfo == null) {
-                    ""
-                } else {
-                    pi.applicationInfo!!.loadLabel(pm).toString()
-                }
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.e(TAG, "Cannot find package with specified package name.", e)
-                return ""
-            }
-        }
-
-        fun getApplicationLabel(context: Context, resolveInfo: ResolveInfo?): String {
-            val pm: PackageManager = context.packageManager
-            val applicationInfo = resolveInfo?.activityInfo?.applicationInfo
-            return applicationInfo?.loadLabel(pm).toString()
-        }
-
-        fun getPackageName(resolveInfo: ResolveInfo?, defaultName: String = ""): String? {
-            return if (resolveInfo == null) {
-                defaultName
-            } else {
-                resolveInfo.activityInfo.packageName
-            }
-        }
-
-        fun getPackageInfo(context: Context, resolveInfo: ResolveInfo?): PackageInfo? {
-            val pm: PackageManager = context.packageManager
-            val packageName = getPackageName(resolveInfo)
-            return if (packageName == null || TextUtils.isEmpty(packageName)) {
-                Log.e(TAG, "PackageName is null or empty.")
-                null
-            } else {
-                try {
-                    pm.getPackageInfo(packageName, PackageManager.GET_CONFIGURATIONS)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    Log.e(TAG, "Cannot find package ${packageName}.", e)
-                    null
-                }
-            }
         }
 
         fun getVersionName(context: Context, resolveInfo: ResolveInfo?): String? {
@@ -241,7 +249,7 @@ class ApplicationUtils {
             val packageName: String = resolveInfo.activityInfo.packageName
             val applicationLabel = getApplicationLabel(context, packageName)
             val activityLabel = getActivityLabel(context, resolveInfo)
-            return applicationLabel.compareTo(activityLabel) != 0
+            return applicationLabel?.compareTo(activityLabel) != 0
         }
 
         fun getApplicationType(context: Context, resolveInfo: ResolveInfo): ApplicationType {
