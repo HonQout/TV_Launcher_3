@@ -1,26 +1,21 @@
-package com.github.honqout.tvlauncher3.view
+package com.github.honqout.tvlauncher3.view.dialog
 
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusGroup
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -36,23 +31,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.view.button.SettingsActionButton
 import com.github.honqout.tvlauncher3.view.text.DateAndWeekdayText
 import com.github.honqout.tvlauncher3.view.text.TimeText
 
 @Composable
-fun SettingsPanel(
-    viewModel: MainViewModel,
+fun SettingsDialog(
+    launcherViewModel: LauncherViewModel,
+    timeViewModel: TimeViewModel,
     onDismissRequest: () -> Unit = {}
 ) {
-    val tag = "SettingsPanel"
-    val numColumns = 2
-    val bgColor = Color.Black.copy(alpha = 0.5f)
+    val tag = "SettingsDialog"
     val context = LocalContext.current
+    val numColumns = 2
     val lazyGridState = rememberLazyGridState()
-    val topBarHeight by viewModel.topBarHeight.collectAsState()
+    val topBarHeight by launcherViewModel.topBarHeight.collectAsState()
 
     BackHandler {
         Log.i(tag, "Pressed back button.")
@@ -70,17 +66,15 @@ fun SettingsPanel(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(bgColor)
-                .padding(20.dp)
-                .windowInsetsPadding(WindowInsets.systemBars)
+                .background(Color.Black.copy(alpha = 0.7f))
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
                     .fillMaxWidth(0.4f)
-                    .background(color = Color.Transparent)
+                    .background(Color.Transparent)
                     .align(Alignment.TopEnd)
-                    .focusable(enabled = false)
+                    .padding(20.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -90,7 +84,7 @@ fun SettingsPanel(
                 ) {
                     TimeText(
                         modifier = Modifier,
-                        viewModel = viewModel,
+                        viewModel = timeViewModel,
                         color = Color.White,
                         fontSize = 30.sp
                     )
@@ -99,7 +93,7 @@ fun SettingsPanel(
 
                     DateAndWeekdayText(
                         modifier = Modifier,
-                        viewModel = viewModel,
+                        viewModel = timeViewModel,
                         color = Color.White,
                         fontSize = 20.sp
                     )
@@ -107,8 +101,7 @@ fun SettingsPanel(
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(numColumns),
-                    modifier = Modifier
-                        .focusGroup(),
+                    modifier = Modifier,
                     state = lazyGridState,
                     contentPadding = PaddingValues(all = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -162,21 +155,6 @@ fun SettingsPanel(
 
                     item {
                         SettingsActionButton(
-                            iconRes = R.drawable.baseline_bluetooth_24,
-                            contentDescriptionRes = R.string.bluetooth,
-                            titleRes = R.string.bluetooth,
-                            descriptionRes = R.string.settings,
-                            onShortClick = {
-                                IntentUtils.launchSettingsActivity(
-                                    context,
-                                    Settings.ACTION_BLUETOOTH_SETTINGS
-                                )
-                            }
-                        )
-                    }
-
-                    item {
-                        SettingsActionButton(
                             iconRes = R.drawable.baseline_web_24,
                             contentDescriptionRes = R.string.internet,
                             titleRes = R.string.internet,
@@ -187,6 +165,21 @@ fun SettingsPanel(
                                     "com.android.tv.settings",
                                     "com.android.tv.settings.connectivity.NetworkActivity",
                                     true
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButton(
+                            iconRes = R.drawable.baseline_bluetooth_24,
+                            contentDescriptionRes = R.string.bluetooth,
+                            titleRes = R.string.bluetooth,
+                            descriptionRes = R.string.settings,
+                            onShortClick = {
+                                IntentUtils.launchSettingsActivity(
+                                    context,
+                                    Settings.ACTION_BLUETOOTH_SETTINGS
                                 )
                             }
                         )

@@ -4,18 +4,16 @@ import android.util.Log
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -35,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,23 +42,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.constants.ColorConstants
-import com.github.honqout.tvlauncher3.view.button.RoundRectButton
+import com.github.honqout.tvlauncher3.view.button.AppButton
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppListDialog(
-    viewModel: MainViewModel = viewModel(),
-    backgroundColor: Color = Color.Black,
-    contentColor: Color = Color.White,
+    viewModel: LauncherViewModel = viewModel(),
     onItemChosen: (index: Int, activityBean: ActivityBean) -> Unit = { _, _ -> },
     onDismissRequest: () -> Unit = {}
 ) {
     val tag = "AppListDialog"
     val numColumns = 5
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     var focusedItemIndex by remember { mutableIntStateOf(0) }
@@ -115,13 +109,14 @@ fun AppListDialog(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundColor)
+                .background(Color.Black)
                 .padding(20.dp)
-                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
             Text(
                 text = stringResource(R.string.choose_an_app),
-                color = contentColor,
+                modifier = Modifier
+                    .focusable(false),
+                color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Start
@@ -134,6 +129,8 @@ fun AppListDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(color = Color.Transparent)
+                    .focusable(false)
+                    //.focusRequester(focusRequester0)
                     .weight(weight = 1.0f)
                     .onKeyEvent { keyEvent ->
                         when (keyEvent.key) {
@@ -249,7 +246,7 @@ fun AppListDialog(
                 ) { index, item ->
                     val focusRequester = remember { FocusRequester() }
 
-                    RoundRectButton(
+                    AppButton(
                         modifier = Modifier
                             .focusRequester(focusRequester)
                             .onFocusChanged { focusState ->
@@ -258,9 +255,7 @@ fun AppListDialog(
                                     focusedItemIndex = index
                                 }
                             },
-                        icon = item.getIcon(context),
-                        iconType = item.iconType,
-                        label = item.label,
+                        item = item,
                         contentDefaultColor = ColorConstants.ButtonContentDefault,
                         contentFocusedColor = ColorConstants.ButtonContentFocused,
                         onShortClick = {

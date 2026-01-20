@@ -5,7 +5,7 @@ import android.util.DisplayMetrics
 
 class DisplayUtils {
     companion object {
-        const val TAG: String = "DisplayUtils"
+        private const val TAG: String = "DisplayUtils"
 
         fun getDensityDpi(context: Context): Int {
             val displayMetrics: DisplayMetrics = context.resources.displayMetrics

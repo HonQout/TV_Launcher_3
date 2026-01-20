@@ -3,21 +3,27 @@
 
     <!-- Title -->
     <string name="home">Home</string>
+    <string name="apps">Apps</string>
+    <string name="input">Input</string>
+    <string name="settings">Settings</string>
 
-    <!-- Common operation -->
-    <string name="delete">Delete</string>
+    <!-- Shortcut operation -->
     <string name="remove">Remove</string>
     <string name="replace">Replace</string>
+    <string name="add_app">Add app</string>
+    <string name="choose_an_app">Choose an app</string>
 
-    <!-- Hint -->
-    <string name="hint_cannot_launch_app">Cannot launch app.</string>
-    <string name="hint_cannot_uninstall_unknown_type">Cannot uninstall an app whose type is unknown.</string>
-    <string name="hint_cannot_uninstall_system_app">Cannot uninstall system app.</string>
-    <string name="hint_uninstall_request_failed">Failed to request uninstallation.</string>
-    <string name="hint_cannot_launch_settings">Cannot launch settings.</string>
-    <string name="hint_no_app_market_installed">No app market installed.</string>
+    <!-- App operation -->
+    <string name="run">Run</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="info">Info</string>
+    <string name="app_market">App market</string>
+
+    <!-- TV -->
+    <string name="signal_source">Signal source</string>
 
     <!-- Settings item -->
+    <string name="tv_settings">TV settings</string>
     <string name="wlan">WLAN</string>
     <string name="bluetooth">Bluetooth</string>
     <string name="internet">Internet</string>
@@ -26,18 +32,19 @@
     <string name="display">Display</string>
     <string name="screen_saver">Screen saver</string>
 
-    <!-- Others -->
+    <!-- Hint -->
     <string name="activity_belongs_to">\"%s\" belongs to the following app:</string>
-    <string name="run">Run</string>
-    <string name="uninstall">Uninstall</string>
-    <string name="info">Info</string>
-    <string name="settings">Settings</string>
-    <string name="tv_settings">TV settings</string>
-    <string name="app_market">App market</string>
-    <string name="add_app">Add app</string>
-    <string name="signal_source">Signal source</string>
-    <string name="input">Input</string>
-    <string name="apps">Apps</string>
-    <string name="all_apps">All apps</string>
-    <string name="choose_an_app">Choose an app</string>
+    <string name="cannot_find_package">Cannot find package.</string>
+    <string name="cannot_find_activity">Cannot find activity.</string>
+    <string name="cannot_access_unexported_activity">Cannot access unexported activity.</string>
+    <string name="activity_requires_extra_permission">This activity requires extra permission to be started.</string>
+    <string name="cannot_launch_app">Cannot launch app.</string>
+    <string name="cannot_uninstall_unknown_type">Cannot uninstall an app whose type is unknown.</string>
+    <string name="cannot_uninstall_system_app">Cannot uninstall system app.</string>
+    <string name="uninstall_request_failed">Failed to request uninstallation.</string>
+    <string name="cannot_launch_settings">Cannot launch settings.</string>
+    <string name="uri_is_empty">Uri is empty.</string>
+    <string name="cannot_find_resource">Cannot find resource.</string>
+    <string name="no_app_market_installed">No app market installed.</string>
+
 </resources>

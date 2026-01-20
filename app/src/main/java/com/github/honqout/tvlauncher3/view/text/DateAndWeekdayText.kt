@@ -12,12 +12,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
 
 @Composable
 fun DateAndWeekdayText(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel,
+    viewModel: TimeViewModel,
     color: Color = MaterialTheme.colorScheme.primary,
     fontSize: TextUnit = 12.sp
 ) {

@@ -1,6 +1,5 @@
 package com.github.honqout.tvlauncher3.view.button
 
-import android.graphics.drawable.Drawable
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
@@ -36,8 +35,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -47,10 +44,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
 import com.github.honqout.tvlauncher3.constants.NumberConstants
-import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.IconType
-import com.github.honqout.tvlauncher3.utils.DrawableUtils
 
 @Composable
 private fun RoundRectButtonImpl(
@@ -169,37 +163,17 @@ private fun RoundRectButtonImpl(
 @Composable
 fun RoundRectButton(
     modifier: Modifier = Modifier,
-    iconType: IconType,
-    icon: Drawable,
+    icon: @Composable () -> Unit,
     label: String,
-    contentDescription: String = label,
+    backgroundColor: Color = colorScheme.primary,
     contentDefaultColor: Color = colorScheme.secondary,
     contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
-    val backgroundColor =
-        Color(DrawableUtils.getBackgroundColorFromAppIcon(icon, Color.White.toArgb()))
-    val iconWidth = when (iconType) {
-        IconType.Icon -> 75.dp
-        IconType.Banner -> 160.dp
-    }
-    val iconHeight = when (iconType) {
-        IconType.Icon -> 75.dp
-        IconType.Banner -> 90.dp
-    }
-
     RoundRectButtonImpl(
         modifier = modifier,
-        icon = {
-            Image(
-                bitmap = icon.toBitmap().asImageBitmap(),
-                contentDescription = contentDescription,
-                modifier = Modifier
-                    .requiredSize(width = iconWidth, height = iconHeight),
-                contentScale = ContentScale.Fit
-            )
-        },
+        icon = icon,
         label = label,
         backgroundColor = backgroundColor,
         contentDefaultColor = contentDefaultColor,

@@ -10,7 +10,7 @@ import androidx.core.graphics.get
 
 class ColorUtils {
     companion object {
-        const val TAG: String = "ColorUtils"
+        private const val TAG: String = "ColorUtils"
 
         /**
          * Get the color of pixel (x,y) of Bitmap bitmap.

@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.entity
+package com.github.honqout.tvlauncher3.room.entity
 
 import android.content.pm.ActivityInfo
 import android.graphics.drawable.Drawable

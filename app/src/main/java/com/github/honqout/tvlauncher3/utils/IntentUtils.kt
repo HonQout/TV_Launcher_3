@@ -8,53 +8,144 @@ import android.net.Uri
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.widget.Toast
 import androidx.core.net.toUri
+import com.github.honqout.tvlauncher3.R
 
 class IntentUtils {
     companion object {
         private const val TAG: String = "IntentUtils"
 
-        /**
-         * Launch the specified activity.
-         * @return True if and only if the activity is successfully launched, false otherwise.
-         */
-        fun launchActivity(
+        enum class LaunchIntentResult {
+            SUCCESS, URI_IS_EMPTY, NO_MATCHING_ACTIVITY, RES_NOT_FOUND
+        }
+
+        enum class LaunchActivityResult {
+            SUCCESS, NOT_EXPORTED, REQUIRE_PERMISSION, NOT_FOUND
+        }
+
+        fun handleLaunchIntentResult(
             context: Context,
-            intent: Intent
-        ): Boolean {
-            val activityInfo = intent.resolveActivityInfo(
-                context.packageManager,
-                PackageManager.MATCH_DEFAULT_ONLY
-            )
-            if (activityInfo != null) {
-                if (activityInfo.exported && TextUtils.isEmpty(activityInfo.permission)) {
-                    try {
-                        context.startActivity(intent)
-                        return true
-                    } catch (e: ActivityNotFoundException) {
-                        Log.e(TAG, "Cannot find requested activity.", e)
-                        return false
-                    }
-                } else {
-                    Log.e(TAG, "Activity is not exported or needs extra permission to start.")
-                    return false
+            result: LaunchIntentResult,
+            onSuccess: () -> Unit = {},
+            onFail: () -> Unit = {}
+        ) {
+            when (result) {
+                LaunchIntentResult.SUCCESS -> {
+                    onSuccess()
                 }
-            } else {
-                Log.e(TAG, "ActivityInfo is null.")
-                return false
+
+                LaunchIntentResult.URI_IS_EMPTY -> {
+                    Toast.makeText(
+                        context,
+                        R.string.uri_is_empty,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
+
+                LaunchIntentResult.NO_MATCHING_ACTIVITY -> {
+                    Toast.makeText(
+                        context,
+                        R.string.no_app_market_installed,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
+
+                LaunchIntentResult.RES_NOT_FOUND -> {
+                    Toast.makeText(
+                        context,
+                        R.string.cannot_find_resource,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
+            }
+        }
+
+        fun handleLaunchActivityResult(
+            context: Context,
+            result: LaunchActivityResult,
+            onSuccess: () -> Unit = {},
+            onFail: () -> Unit = {}
+        ) {
+            when (result) {
+                LaunchActivityResult.SUCCESS -> {
+                    onSuccess()
+                }
+
+                LaunchActivityResult.NOT_EXPORTED -> {
+                    Toast.makeText(
+                        context,
+                        R.string.cannot_access_unexported_activity,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
+
+                LaunchActivityResult.REQUIRE_PERMISSION -> {
+                    Toast.makeText(
+                        context,
+                        R.string.activity_requires_extra_permission,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
+
+                LaunchActivityResult.NOT_FOUND -> {
+                    Toast.makeText(
+                        context,
+                        R.string.cannot_find_activity,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onFail()
+                }
             }
         }
 
         /**
          * Launch the specified activity.
-         * @return True if and only if the activity is successfully launched, false otherwise.
+         */
+        fun launchActivity(
+            context: Context,
+            intent: Intent
+        ): LaunchActivityResult {
+            val activityInfo = intent.resolveActivityInfo(
+                context.packageManager,
+                PackageManager.MATCH_DEFAULT_ONLY
+            )
+            if (activityInfo != null) {
+                if (!activityInfo.exported) {
+                    Log.e(TAG, "Cannot launch activity because it is not exported.")
+                    return LaunchActivityResult.NOT_EXPORTED
+                } else if (!TextUtils.isEmpty(activityInfo.permission)) {
+                    Log.e(TAG, "Activity is not exported or needs extra permission to start.")
+                    return LaunchActivityResult.REQUIRE_PERMISSION
+                } else {
+                    try {
+                        context.startActivity(intent)
+                        return LaunchActivityResult.SUCCESS
+                    } catch (e: ActivityNotFoundException) {
+                        Log.e(TAG, "Cannot find requested activity.", e)
+                        return LaunchActivityResult.NOT_FOUND
+                    }
+                }
+            } else {
+                Log.e(TAG, "ActivityInfo is null.")
+                return LaunchActivityResult.NOT_FOUND
+            }
+        }
+
+        /**
+         * Launch the specified activity.
          */
         fun launchActivity(
             context: Context,
             packageName: String,
             activityName: String,
             newTask: Boolean
-        ): Boolean {
+        ): LaunchActivityResult {
             val intent = Intent().apply {
                 setClassName(packageName, activityName)
                 if (newTask) {
@@ -65,26 +156,35 @@ class IntentUtils {
         }
 
         /**
-         * Launch an app's launch activity.
-         * @return True if and only if the activity is successfully launched, false otherwise.
+         * Launch an app's launcher activity. This will launch the Leanback Launch Intent which is
+         * designed for TV prior to the Launch Intent which is designed for phone and tablet. If
+         * both intents are null, LaunchActivityIntent.NOT_FOUND will be returned.
          */
-        fun launchApp(context: Context, packageName: String, newTask: Boolean): Boolean {
+        fun launchApp(
+            context: Context,
+            packageName: String,
+            newTask: Boolean
+        ): LaunchActivityResult {
             val pm = context.packageManager
+            val leanbackIntent = pm.getLeanbackLaunchIntentForPackage(packageName)
             val intent = pm.getLaunchIntentForPackage(packageName)
-            if (intent == null) {
-                Log.e(TAG, "Intent is null.")
-                return false
-            } else {
+            if (leanbackIntent != null) {
+                if (newTask) {
+                    leanbackIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                return launchActivity(context, leanbackIntent)
+            } else if (intent != null) {
                 if (newTask) {
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 return launchActivity(context, intent)
+            } else {
+                return LaunchActivityResult.NOT_FOUND
             }
         }
 
         /**
          * Launch an activity of Settings (com.android.settings).
-         * @return True if and only if the activity is successfully launched, false otherwise.
          */
         fun launchSettingsActivity(context: Context, activity: String): Boolean {
             if (!activity.startsWith("android.settings.")) {
@@ -106,11 +206,11 @@ class IntentUtils {
 
         /**
          * Request to uninstall an application.
-         * @return True if and only if the request is successfully requested, false otherwise.
          */
-        fun requestUninstallApp(context: Context, packageName: String): Boolean {
+        fun requestUninstallApp(context: Context, packageName: String): LaunchIntentResult {
             if (TextUtils.isEmpty(packageName)) {
-                return false
+                Log.e(TAG, "Cannot uninstall app because the given packageName is empty.")
+                return LaunchIntentResult.URI_IS_EMPTY
             }
             val intent = Intent(Intent.ACTION_DELETE).apply {
                 setData(("package:$packageName").toUri())
@@ -118,49 +218,58 @@ class IntentUtils {
             }
             try {
                 context.startActivity(intent)
-                return true
+                return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Failed to uninstall application. Cannot find requested activity.", e)
-                return false
+                Log.e(TAG, "Cannot uninstall app because requested package cannot be found.", e)
+                return LaunchIntentResult.RES_NOT_FOUND
             }
         }
 
         /**
          * Open the Application Details Page of the given application in Settings (com.android.settings).
-         * @return True if and only if the activity is successfully launched, false otherwise.
          */
-        fun openApplicationDetailsPage(context: Context, packageName: String): Boolean {
+        fun openApplicationDetailsPage(context: Context, packageName: String): LaunchIntentResult {
             if (TextUtils.isEmpty(packageName)) {
-                return false
+                Log.e(
+                    TAG,
+                    "Cannot launch activity because the given packageName is null or empty."
+                )
+                return LaunchIntentResult.URI_IS_EMPTY
             }
-            val intent = Intent().apply {
-                setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 setData(Uri.fromParts("package", packageName, null))
                 setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             try {
                 context.startActivity(intent)
-                return true
+                return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Failed to launch Settings. Cannot find requested activity.", e)
-                return false
+                Log.e(TAG, "Cannot launch Settings because requested package cannot be found.", e)
+                return LaunchIntentResult.NO_MATCHING_ACTIVITY
             }
         }
 
-        fun openAppInMarket(context: Context, packageName: String): Boolean {
+        fun openAppInMarket(context: Context, packageName: String): LaunchIntentResult {
             if (TextUtils.isEmpty(packageName)) {
-                return false
+                Log.e(
+                    TAG,
+                    "Cannot open detail page of this app in app market because the given packageName is null or empty."
+                )
+                return LaunchIntentResult.URI_IS_EMPTY
             }
-            val intent = Intent().apply {
-                setAction(Intent.ACTION_VIEW)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
                 setData(("market://details?id=$packageName").toUri())
             }
             try {
                 context.startActivity(intent)
-                return true
+                return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Failed to find app market.", e)
-                return false
+                Log.e(
+                    TAG,
+                    "Cannot open detail page of this app in app market because no activity can open this uri.",
+                    e
+                )
+                return LaunchIntentResult.NO_MATCHING_ACTIVITY
             }
         }
     }

@@ -1,13 +1,14 @@
+import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.protobuf") version "0.9.5"
+    alias(libs.plugins.protobuf)
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = "com.github.honqout.tvlauncher3"
     compileSdk = 36
 
@@ -15,8 +16,8 @@ android {
         applicationId = "com.github.honqout.tvlauncher3"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         ndk {
             abiFilters.add("armeabi")
@@ -44,14 +45,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
     buildFeatures {
         compose = true
         viewBinding = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -61,15 +63,20 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.viewbinding)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
-    implementation(libs.androidx.foundation)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -82,31 +89,27 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.palette)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.tv.foundation)
     implementation(libs.androidx.tv.material)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.coil.compose)
     implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.protobuf.javalite)
     implementation(libs.protobuf.kotlin.lite)
-    implementation(libs.androidx.compose.ui.viewbinding)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.21.12"
+        artifact = "com.google.protobuf:protoc:3.25.1"
     }
 
     generateProtoTasks {

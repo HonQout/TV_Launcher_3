@@ -54,7 +54,7 @@ fun RoundButton(
     )
     val containerColor by animateColorAsState(
         targetValue = if (focusState.value || hoverState.value) ColorConstants.ButtonBackgroundFocused
-        else ColorConstants.ButtonBackgroundDefault,
+        else ColorConstants.OnWallpaperBackground,
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val contentColor by animateColorAsState(

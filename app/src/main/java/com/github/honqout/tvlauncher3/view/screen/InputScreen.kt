@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.screen
+package com.github.honqout.tvlauncher3.view.screen
 
 import android.media.tv.TvContract
 import android.util.Log
@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -35,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.InputViewModel
 import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.databinding.TvViewLayoutBinding
 import com.github.honqout.tvlauncher3.view.button.TvInputButton
@@ -43,14 +45,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun InputScreen(
-    viewModel: MainViewModel = viewModel()
+    viewModel: InputViewModel = viewModel()
 ) {
     val tag = "InputScreen"
     val numColumns = 1
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
-    val focusedItemIndex by viewModel.focusedItemIndex3.collectAsState()
+    val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
 
     val centerFocusedItem = {
         if (focusedItemIndex in 0 until viewModel.tvInputList.size) {
@@ -94,6 +96,7 @@ fun InputScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(1f)
+                .padding(20.dp)
         ) {
             Spacer(modifier = Modifier.height((topBarHeight + 10).dp))
 
@@ -110,9 +113,10 @@ fun InputScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.2f)
                         .background(
-                            color = ColorConstants.ListBackground,
+                            color = ColorConstants.OnWallpaperBackground,
                             shape = RoundedCornerShape(16.dp)
                         )
+                        .focusRestorer()
                         .onKeyEvent { keyEvent ->
                             when (keyEvent.key) {
                                 Key.DirectionUp -> {
@@ -176,7 +180,6 @@ fun InputScreen(
                     factory = TvViewLayoutBinding::inflate,
                     modifier = Modifier,
                     update = {
-                        val selectedIndex = viewModel.focusedItemIndex3
                         val tvInputInfo = viewModel.getSelectedTvInputInfo()
                         if (tvInputInfo != null) {
                             val tvInputId = tvInputInfo.id

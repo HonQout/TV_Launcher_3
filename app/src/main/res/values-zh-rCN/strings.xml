@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TV Launcher 3</string>
-    <string name="replace">替换</string>
-    <string name="hint_cannot_launch_app">无法启动应用。</string>
+
+    <!-- Title -->
     <string name="home">主页</string>
-    <string name="hint_cannot_launch_settings">无法启动设置。</string>
-    <string name="hint_no_app_market_installed">未安装应用市场。</string>
-    <string name="activity_belongs_to">“%s”属于以下应用：</string>
+    <string name="apps">应用</string>
+    <string name="input">输入</string>
+    <string name="settings">设置</string>
+
+    <!-- Shortcut operation -->
+    <string name="remove">移除</string>
+    <string name="replace">替换</string>
+    <string name="add_app">添加应用</string>
+    <string name="choose_an_app">选择一个应用</string>
+
+    <!-- App operation -->
     <string name="run">运行</string>
     <string name="uninstall">卸载</string>
     <string name="info">信息</string>
-    <string name="settings">设置</string>
+    <string name="app_market">应用市场</string>
+
+    <!-- TV -->
+    <string name="signal_source">信号源</string>
+
+    <!-- Settings item -->
     <string name="tv_settings">电视设置</string>
     <string name="wlan">无线局域网</string>
     <string name="bluetooth">蓝牙</string>
@@ -18,17 +31,21 @@
     <string name="accessory">配件</string>
     <string name="sound">声音</string>
     <string name="display">显示</string>
-    <string name="hint_cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
-    <string name="hint_cannot_uninstall_system_app">无法卸载系统应用。</string>
     <string name="screen_saver">屏保</string>
-    <string name="app_market">应用市场</string>
-    <string name="hint_uninstall_request_failed">请求卸载失败。</string>
-    <string name="add_app">添加应用</string>
-    <string name="signal_source">信号源</string>
-    <string name="input">输入</string>
-    <string name="apps">应用</string>
-    <string name="all_apps">所有应用</string>
-    <string name="choose_an_app">选择一个应用</string>
-    <string name="delete">删除</string>
-    <string name="remove">移除</string>
+
+    <!-- Hint -->
+    <string name="activity_belongs_to">“%s”属于以下应用：</string>
+    <string name="cannot_find_package">找不到应用包。</string>
+    <string name="cannot_find_activity">找不到活动。</string>
+    <string name="cannot_access_unexported_activity">无法访问未导出的活动。</string>
+    <string name="activity_requires_extra_permission">此活动需要额外的权限来启动。</string>
+    <string name="cannot_launch_app">无法启动应用。</string>
+    <string name="cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
+    <string name="cannot_uninstall_system_app">无法卸载系统应用。</string>
+    <string name="uninstall_request_failed">请求卸载失败。</string>
+    <string name="cannot_launch_settings">无法启动设置。</string>
+    <string name="uri_is_empty">统一资源标识符为空。</string>
+    <string name="cannot_find_resource">找不到资源。</string>
+    <string name="no_app_market_installed">未安装应用市场。</string>
+
 </resources>

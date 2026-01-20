@@ -1,11 +1,11 @@
-package com.github.honqout.tvlauncher3.dao
+package com.github.honqout.tvlauncher3.room.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.github.honqout.tvlauncher3.entity.AppEntity
+import com.github.honqout.tvlauncher3.room.entity.AppEntity
 
 @Dao
 interface AppDao {

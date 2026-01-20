@@ -1,7 +1,6 @@
 package com.github.honqout.tvlauncher3.view.button
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -22,9 +21,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.MainViewModel
+import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
@@ -32,7 +30,7 @@ import com.github.honqout.tvlauncher3.utils.IntentUtils
 @Composable
 fun AppShortcutButton(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel,
+    viewModel: LauncherViewModel,
     index: Int,
     item: ActivityBean?
 ) {
@@ -60,11 +58,11 @@ fun AppShortcutButton(
                 contentFocusedColor = ColorConstants.ButtonContentFocused,
                 onShortClick = {
                     viewModel.setFocusedItemIndex1(index)
-                    viewModel.setShowAppListDialog(true)
+                    viewModel.setShowAppListScreen(true)
                 }
             )
         } else {
-            RoundRectButton(
+            AppButton(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
@@ -72,26 +70,14 @@ fun AppShortcutButton(
                             viewModel.setFocusedItemIndex1(index)
                         }
                     },
-                icon = item.getIcon(context),
-                iconType = item.iconType,
-                label = item.label,
+                item = item,
                 contentDefaultColor = ColorConstants.ButtonContentDefault,
                 contentFocusedColor = ColorConstants.ButtonContentFocused,
                 onShortClick = {
-                    val packageName = item.packageName
-                    val result: Boolean =
-                        IntentUtils.launchApp(context, packageName, true)
-                    if (!result) {
-                        Toast.makeText(
-                            context,
-                            ContextCompat.getString(
-                                context,
-                                R.string.hint_cannot_launch_app
-                            ),
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
+                    IntentUtils.handleLaunchActivityResult(
+                        context,
+                        IntentUtils.launchApp(context, item.packageName, true)
+                    )
                 },
                 onLongClick = {
                     expanded = true
@@ -132,7 +118,7 @@ fun AppShortcutButton(
                 },
                 onClick = {
                     viewModel.setFocusedItemIndex1(index)
-                    viewModel.setShowAppListDialog(true)
+                    viewModel.setShowAppListScreen(true)
                     expanded = false
                 },
                 leadingIcon = {
