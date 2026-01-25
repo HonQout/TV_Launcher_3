@@ -44,7 +44,7 @@
     <string name="uninstall_request_failed">Failed to request uninstallation.</string>
     <string name="cannot_launch_settings">Cannot launch settings.</string>
     <string name="uri_is_empty">Uri is empty.</string>
-    <string name="cannot_find_resource">Cannot find resource.</string>
     <string name="no_app_market_installed">No app market installed.</string>
+    <string name="no_matching_activity">No matching activity.</string>
 
 </resources>

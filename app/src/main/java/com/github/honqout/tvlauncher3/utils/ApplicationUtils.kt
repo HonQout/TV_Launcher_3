@@ -27,6 +27,10 @@ class ApplicationUtils {
             UNKNOWN, SYSTEM, UPDATED_SYSTEM, USER
         }
 
+        enum class LauncherActivityType {
+            NORMAL, LEANBACK
+        }
+
         enum class IconType {
             Icon, Banner
         }
@@ -197,21 +201,6 @@ class ApplicationUtils {
             }
         }
 
-        /**
-         * Get Pair(IconType, (Drawable) Icon) of the application.
-         * @return Pair(IconType.Icon, PackageManager.defaultActivityIcon) if the packageName of
-         * the application cannot be obtained, Pair(IconType.Banner, banner) if the application has
-         * a banner, or Pair(IconType.Icon, icon or PackageManager.defaultActivityIcon) if the
-         * application doesn't have a banner.
-         */
-        fun getApplicationIconPair(
-            context: Context,
-            resolveInfo: ResolveInfo?
-        ): Pair<IconType, Drawable> {
-            val packageName = getPackageName(resolveInfo)
-            return getApplicationIconPair(context, packageName)
-        }
-
         fun getApplicationLabel(context: Context, packageName: String): String {
             val pm = context.packageManager
             val packageInfo = getPackageInfo(context, packageName)
@@ -346,6 +335,36 @@ class ApplicationUtils {
             return 0
         }
 
+        /**
+         * Get Pair(IconType, (Drawable) Icon) of a concrete activity of the application.
+         * @return Pair(IconType.Icon, PackageManager.defaultActivityIcon) if the packageName of
+         * the application cannot be obtained, Pair(IconType.Banner, banner) if the application has
+         * a banner, or Pair(IconType.Icon, icon or PackageManager.defaultActivityIcon) if the
+         * application doesn't have a banner.
+         */
+        fun getActivityIconPair(
+            context: Context,
+            packageName: String?,
+            activityName: String?
+        ): Pair<IconType, Drawable> {
+            val pm = context.packageManager
+            return if ((packageName == null || TextUtils.isEmpty(packageName))
+                || (activityName == null || TextUtils.isEmpty(activityName))
+            ) {
+                Pair(IconType.Icon, pm.defaultActivityIcon)
+            } else {
+                val banner = pm.getApplicationBanner(packageName)
+                if (banner != null) {
+                    Pair(IconType.Banner, banner)
+                } else {
+                    Pair(
+                        IconType.Icon,
+                        getActivityIcon(context, packageName, activityName)
+                    )
+                }
+            }
+        }
+
         fun getActivityName(resolveInfo: ResolveInfo?): String {
             return resolveInfo?.activityInfo?.name ?: ""
         }
@@ -398,16 +417,29 @@ class ApplicationUtils {
         }
 
         /**
-         * Get a list of intent activities.
+         * Get a list of ResolveInfo of launcher activity.
          *
          * @param packageName Specify which package should these activities belong to. Passing
          *                    null or empty string ("") to get all activities of all installed
          *                    packages.
          */
-        fun getIntentActivityList(context: Context, packageName: String?): List<ResolveInfo> {
+        fun getLauncherActivityList(
+            context: Context,
+            type: LauncherActivityType,
+            packageName: String?
+        ): List<ResolveInfo> {
             val pm: PackageManager = context.packageManager
             val intent: Intent = Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
+                when (type) {
+                    LauncherActivityType.NORMAL -> {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                    }
+
+                    LauncherActivityType.LEANBACK -> {
+                        addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER)
+                    }
+                }
+
                 if (packageName != null && !TextUtils.isEmpty(packageName)) {
                     setPackage(packageName)
                 }
@@ -415,30 +447,16 @@ class ApplicationUtils {
             return pm.queryIntentActivities(intent, 0)
         }
 
-        fun getIntentActivity(
+        fun getLauncherActivity(
             context: Context,
+            type: LauncherActivityType,
             packageName: String,
             activityName: String
         ): ResolveInfo? {
-            val intentActivities = getIntentActivityList(context, packageName)
+            val intentActivities = getLauncherActivityList(context, type, packageName)
             return intentActivities.find { resolveInfo ->
                 getActivityName(resolveInfo) == activityName
             }
-        }
-
-        /**
-         * The implementation of function getActivityBeanList.
-         */
-        private fun getActivityBeanList(
-            context: Context,
-            intentActivityList: List<ResolveInfo>
-        ): List<ActivityBean> {
-            val activityBeanList: MutableList<ActivityBean> = mutableListOf()
-            intentActivityList.forEach { intentActivity ->
-                val activityBean = ActivityBean(context, intentActivity)
-                activityBeanList.add(activityBean)
-            }
-            return activityBeanList
         }
 
         /**
@@ -448,9 +466,18 @@ class ApplicationUtils {
          *                    null or empty string ("") to get all ActivityBeans of all installed
          *                    packages.
          */
-        fun getActivityBeanList(context: Context, packageName: String?): List<ActivityBean> {
-            val intentActivityList = getIntentActivityList(context, packageName)
-            return getActivityBeanList(context, intentActivityList)
+        fun getActivityBeanList(
+            context: Context,
+            type: LauncherActivityType,
+            packageName: String?
+        ): List<ActivityBean> {
+            val intentActivityList = getLauncherActivityList(context, type, packageName)
+            val activityBeanList: MutableList<ActivityBean> = mutableListOf()
+            intentActivityList.forEach { intentActivity ->
+                val activityBean = ActivityBean(context, intentActivity)
+                activityBeanList.add(activityBean)
+            }
+            return activityBeanList
         }
 
         fun shouldShowBelongToHint(

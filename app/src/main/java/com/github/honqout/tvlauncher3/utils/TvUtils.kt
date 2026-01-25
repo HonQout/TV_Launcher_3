@@ -27,7 +27,7 @@ class TvUtils {
                 context.startActivity(intent)
                 true
             }.getOrElse {
-                Log.e(TAG, "Failed to switch to Tv input source.", it)
+                Log.e(TAG, "Cannot switch to TV input source.", it)
                 false
             }
         }

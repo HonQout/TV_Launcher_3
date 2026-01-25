@@ -44,8 +44,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.honqout.tvlauncher3.constants.NumberConstants
+import com.github.honqout.tvlauncher3.constants.UIConstants
 
 @Composable
 fun AppActionButton(
@@ -144,7 +144,7 @@ fun AppActionButton(
                 text = stringResource(labelRes),
                 modifier = Modifier,
                 color = contentColor,
-                fontSize = 18.sp,
+                fontSize = UIConstants.FONT_SIZE_LARGE,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )

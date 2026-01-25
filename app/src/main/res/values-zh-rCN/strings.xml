@@ -45,7 +45,7 @@
     <string name="uninstall_request_failed">请求卸载失败。</string>
     <string name="cannot_launch_settings">无法启动设置。</string>
     <string name="uri_is_empty">统一资源标识符为空。</string>
-    <string name="cannot_find_resource">找不到资源。</string>
     <string name="no_app_market_installed">未安装应用市场。</string>
+    <string name="no_matching_activity">没有匹配的活动。</string>
 
 </resources>

@@ -45,7 +45,7 @@ import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.constants.ColorConstants
-import com.github.honqout.tvlauncher3.view.button.AppButton
+import com.github.honqout.tvlauncher3.view.button.ActivityButtonTv
 import kotlinx.coroutines.launch
 
 @Composable
@@ -246,7 +246,7 @@ fun AppListDialog(
                 ) { index, item ->
                     val focusRequester = remember { FocusRequester() }
 
-                    AppButton(
+                    ActivityButtonTv(
                         modifier = Modifier
                             .focusRequester(focusRequester)
                             .onFocusChanged { focusState ->

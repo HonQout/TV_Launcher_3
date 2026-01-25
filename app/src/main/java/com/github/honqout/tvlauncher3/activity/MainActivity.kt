@@ -36,8 +36,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,12 +54,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.tv.material3.Icon
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabDefaults
 import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
+import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.activity.ui.theme.TVLauncher3Theme
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.InputViewModel
@@ -69,9 +68,10 @@ import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
 import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.constants.NumberConstants
+import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.DisplayUtils
 import com.github.honqout.tvlauncher3.utils.UIUtils
-import com.github.honqout.tvlauncher3.view.button.RoundButton
+import com.github.honqout.tvlauncher3.view.button.IconButtonTv
 import com.github.honqout.tvlauncher3.view.dialog.SettingsDialog
 import com.github.honqout.tvlauncher3.view.screen.AppsScreen
 import com.github.honqout.tvlauncher3.view.screen.HomeScreen
@@ -113,18 +113,19 @@ class MainActivity : ComponentActivity() {
             }
 
             BackHandler {
-                Log.i(TAG,"Pressed back button.")
+                Log.i(TAG, "Pressed back button.")
             }
 
             TVLauncher3Theme {
                 val tabs = launcherViewModel.tabs
-                val showSettingsScreen by launcherViewModel.showSettingsScreen.collectAsState()
+                val showSettingsDialog by launcherViewModel.showSettingsDialog.collectAsState()
                 val selectedTabIndex by launcherViewModel.selectedTabIndex.collectAsState()
                 val focusRequester = remember { FocusRequester() }
 
                 LaunchedEffect(Unit) {
                     delay(100)
                     focusRequester.requestFocus()
+                    Log.i(TAG, "Focused TabRow.")
                 }
 
                 Box(
@@ -150,7 +151,7 @@ class MainActivity : ComponentActivity() {
                             selectedTabIndex = selectedTabIndex,
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(ColorConstants.OnWallpaperBackground)
+                                .background(ColorConstants.OnWallpaperContainer)
                                 .focusRestorer()
                                 .focusRequester(focusRequester),
                             containerColor = Color.Transparent,
@@ -160,8 +161,8 @@ class MainActivity : ComponentActivity() {
                                     currentTabPosition = tabPositions[selectedTabIndex],
                                     doesTabRowHaveFocus = doesTabRowHaveFocus,
                                     modifier = Modifier,
-                                    activeColor = ColorConstants.TabBackgroundColorActive,
-                                    inactiveColor = ColorConstants.TabBackgroundColorInactive
+                                    activeColor = ColorConstants.TabContainerColorActive,
+                                    inactiveColor = ColorConstants.TabContainerColorInactive
                                 )
                             }
                         ) {
@@ -171,7 +172,7 @@ class MainActivity : ComponentActivity() {
                                 val hoverState = interactionSource.collectIsHoveredAsState()
                                 val bgColor by animateColorAsState(
                                     targetValue = if (focusState.value || hoverState.value)
-                                        ColorConstants.TabBackgroundColorActive
+                                        ColorConstants.TabContainerColorActive
                                     else Color.Transparent,
                                     animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
                                 )
@@ -229,7 +230,7 @@ class MainActivity : ComponentActivity() {
                                             Text(
                                                 text = stringResource(tab.second),
                                                 color = contentColor,
-                                                fontSize = 16.sp
+                                                fontSize = UIConstants.FONT_SIZE_MEDIUM
                                             )
                                         }
                                     }
@@ -239,7 +240,7 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        RoundButton(
+                        IconButtonTv(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.settings,
                             onShortClick = {
@@ -261,7 +262,7 @@ class MainActivity : ComponentActivity() {
                             },
                             modifier = Modifier
                                 .background(
-                                    color = ColorConstants.OnWallpaperBackground,
+                                    color = ColorConstants.OnWallpaperContainer,
                                     shape = RoundedCornerShape(16.dp)
                                 )
                                 .padding(10.dp)
@@ -283,7 +284,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     AnimatedVisibility(
-                        visible = showSettingsScreen,
+                        visible = showSettingsDialog,
                         enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
                         exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
                     ) {

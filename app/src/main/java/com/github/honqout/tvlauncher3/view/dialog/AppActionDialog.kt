@@ -1,10 +1,8 @@
 package com.github.honqout.tvlauncher3.view.dialog
 
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -20,10 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -34,24 +32,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.graphics.drawable.toBitmap
 import androidx.tv.material3.Text
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
+import coil3.request.error
+import coil3.request.fallback
+import coil3.request.placeholder
+import coil3.size.Precision
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.bean.ActivityBean
+import com.github.honqout.tvlauncher3.coil.model.AppIconModel
+import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.AppActionButton
+import com.github.honqout.tvlauncher3.view.button.AppActionButtonTv
 
 @Composable
 fun AppActionDialog(
-    activityBean: ActivityBean,
+    item: ActivityBean,
     onDismissRequest: () -> Unit = {}
 ) {
-    val tag = "AppActionDialog"
     val context = LocalContext.current
+    val defIcon = context.packageManager.defaultActivityIcon
+
+    val imageRequest = remember(item.packageName) {
+        ImageRequest.Builder(context)
+            .data(AppIconModel(item.packageName))
+            .precision(Precision.INEXACT)
+            .allowHardware(true)
+            .crossfade(false)
+            .placeholder(defIcon)
+            .error(defIcon)
+            .fallback(defIcon)
+            .build()
+    }
 
     BackHandler {
-        Log.i(tag, "Pressed back button.")
         onDismissRequest()
     }
 
@@ -80,7 +98,7 @@ fun AppActionDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AnimatedVisibility(
-                    visible = activityBean.showBelongToHint,
+                    visible = item.showBelongToHint,
                     modifier = Modifier
                         .wrapContentSize()
                 ) {
@@ -88,12 +106,12 @@ fun AppActionDialog(
                         Text(
                             text = String.format(
                                 stringResource(R.string.activity_belongs_to),
-                                activityBean.label
+                                item.label
                             ),
                             modifier = Modifier
                                 .fillMaxWidth(),
                             color = Color.LightGray,
-                            fontSize = 16.sp,
+                            fontSize = UIConstants.FONT_SIZE_SMALL,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1
                         )
@@ -102,19 +120,14 @@ fun AppActionDialog(
                     }
                 }
 
-                Image(
-                    bitmap = ApplicationUtils.getApplicationIcon(
-                        context,
-                        activityBean.packageName
-                    )
-                        .toBitmap()
-                        .asImageBitmap(),
-                    contentDescription = "app icon",
+                AsyncImage(
                     modifier = Modifier
                         .size(size = 75.dp)
                         .graphicsLayer {
                             cameraDistance = 12f
                         },
+                    model = imageRequest,
+                    contentDescription = item.label,
                     contentScale = ContentScale.Fit
                 )
 
@@ -123,7 +136,7 @@ fun AppActionDialog(
                 Text(
                     text = ApplicationUtils.getApplicationLabel(
                         context,
-                        activityBean.packageName
+                        item.packageName
                     ),
                     modifier = Modifier,
                     color = Color.White,
@@ -136,10 +149,10 @@ fun AppActionDialog(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = activityBean.packageName,
+                    text = item.packageName,
                     modifier = Modifier,
                     color = Color.LightGray,
-                    fontSize = 18.sp,
+                    fontSize = UIConstants.FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -149,11 +162,11 @@ fun AppActionDialog(
                 Text(
                     text = ApplicationUtils.getVersionNameAndVersionCode(
                         context,
-                        activityBean.packageName
+                        item.packageName
                     ),
                     modifier = Modifier,
                     color = Color.LightGray,
-                    fontSize = 18.sp,
+                    fontSize = UIConstants.FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -167,26 +180,31 @@ fun AppActionDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AppActionButton(
+                AppActionButtonTv(
                     modifier = Modifier,
                     iconRes = R.drawable.baseline_play_circle_filled_24,
                     labelRes = R.string.run,
                     onShortClick = {
                         IntentUtils.handleLaunchActivityResult(
                             context,
-                            IntentUtils.launchApp(context, activityBean.packageName, true)
+                            IntentUtils.launchActivity(
+                                context,
+                                item.packageName,
+                                item.activityName,
+                                true
+                            )
                         )
                     },
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                AppActionButton(
+                AppActionButtonTv(
                     modifier = Modifier,
                     iconRes = R.drawable.baseline_delete_24,
                     labelRes = R.string.uninstall,
                     onShortClick = {
-                        when (activityBean.appType) {
+                        when (item.appType) {
                             ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
                                 Toast.makeText(
                                     context,
@@ -209,7 +227,7 @@ fun AppActionDialog(
                                     context,
                                     IntentUtils.requestUninstallApp(
                                         context,
-                                        activityBean.packageName
+                                        item.packageName
                                     ),
                                     { onDismissRequest() }
                                 )
@@ -220,7 +238,7 @@ fun AppActionDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                AppActionButton(
+                AppActionButtonTv(
                     modifier = Modifier,
                     iconRes = R.drawable.baseline_info_24,
                     labelRes = R.string.info,
@@ -229,7 +247,7 @@ fun AppActionDialog(
                             context,
                             IntentUtils.openApplicationDetailsPage(
                                 context,
-                                activityBean.packageName
+                                item.packageName
                             ),
                             { onDismissRequest() }
                         )
@@ -238,7 +256,7 @@ fun AppActionDialog(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                AppActionButton(
+                AppActionButtonTv(
                     modifier = Modifier,
                     iconRes = R.drawable.baseline_store_24,
                     labelRes = R.string.app_market,
@@ -247,7 +265,7 @@ fun AppActionDialog(
                             context,
                             IntentUtils.openAppInMarket(
                                 context,
-                                activityBean.packageName
+                                item.packageName
                             ),
                             { onDismissRequest() }
                         )

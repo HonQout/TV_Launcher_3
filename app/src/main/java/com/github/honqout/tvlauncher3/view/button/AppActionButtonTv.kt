@@ -3,7 +3,7 @@ package com.github.honqout.tvlauncher3.view.button
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,19 +21,21 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Glow
+import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
+import com.github.honqout.tvlauncher3.constants.UIConstants
 
 @Composable
-fun AppActionButtonTV(
+fun AppActionButtonTv(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     @StringRes labelRes: Int,
@@ -45,6 +47,11 @@ fun AppActionButtonTV(
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onShortClick() }
+                )
+            }
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
                     Key.Enter -> {
@@ -91,15 +98,12 @@ fun AppActionButtonTV(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            Icon(
                 painter = painterResource(iconRes),
                 contentDescription = stringResource(contentDescriptionRes),
                 modifier = Modifier
                     .size(40.dp)
-                    .graphicsLayer {
-                        cameraDistance = 12f
-                    },
-                contentScale = ContentScale.Fit
+                    .graphicsLayer { cameraDistance = 12f }
             )
 
             Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
@@ -107,7 +111,8 @@ fun AppActionButtonTV(
             Text(
                 text = stringResource(labelRes),
                 modifier = Modifier,
-                fontSize = 16.sp,
+                fontSize = UIConstants.FONT_SIZE_LARGE,
+                fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )

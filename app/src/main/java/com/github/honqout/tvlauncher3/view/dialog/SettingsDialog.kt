@@ -33,8 +33,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
+import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.SettingsActionButton
+import com.github.honqout.tvlauncher3.view.button.SettingsActionButtonTv
 import com.github.honqout.tvlauncher3.view.text.DateAndWeekdayText
 import com.github.honqout.tvlauncher3.view.text.TimeText
 
@@ -95,7 +96,7 @@ fun SettingsDialog(
                         modifier = Modifier,
                         viewModel = timeViewModel,
                         color = Color.White,
-                        fontSize = 20.sp
+                        fontSize = UIConstants.FONT_SIZE_EXTRA_LARGE
                     )
                 }
 
@@ -109,29 +110,14 @@ fun SettingsDialog(
                     userScrollEnabled = true
                 ) {
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.settings,
                             titleRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
+                                IntentUtils.launchAction(
                                     context,
-                                    Settings.ACTION_SETTINGS
-                                )
-                            }
-                        )
-                    }
-
-                    item {
-                        SettingsActionButton(
-                            iconRes = R.drawable.baseline_settings_24,
-                            contentDescriptionRes = R.string.tv_settings,
-                            titleRes = R.string.tv_settings,
-                            onShortClick = {
-                                IntentUtils.launchActivity(
-                                    context,
-                                    "com.android.tv.settings",
-                                    "com.android.tv.settings.MainSettings",
+                                    Settings.ACTION_SETTINGS,
                                     true
                                 )
                             }
@@ -139,22 +125,42 @@ fun SettingsDialog(
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
+                            iconRes = R.drawable.baseline_settings_24,
+                            contentDescriptionRes = R.string.tv_settings,
+                            titleRes = R.string.tv_settings,
+                            onShortClick = {
+                                IntentUtils.handleLaunchActivityResult(
+                                    context,
+                                    IntentUtils.launchActivity(
+                                        context,
+                                        "com.android.tv.settings",
+                                        "com.android.tv.settings.MainSettings",
+                                        true
+                                    )
+                                )
+                            }
+                        )
+                    }
+
+                    item {
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_wifi_24,
                             contentDescriptionRes = R.string.wlan,
                             titleRes = R.string.wlan,
                             descriptionRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
+                                IntentUtils.launchAction(
                                     context,
-                                    Settings.ACTION_WIFI_SETTINGS
+                                    Settings.ACTION_WIFI_SETTINGS,
+                                    true
                                 )
                             },
                         )
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_web_24,
                             contentDescriptionRes = R.string.internet,
                             titleRes = R.string.internet,
@@ -171,22 +177,23 @@ fun SettingsDialog(
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_bluetooth_24,
                             contentDescriptionRes = R.string.bluetooth,
                             titleRes = R.string.bluetooth,
                             descriptionRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
+                                IntentUtils.launchAction(
                                     context,
-                                    Settings.ACTION_BLUETOOTH_SETTINGS
+                                    Settings.ACTION_BLUETOOTH_SETTINGS,
+                                    true
                                 )
                             }
                         )
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_settings_remote_24,
                             contentDescriptionRes = R.string.accessory,
                             titleRes = R.string.accessory,
@@ -203,22 +210,23 @@ fun SettingsDialog(
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_speaker_24,
                             contentDescriptionRes = R.string.sound,
                             titleRes = R.string.sound,
                             descriptionRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
+                                IntentUtils.launchAction(
                                     context,
-                                    Settings.ACTION_SOUND_SETTINGS
+                                    Settings.ACTION_SOUND_SETTINGS,
+                                    true
                                 )
                             }
                         )
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_speaker_24,
                             contentDescriptionRes = R.string.sound,
                             titleRes = R.string.sound,
@@ -235,22 +243,23 @@ fun SettingsDialog(
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_tv_24,
                             contentDescriptionRes = R.string.display,
                             titleRes = R.string.display,
                             descriptionRes = R.string.settings,
                             onShortClick = {
-                                IntentUtils.launchSettingsActivity(
+                                IntentUtils.launchAction(
                                     context,
-                                    Settings.ACTION_DISPLAY_SETTINGS
+                                    Settings.ACTION_DISPLAY_SETTINGS,
+                                    true
                                 )
                             }
                         )
                     }
 
                     item {
-                        SettingsActionButton(
+                        SettingsActionButtonTv(
                             iconRes = R.drawable.baseline_settings_system_daydream_24,
                             contentDescriptionRes = R.string.screen_saver,
                             titleRes = R.string.screen_saver,

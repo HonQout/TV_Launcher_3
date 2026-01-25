@@ -8,16 +8,20 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.ImageFetchResult
 import coil3.request.Options
-import com.github.honqout.tvlauncher3.coil.model.AppIconModel
+import com.github.honqout.tvlauncher3.coil.model.ActivityIconModel
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 
-class AppIconFetcher(
+class ActivityIconFetcher(
     private val context: Context,
-    private val data: AppIconModel,
-    private val options: Options
+    private val data: ActivityIconModel,
+    private val options: Options,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult {
-        val icon = ApplicationUtils.getApplicationIcon(context, data.packageName)
+        val (_, icon) = ApplicationUtils.getActivityIconPair(
+            context,
+            data.packageName,
+            data.activityName
+        )
         return ImageFetchResult(
             image = icon.asImage(),
             isSampled = false,
@@ -25,13 +29,13 @@ class AppIconFetcher(
         )
     }
 
-    class Factory(private val context: Context) : Fetcher.Factory<AppIconModel> {
+    class Factory(private val context: Context) : Fetcher.Factory<ActivityIconModel> {
         override fun create(
-            data: AppIconModel,
+            data: ActivityIconModel,
             options: Options,
             imageLoader: ImageLoader
         ): Fetcher {
-            return AppIconFetcher(
+            return ActivityIconFetcher(
                 context = context,
                 data = data,
                 options = options

@@ -113,7 +113,7 @@ fun InputScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.2f)
                         .background(
-                            color = ColorConstants.OnWallpaperBackground,
+                            color = ColorConstants.OnWallpaperContainer,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .focusRestorer()

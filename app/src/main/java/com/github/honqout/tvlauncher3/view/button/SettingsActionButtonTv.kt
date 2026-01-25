@@ -1,8 +1,8 @@
 package com.github.honqout.tvlauncher3.view.button
 
-import android.view.KeyEvent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,60 +12,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
+import androidx.tv.material3.Icon
+import androidx.tv.material3.Text
+import com.github.honqout.tvlauncher3.constants.UIConstants
 
 @Composable
-fun SettingsActionButtonTV(
+fun SettingsActionButtonTv(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
+    @StringRes contentDescriptionRes: Int,
     @StringRes titleRes: Int,
-    @StringRes contentDescriptionRes: Int = titleRes,
     onShortClick: () -> Unit = {}
 ) {
     Button(
-        onClick = onShortClick,
         modifier = modifier
-            .height(90.dp)
-            .width(120.dp)
-            .onKeyEvent { keyEvent ->
-                when (keyEvent.key) {
-                    Key.Enter -> {
-                        when (keyEvent.nativeKeyEvent.action) {
-                            KeyEvent.ACTION_UP -> {
-                                onShortClick()
-                                true
-                            }
-
-                            else -> false
-                        }
-                    }
-
-                    else -> false
-                }
+            .size(width = 120.dp, height = 90.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onShortClick() }
+                )
             },
+        onClick = onShortClick,
         onLongClick = {},
-        enabled = true,
         scale = ButtonDefaults.scale(),
         colors = ButtonDefaults.colors(
             containerColor = Color.DarkGray.copy(alpha = 0.5f),
             contentColor = Color.White,
             focusedContainerColor = Color.Gray.copy(alpha = 0.5f),
-            focusedContentColor = Color.Black
+            focusedContentColor = Color.White
         ),
         tonalElevation = 12.dp,
         border = ButtonDefaults.border(),
@@ -95,7 +80,7 @@ fun SettingsActionButtonTV(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = 20.sp,
+                    fontSize = UIConstants.FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -105,7 +90,7 @@ fun SettingsActionButtonTV(
 }
 
 @Composable
-fun SettingsActionButtonTV(
+fun SettingsActionButtonTv(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     @StringRes contentDescriptionRes: Int,
@@ -114,34 +99,21 @@ fun SettingsActionButtonTV(
     onShortClick: () -> Unit = {}
 ) {
     Button(
-        onClick = onShortClick,
         modifier = modifier
-            .height(90.dp)
-            .width(120.dp)
-            .onKeyEvent { keyEvent ->
-                when (keyEvent.key) {
-                    Key.Enter -> {
-                        when (keyEvent.nativeKeyEvent.action) {
-                            KeyEvent.ACTION_UP -> {
-                                onShortClick()
-                                true
-                            }
-
-                            else -> false
-                        }
-                    }
-
-                    else -> false
-                }
+            .size(width = 120.dp, height = 90.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onShortClick() }
+                )
             },
+        onClick = onShortClick,
         onLongClick = {},
-        enabled = true,
         scale = ButtonDefaults.scale(),
         colors = ButtonDefaults.colors(
             containerColor = Color.DarkGray.copy(alpha = 0.5f),
             contentColor = Color.White,
             focusedContainerColor = Color.Gray.copy(alpha = 0.5f),
-            focusedContentColor = Color.Black
+            focusedContentColor = Color.White
         ),
         tonalElevation = 12.dp,
         border = ButtonDefaults.border(),
@@ -171,7 +143,7 @@ fun SettingsActionButtonTV(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = 20.sp,
+                    fontSize = UIConstants.FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -181,7 +153,7 @@ fun SettingsActionButtonTV(
                 Text(
                     text = stringResource(descriptionRes),
                     color = Color.LightGray,
-                    fontSize = 16.sp,
+                    fontSize = UIConstants.FONT_SIZE_MEDIUM,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )

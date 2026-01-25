@@ -37,7 +37,7 @@ import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.constants.NumberConstants
 
 @Composable
-fun RoundButton(
+fun IconButton(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int,
     @StringRes contentDescriptionRes: Int,
@@ -53,8 +53,8 @@ fun RoundButton(
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val containerColor by animateColorAsState(
-        targetValue = if (focusState.value || hoverState.value) ColorConstants.ButtonBackgroundFocused
-        else ColorConstants.OnWallpaperBackground,
+        targetValue = if (focusState.value || hoverState.value) ColorConstants.ButtonContainerFocused
+        else ColorConstants.OnWallpaperContainer,
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val contentColor by animateColorAsState(

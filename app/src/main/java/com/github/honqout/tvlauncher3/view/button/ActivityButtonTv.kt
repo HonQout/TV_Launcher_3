@@ -16,11 +16,11 @@ import coil3.request.allowHardware
 import coil3.request.crossfade
 import coil3.size.Precision
 import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.coil.fetcher.AppIconModel
+import com.github.honqout.tvlauncher3.coil.model.ActivityIconModel
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 
 @Composable
-fun AppButton(
+fun ActivityButtonTv(
     modifier: Modifier = Modifier,
     item: ActivityBean,
     contentDefaultColor: Color = colorScheme.secondary,
@@ -32,14 +32,14 @@ fun AppButton(
 
     val imageRequest = remember(item.packageName) {
         ImageRequest.Builder(context)
-            .data(AppIconModel(item.packageName))
+            .data(ActivityIconModel(item.packageName, item.activityName))
             .precision(Precision.INEXACT)
             .allowHardware(true)
             .crossfade(false)
             .build()
     }
 
-    RoundRectButton(
+    RoundRectButtonTv(
         modifier = modifier,
         icon = {
             AsyncImage(

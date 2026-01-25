@@ -5,9 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,12 +17,14 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Icon
+import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.constants.ColorConstants
 
 @Composable
-fun AppShortcutButton(
+fun AppShortcutButtonTv(
     modifier: Modifier = Modifier,
     item: ActivityBean?,
     onFocused: () -> Unit = {},
@@ -41,7 +41,7 @@ fun AppShortcutButton(
         contentAlignment = Alignment.TopCenter
     ) {
         if (item == null) {
-            RoundRectButton(
+            RoundRectButtonTv(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
@@ -50,12 +50,13 @@ fun AppShortcutButton(
                     },
                 drawableRes = R.drawable.baseline_add_24,
                 label = stringResource(R.string.add_app),
+                backgroundColor = ColorConstants.ButtonContainerDefault,
                 contentDefaultColor = ColorConstants.ButtonContentDefault,
                 contentFocusedColor = ColorConstants.ButtonContentFocused,
                 onShortClick = onAddItem
             )
         } else {
-            AppButton(
+            ActivityButtonTv(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {

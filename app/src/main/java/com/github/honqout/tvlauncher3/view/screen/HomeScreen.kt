@@ -1,11 +1,10 @@
 package com.github.honqout.tvlauncher3.view.screen
 
-import android.util.Log
-import android.view.KeyEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,27 +23,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.constants.ColorConstants
-import com.github.honqout.tvlauncher3.view.button.AppShortcutButton
+import com.github.honqout.tvlauncher3.utils.IntentUtils
+import com.github.honqout.tvlauncher3.view.button.AppShortcutButtonTv
 import com.github.honqout.tvlauncher3.view.dialog.AppListDialog
 
 @Composable
 fun HomeScreen(
     viewModel: LauncherViewModel = viewModel()
 ) {
-    val tag = "HomeScreen"
-    val numColumns = 5
+    val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
+    val numFixedActivity = viewModel.numFixedActivity
     val topBarHeight by viewModel.topBarHeight.collectAsState()
-    val showAppListScreen by viewModel.showAppListScreen.collectAsState()
+    val showAppListDialog by viewModel.showAppListDialog.collectAsState()
+    val fixedActivityBeanList by viewModel.fixedActivityListState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -61,51 +60,19 @@ fun HomeScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(numColumns),
+                columns = GridCells.Fixed(numFixedActivity),
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = ColorConstants.OnWallpaperBackground,
+                        color = ColorConstants.OnWallpaperContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
-                    .focusRestorer()
-                    .onKeyEvent { keyEvent ->
-                        when (keyEvent.key) {
-                            Key.DirectionLeft -> {
-                                when (keyEvent.nativeKeyEvent.action) {
-                                    KeyEvent.ACTION_DOWN -> {
-                                        Log.i(tag, "Pressed key: DirectionLeft")
-                                        false
-                                    }
-
-                                    KeyEvent.ACTION_UP -> {
-                                        Log.i(tag, "Released key: DirectionLeft")
-                                        false
-                                    }
-
-                                    else -> false
-                                }
-                            }
-
-                            Key.DirectionRight -> {
-                                when (keyEvent.nativeKeyEvent.action) {
-                                    KeyEvent.ACTION_DOWN -> {
-                                        Log.i(tag, "Pressed key: DirectionRight")
-                                        false
-                                    }
-
-                                    KeyEvent.ACTION_UP -> {
-                                        Log.i(tag, "Released key: DirectionRight")
-                                        false
-                                    }
-
-                                    else -> false
-                                }
-                            }
-
-                            else -> false
+                    .onFocusChanged { focusState ->
+                        if (!focusState.hasFocus) {
+                            viewModel.setFocusedItemIndex1(-1)
                         }
-                    },
+                    }
+                    .focusable(false),
                 state = lazyGridState,
                 contentPadding = PaddingValues(all = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -113,27 +80,56 @@ fun HomeScreen(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
-                    viewModel.fixedActivityBeanList
+                    items = fixedActivityBeanList,
+                    key = { index, item -> "key_${index}" }
                 ) { index, item ->
-                    AppShortcutButton(
+                    AppShortcutButtonTv(
                         modifier = Modifier,
-                        viewModel = viewModel,
-                        index = index,
-                        item = item
+                        item = item,
+                        onFocused = {
+                            viewModel.setFocusedItemIndex1(index)
+                        },
+                        onAddItem = {
+                            viewModel.setFocusedItemIndex1(index)
+                            viewModel.setShowAppListScreen(true)
+                        },
+                        onStartApp = {
+                            if (item != null) {
+                                IntentUtils.handleLaunchActivityResult(
+                                    context,
+                                    IntentUtils.launchActivity(
+                                        context,
+                                        item.packageName,
+                                        item.activityName,
+                                        true
+                                    )
+                                )
+                            }
+                        },
+                        onRemoveItem = {
+                            viewModel.addItemToFixedActivityBeanList(
+                                index = index,
+                                item = null
+                            )
+                        },
+                        onReplaceItem = {
+                            viewModel.setFocusedItemIndex1(index)
+                            viewModel.setShowAppListScreen(true)
+                        }
                     )
                 }
             }
         }
 
         AnimatedVisibility(
-            visible = showAppListScreen,
+            visible = showAppListDialog,
             enter = slideInVertically(initialOffsetY = { it }),
             exit = slideOutVertically(targetOffsetY = { it })
         ) {
             AppListDialog(
                 viewModel = viewModel,
-                onItemChosen = { index, activityBean ->
-                    viewModel.updateFixedActivityList(
+                onItemChosen = { _, activityBean ->
+                    viewModel.addItemToFixedActivityBeanList(
                         index = null,
                         item = activityBean
                     )

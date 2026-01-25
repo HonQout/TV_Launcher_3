@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.persistence
+package com.github.honqout.tvlauncher3.datastore
 
 import android.content.Context
 import android.util.Log
@@ -10,7 +10,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.github.honqout.tvlauncher3.bean.ActivityRecord
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -31,22 +33,21 @@ class SettingsRepository(context: Context) {
                 preferences[FIXED_ACTIVITY_RECORD] = json
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to save fixed activity bean.", e)
+            Log.e(TAG, "Cannot save fixed activity record.", e)
             throw e
         }
     }
 
     val fixedActivityRecordFlow: Flow<List<ActivityRecord?>> =
         dataStore.data.map { preferences ->
-            val json =
-                preferences[FIXED_ACTIVITY_RECORD] ?: return@map List(NUM_FIXED_ACTIVITY) { null }
+            val json = preferences[FIXED_ACTIVITY_RECORD]
+                ?: return@map List(NUM_FIXED_ACTIVITY) { null }
             try {
                 val type = object : TypeToken<List<ActivityRecord?>>() {}.type
-                Gson().fromJson<List<ActivityRecord?>>(json, type)
-                    ?: List(NUM_FIXED_ACTIVITY) { null }
+                Gson().fromJson(json, type) ?: List(NUM_FIXED_ACTIVITY) { null }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to parse fixed activity bean by JSON.", e)
+                Log.e(TAG, "Cannot parse fixed activity record by JSON.", e)
                 List(NUM_FIXED_ACTIVITY) { null }
             }
-        }
+        }.flowOn(Dispatchers.IO)
 }

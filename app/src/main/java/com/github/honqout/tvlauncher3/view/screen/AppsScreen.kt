@@ -26,13 +26,10 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
@@ -45,10 +42,9 @@ import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.AppButton
+import com.github.honqout.tvlauncher3.view.button.ActivityButtonTv
 import com.github.honqout.tvlauncher3.view.dialog.AppActionDialog
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 
 @Composable
 fun AppsScreen(
@@ -56,14 +52,13 @@ fun AppsScreen(
 ) {
     val tag = "AppsScreen"
     val context = LocalContext.current
-    val numColumns = 5
     val coroutineScope = rememberCoroutineScope()
     val lazyGridState = rememberLazyGridState()
-    val focusRequesters = remember { mutableMapOf<Int, FocusRequester>() }
+    val numColumns = viewModel.numColumns
     val topBarHeight by viewModel.topBarHeight.collectAsState()
-    val showAppActionScreen by viewModel.showAppActionScreen.collectAsState()
+    val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
     val focusedItemIndex by viewModel.focusedItemIndex2.collectAsState()
-    val activityBean: ActivityBean? by viewModel.activityBean.collectAsState()
+    val activityBean: ActivityBean? by viewModel.selectedActivityBean.collectAsState()
 
     val centerFocusedItem = {
         if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
@@ -117,18 +112,6 @@ fun AppsScreen(
         }
     }
 
-    LaunchedEffect(viewModel.activityBeanList) {
-        if (viewModel.activityBeanList.isNotEmpty()) {
-            val targetIndex =
-                if (viewModel.focusedItemIndex2.value in viewModel.activityBeanList.indices)
-                    viewModel.focusedItemIndex2.value
-                else 0
-            yield()
-            focusRequesters[targetIndex]?.requestFocus()
-        }
-
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -139,14 +122,14 @@ fun AppsScreen(
                 .fillMaxSize()
                 .padding(20.dp)
         ) {
-            Spacer(modifier = Modifier.height((topBarHeight + 10).dp))
+            Spacer(modifier = Modifier.height((topBarHeight + 16).dp))
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(numColumns),
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = ColorConstants.OnWallpaperBackground,
+                        color = ColorConstants.OnWallpaperContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .weight(weight = 1.0f)
@@ -230,7 +213,7 @@ fun AppsScreen(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(viewModel.activityBeanList) { index, item ->
-                    AppButton(
+                    ActivityButtonTv(
                         modifier = Modifier
                             .onFocusChanged { focusState ->
                                 if (focusState.isFocused) {
@@ -253,7 +236,7 @@ fun AppsScreen(
                             )
                         },
                         onLongClick = {
-                            viewModel.setActivityBean(item)
+                            viewModel.setSelectedActivityBean(item)
                             viewModel.setShowAppActionScreen(true)
                         }
                     )
@@ -262,7 +245,7 @@ fun AppsScreen(
         }
 
         AnimatedVisibility(
-            visible = showAppActionScreen && activityBean != null,
+            visible = showAppActionDialog && activityBean != null,
             enter = scaleIn(
                 initialScale = 0.8f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
@@ -270,7 +253,7 @@ fun AppsScreen(
             exit = scaleOut(targetScale = 0.8f) + fadeOut()
         ) {
             AppActionDialog(
-                activityBean = activityBean!!,
+                item = activityBean!!,
                 onDismissRequest = {
                     viewModel.setShowAppActionScreen(false)
                 },

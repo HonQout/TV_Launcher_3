@@ -17,7 +17,7 @@ class IntentUtils {
         private const val TAG: String = "IntentUtils"
 
         enum class LaunchIntentResult {
-            SUCCESS, URI_IS_EMPTY, NO_MATCHING_ACTIVITY, RES_NOT_FOUND
+            SUCCESS, URI_IS_EMPTY, NO_MATCHING_ACTIVITY
         }
 
         enum class LaunchActivityResult {
@@ -47,16 +47,7 @@ class IntentUtils {
                 LaunchIntentResult.NO_MATCHING_ACTIVITY -> {
                     Toast.makeText(
                         context,
-                        R.string.no_app_market_installed,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-
-                LaunchIntentResult.RES_NOT_FOUND -> {
-                    Toast.makeText(
-                        context,
-                        R.string.cannot_find_resource,
+                        R.string.no_matching_activity,
                         Toast.LENGTH_SHORT
                     ).show()
                     onFail()
@@ -105,12 +96,31 @@ class IntentUtils {
         }
 
         /**
+         * Launch an action which is defined by system.
+         */
+        fun launchAction(context: Context, action: String, newTask: Boolean): LaunchIntentResult {
+            if (TextUtils.isEmpty(action)) {
+                Log.e(TAG, "Cannot launch intent because the given action is empty.")
+                return LaunchIntentResult.URI_IS_EMPTY
+            }
+            val intent = Intent(action).apply {
+                if (newTask) {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
+            try {
+                context.startActivity(intent)
+                return LaunchIntentResult.SUCCESS
+            } catch (e: ActivityNotFoundException) {
+                Log.e(TAG, "Cannot launch intent because no activity can handle it.", e)
+                return LaunchIntentResult.NO_MATCHING_ACTIVITY
+            }
+        }
+
+        /**
          * Launch the specified activity.
          */
-        fun launchActivity(
-            context: Context,
-            intent: Intent
-        ): LaunchActivityResult {
+        fun launchActivity(context: Context, intent: Intent): LaunchActivityResult {
             val activityInfo = intent.resolveActivityInfo(
                 context.packageManager,
                 PackageManager.MATCH_DEFAULT_ONLY
@@ -184,27 +194,6 @@ class IntentUtils {
         }
 
         /**
-         * Launch an activity of Settings (com.android.settings).
-         */
-        fun launchSettingsActivity(context: Context, activity: String): Boolean {
-            if (!activity.startsWith("android.settings.")) {
-                Log.e(TAG, "Required activity is not a settings activity.")
-                return false
-            }
-            val intent = Intent(activity).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            if (intent.resolveActivity(context.packageManager) != null) {
-                Log.i(TAG, "Prepare to start activity $activity")
-                context.startActivity(intent)
-                return true
-            } else {
-                Log.e(TAG, "Intent is null.")
-                return false
-            }
-        }
-
-        /**
          * Request to uninstall an application.
          */
         fun requestUninstallApp(context: Context, packageName: String): LaunchIntentResult {
@@ -220,8 +209,8 @@ class IntentUtils {
                 context.startActivity(intent)
                 return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Cannot uninstall app because requested package cannot be found.", e)
-                return LaunchIntentResult.RES_NOT_FOUND
+                Log.e(TAG, "Cannot uninstall app because no activity can handle it.", e)
+                return LaunchIntentResult.NO_MATCHING_ACTIVITY
             }
         }
 
