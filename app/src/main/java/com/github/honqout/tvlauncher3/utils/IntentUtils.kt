@@ -217,11 +217,14 @@ class IntentUtils {
         /**
          * Open the Application Details Page of the given application in Settings (com.android.settings).
          */
-        fun openApplicationDetailsPage(context: Context, packageName: String): LaunchIntentResult {
+        fun launchApplicationDetailsSettings(
+            context: Context,
+            packageName: String
+        ): LaunchIntentResult {
             if (TextUtils.isEmpty(packageName)) {
                 Log.e(
                     TAG,
-                    "Cannot launch activity because the given packageName is null or empty."
+                    "Cannot launch Settings because the given packageName is null or empty."
                 )
                 return LaunchIntentResult.URI_IS_EMPTY
             }

@@ -245,7 +245,7 @@ fun AppActionDialog(
                     onShortClick = {
                         IntentUtils.handleLaunchIntentResult(
                             context,
-                            IntentUtils.openApplicationDetailsPage(
+                            IntentUtils.launchApplicationDetailsSettings(
                                 context,
                                 item.packageName
                             ),

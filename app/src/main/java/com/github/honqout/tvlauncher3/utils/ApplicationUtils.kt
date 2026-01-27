@@ -41,7 +41,7 @@ class ApplicationUtils {
 
         fun getPackageInfo(context: Context, packageName: String?): PackageInfo? {
             if (packageName == null || TextUtils.isEmpty(packageName)) {
-                Log.e(TAG, "Cannot get packageInfo because the given packageName is null or empty.")
+                Log.e(TAG, "Cannot get PackageInfo because the given packageName is null or empty.")
                 return null
             }
             val pm = context.packageManager
@@ -54,7 +54,7 @@ class ApplicationUtils {
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(
                     TAG,
-                    "Cannot get packageInfo because package $packageName doesn't exist.",
+                    "Cannot get PackageInfo because package $packageName doesn't exist.",
                     e
                 )
                 return null
@@ -65,7 +65,7 @@ class ApplicationUtils {
             if (packageName == null || TextUtils.isEmpty(packageName)) {
                 Log.e(
                     TAG,
-                    "Cannot get applicationInfo because the given packageName is null or empty."
+                    "Cannot get ApplicationInfo because the given packageName is null or empty."
                 )
                 return null
             }
@@ -82,7 +82,7 @@ class ApplicationUtils {
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(
                     TAG,
-                    "Cannot get applicationInfo because package $packageName doesn't exist.",
+                    "Cannot get ApplicationInfo because package $packageName doesn't exist.",
                     e
                 )
                 return null
@@ -203,8 +203,8 @@ class ApplicationUtils {
 
         fun getApplicationLabel(context: Context, packageName: String): String {
             val pm = context.packageManager
-            val packageInfo = getPackageInfo(context, packageName)
-            return packageInfo?.applicationInfo?.loadLabel(pm)?.toString() ?: ""
+            val applicationInfo = getApplicationInfo(context, packageName)
+            return applicationInfo?.loadLabel(pm)?.toString() ?: ""
         }
 
         fun getApplicationType(context: Context, packageName: String?): ApplicationType {
@@ -279,7 +279,7 @@ class ApplicationUtils {
                 } catch (e: PackageManager.NameNotFoundException) {
                     Log.e(
                         TAG,
-                        "Cannot get activityInfo because activity $activityName of package $packageName doesn't exist.",
+                        "Cannot get ActivityInfo because activity $activityName of package $packageName doesn't exist.",
                         e
                     )
                 }
@@ -305,17 +305,6 @@ class ApplicationUtils {
                 }
             }
             return pm.defaultActivityIcon
-        }
-
-        fun getActivityIcon(context: Context, activityInfo: ActivityInfo?): Drawable {
-            if (activityInfo != null) {
-                val packageName = activityInfo.packageName
-                val activityName = activityInfo.name
-                if (packageName != null && activityName != null) {
-                    return getActivityIcon(context, packageName, activityName)
-                }
-            }
-            return context.packageManager.defaultActivityIcon
         }
 
         @DrawableRes
