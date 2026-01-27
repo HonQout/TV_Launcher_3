@@ -82,7 +82,9 @@ private fun RoundRectButtonTvImpl(
             containerColor = Color.Transparent,
             contentColor = contentDefaultColor,
             focusedContainerColor = Color.Transparent,
-            focusedContentColor = contentFocusedColor
+            focusedContentColor = contentFocusedColor,
+            pressedContainerColor = Color.Transparent,
+            pressedContentColor = contentFocusedColor
         )
     ) {
         Column(

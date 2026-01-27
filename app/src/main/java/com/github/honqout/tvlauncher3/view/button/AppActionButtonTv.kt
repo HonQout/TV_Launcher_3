@@ -82,7 +82,9 @@ fun AppActionButtonTv(
             containerColor = Color.DarkGray,
             contentColor = Color.White,
             focusedContainerColor = Color.Gray,
-            focusedContentColor = Color.Black
+            focusedContentColor = Color.Black,
+            pressedContainerColor = Color.Gray,
+            pressedContentColor = Color.Black
         ),
         tonalElevation = 12.dp,
         border = ButtonDefaults.border(),

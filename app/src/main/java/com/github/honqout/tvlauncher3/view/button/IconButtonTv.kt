@@ -47,7 +47,9 @@ fun IconButtonTv(
             containerColor = ColorConstants.OnWallpaperContainer,
             contentColor = ColorConstants.ButtonContentDefault,
             focusedContainerColor = ColorConstants.ButtonContainerFocused,
-            focusedContentColor = ColorConstants.ButtonContentFocused
+            focusedContentColor = ColorConstants.ButtonContentFocused,
+            pressedContainerColor = ColorConstants.ButtonContainerFocused,
+            pressedContentColor = ColorConstants.ButtonContentFocused
         ),
         contentPadding = PaddingValues(0.dp)
     ) {

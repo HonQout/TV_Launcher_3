@@ -50,7 +50,9 @@ fun SettingsActionButtonTv(
             containerColor = Color.DarkGray.copy(alpha = 0.5f),
             contentColor = Color.White,
             focusedContainerColor = Color.Gray.copy(alpha = 0.5f),
-            focusedContentColor = Color.White
+            focusedContentColor = Color.White,
+            pressedContainerColor = Color.Gray.copy(alpha = 0.5f),
+            pressedContentColor = Color.White
         ),
         tonalElevation = 12.dp,
         border = ButtonDefaults.border(),
