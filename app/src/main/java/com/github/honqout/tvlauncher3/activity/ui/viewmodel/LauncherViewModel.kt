@@ -60,7 +60,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         it.packageName,
                         it.activityName
                     )
-                    resolveInfo?.let { ActivityBean(getApplication(), it) }
+                    resolveInfo?.let { ActivityBean(getApplication(), resolveInfo) }
                 }
             }
         }

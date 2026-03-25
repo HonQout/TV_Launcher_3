@@ -98,7 +98,11 @@ fun AppActionDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AnimatedVisibility(
-                    visible = item.showBelongToHint,
+                    visible = ApplicationUtils.shouldShowBelongToHint(
+                        context,
+                        item.packageName,
+                        item.activityName
+                    ),
                     modifier = Modifier
                         .wrapContentSize()
                 ) {
@@ -204,7 +208,11 @@ fun AppActionDialog(
                     iconRes = R.drawable.baseline_delete_24,
                     labelRes = R.string.uninstall,
                     onShortClick = {
-                        when (item.appType) {
+                        val type: ApplicationUtils.Companion.ApplicationType =
+                            ApplicationUtils.getApplicationType(
+                                context, item.packageName
+                            )
+                        when (type) {
                             ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
                                 Toast.makeText(
                                     context,
