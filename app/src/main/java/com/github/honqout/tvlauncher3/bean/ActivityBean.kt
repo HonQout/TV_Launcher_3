@@ -8,19 +8,21 @@ import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.IconType
 import com.github.honqout.tvlauncher3.utils.DrawableUtils
 
-class ActivityBean : ActivityRecord {
+class ActivityBean {
+    var activityRecord: ActivityRecord
     var label: String = ""
     var iconType: IconType = IconType.Icon
 
     @ColorInt
     var color: Int = Color.TRANSPARENT
 
-    constructor(context: Context, resolveInfo: ResolveInfo) : super(resolveInfo) {
+    constructor(context: Context, resolveInfo: ResolveInfo) {
+        activityRecord = ActivityRecord(resolveInfo)
         label = ApplicationUtils.getActivityLabel(context, resolveInfo)
         val (iconType, icon) = ApplicationUtils.getActivityIconPair(
             context,
-            packageName,
-            activityName
+            activityRecord.packageName,
+            activityRecord.activityName
         )
         this.iconType = iconType
         color = DrawableUtils.getBackgroundColorFromAppIcon(icon)

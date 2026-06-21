@@ -37,8 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.InputViewModel
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.databinding.TvViewLayoutBinding
 import com.github.honqout.tvlauncher3.view.button.TvInputButton
 import kotlinx.coroutines.launch
@@ -55,13 +59,13 @@ fun InputScreen(
     val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
 
     val centerFocusedItem = {
-        if (focusedItemIndex in 0 until viewModel.tvInputList.size) {
+        if (focusedItemIndex in viewModel.tvInputList.indices) {
             val layoutInfo = lazyGridState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
                 val firstVisibleItem = visibleItems.first()
                 val focusedItemIndexOffset = focusedItemIndex - firstVisibleItem.index
-                if (focusedItemIndexOffset in 0 until visibleItems.size) {
+                if (focusedItemIndexOffset in visibleItems.indices) {
                     val viewportCenter =
                         (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2F
                     val focusedItem =
@@ -96,7 +100,7 @@ fun InputScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(1f)
-                .padding(20.dp)
+                .padding(PADDING_SCREEN_EDGE)
         ) {
             Spacer(modifier = Modifier.height((topBarHeight + 10).dp))
 
@@ -113,7 +117,7 @@ fun InputScreen(
                         .fillMaxHeight()
                         .fillMaxWidth(0.2f)
                         .background(
-                            color = ColorConstants.OnWallpaperContainer,
+                            color = OnWallpaperContainer,
                             shape = RoundedCornerShape(16.dp)
                         )
                         .focusRestorer()
@@ -157,9 +161,9 @@ fun InputScreen(
                             }
                         },
                     state = lazyGridState,
-                    contentPadding = PaddingValues(all = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                    verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                    horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
                     userScrollEnabled = true
                 ) {
                     itemsIndexed(viewModel.tvInputList) { index, item ->

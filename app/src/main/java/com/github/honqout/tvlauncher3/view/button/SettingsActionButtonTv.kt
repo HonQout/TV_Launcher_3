@@ -25,7 +25,8 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.constants.UIConstants
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_MEDIUM
 
 @Composable
 fun SettingsActionButtonTv(
@@ -82,7 +83,7 @@ fun SettingsActionButtonTv(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -145,7 +146,7 @@ fun SettingsActionButtonTv(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -155,7 +156,7 @@ fun SettingsActionButtonTv(
                 Text(
                     text = stringResource(descriptionRes),
                     color = Color.LightGray,
-                    fontSize = UIConstants.FONT_SIZE_MEDIUM,
+                    fontSize = FONT_SIZE_MEDIUM,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )

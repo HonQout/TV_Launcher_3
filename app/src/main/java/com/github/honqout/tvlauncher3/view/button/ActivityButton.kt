@@ -30,9 +30,14 @@ fun AppButton(
 ) {
     val context = LocalContext.current
 
-    val imageRequest = remember(item.packageName) {
+    val imageRequest = remember(item.activityRecord.packageName) {
         ImageRequest.Builder(context)
-            .data(ActivityIconModel(item.packageName, item.activityName))
+            .data(
+                ActivityIconModel(
+                    item.activityRecord.packageName,
+                    item.activityRecord.activityName
+                )
+            )
             .precision(Precision.INEXACT)
             .allowHardware(true)
             .crossfade(false)

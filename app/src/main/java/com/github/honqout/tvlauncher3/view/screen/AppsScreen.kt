@@ -38,9 +38,15 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
+import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.view.button.ActivityButtonTv
 import com.github.honqout.tvlauncher3.view.dialog.AppActionDialog
@@ -61,13 +67,13 @@ fun AppsScreen(
     val activityBean: ActivityBean? by viewModel.selectedActivityBean.collectAsState()
 
     val centerFocusedItem = {
-        if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
+        if (focusedItemIndex in viewModel.activityBeanList.indices) {
             val layoutInfo = lazyGridState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
                 val firstVisibleItem = visibleItems.first()
                 val focusedItemIndexOffset = focusedItemIndex - firstVisibleItem.index
-                if (focusedItemIndexOffset in 0 until visibleItems.size) {
+                if (focusedItemIndexOffset in visibleItems.indices) {
                     val viewportCenter =
                         (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2F
                     val focusedItem =
@@ -120,7 +126,7 @@ fun AppsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
+                .padding(PADDING_SCREEN_EDGE)
         ) {
             Spacer(modifier = Modifier.height((topBarHeight + 16).dp))
 
@@ -129,7 +135,7 @@ fun AppsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = ColorConstants.OnWallpaperContainer,
+                        color = OnWallpaperContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .weight(weight = 1.0f)
@@ -207,9 +213,9 @@ fun AppsScreen(
                         }
                     },
                 state = lazyGridState,
-                contentPadding = PaddingValues(all = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
                 userScrollEnabled = true
             ) {
                 itemsIndexed(viewModel.activityBeanList) { index, item ->
@@ -222,15 +228,15 @@ fun AppsScreen(
                                 }
                             },
                         item = item,
-                        contentDefaultColor = ColorConstants.ButtonContentDefault,
-                        contentFocusedColor = ColorConstants.ButtonContentFocused,
+                        contentDefaultColor = ButtonContentDefault,
+                        contentFocusedColor = ButtonContentFocused,
                         onShortClick = {
                             IntentUtils.handleLaunchActivityResult(
                                 context,
                                 IntentUtils.launchActivity(
                                     context,
-                                    item.packageName,
-                                    item.activityName,
+                                    item.activityRecord.packageName,
+                                    item.activityRecord.activityName,
                                     true
                                 )
                             )

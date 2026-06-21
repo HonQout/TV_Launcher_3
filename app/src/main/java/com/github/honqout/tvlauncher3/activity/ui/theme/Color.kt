@@ -9,3 +9,14 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+
+val OnWallpaperContainer = Color.LightGray.copy(alpha = 0.3f)
+val ButtonContainerDefault = Color.LightGray.copy(alpha = 0.45f)
+val ButtonContainerFocused = Color.LightGray.copy(alpha = 0.6f)
+val ButtonContentDefault = Color.White.copy(alpha = 0.7f)
+val ButtonContentFocused = Color.White
+val TabContainerColorActive = Color.White.copy(alpha = 0.4f)
+val TabContainerColorInactive = Color.White.copy(alpha = 0.3f)
+val TabContentColorActive = Color.Black
+val TabContentColorHovered = Color.Black.copy(alpha = 0.5f)
+val TabContentColorInactive = Color.White

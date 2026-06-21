@@ -254,16 +254,13 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     if (targetIndex in 0..<numFixedActivity) {
                         val list = fixedActivityListState.value.toMutableList()
                         list[targetIndex] = item
-                        if (item == null) {
-                            Log.i(TAG, "Set item $targetIndex of FixedItemList to null")
-                        } else {
-                            Log.i(
-                                TAG,
-                                "Set item $targetIndex of FixedItemList to activity ${item.getKey()}"
-                            )
-                        }
+                        Log.i(
+                            TAG,
+                            "Set item $targetIndex of FixedItemList to "
+                                    + (item?.activityRecord?.getKey() ?: "null")
+                        )
                         withContext(Dispatchers.IO) {
-                            settingsRepository.saveFixedActivityRecord(list)
+                            settingsRepository.saveFixedActivityRecord(list.map { it?.activityRecord })
                         }
                     }
                 }
@@ -280,12 +277,12 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     for (i in 0..<numFixedActivity) {
                         var item = fixedActivityListState.value[i]
                         if (item != null) {
-                            if (packageName == item.packageName) {
+                            if (packageName == item.activityRecord.packageName) {
                                 val resolveInfo = ApplicationUtils.getLauncherActivity(
                                     context,
                                     LauncherActivityType.NORMAL,
-                                    item.packageName,
-                                    item.activityName
+                                    item.activityRecord.packageName,
+                                    item.activityRecord.activityName
                                 )
                                 item = if (resolveInfo == null) {
                                     null
@@ -293,7 +290,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                                     ActivityBean(context, resolveInfo)
                                 }
                             }
-                            list.add(item as ActivityRecord)
+                            list.add(item?.activityRecord)
                         } else {
                             list.add(null)
                         }
@@ -312,7 +309,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 withContext(Dispatchers.Default) {
                     // Save focused item
                     val focusedItem =
-                        if (_focusedItemIndex2.value in 0 until _activityBeanList.size) {
+                        if (_focusedItemIndex2.value in _activityBeanList.indices) {
                             _activityBeanList[_focusedItemIndex2.value]
                         } else {
                             _activityBeanList[0]
@@ -333,7 +330,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     // Remove
                     if (op == ListOp.REMOVE || op == ListOp.REPLACE) {
                         val removeResult = _activityBeanList.removeAll { activityBean ->
-                            activityBean.packageName == packageName
+                            activityBean.activityRecord.packageName == packageName
                         }
                         Log.i(TAG, "Removed items from ActivityBeanList: $removeResult")
                     }
@@ -357,7 +354,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         } else {
                             _focusedItemIndex2.value
                         }
-                    if (currentIndex in 0 until _activityBeanList.size) {
+                    if (currentIndex in _activityBeanList.indices) {
                         setFocusedItemIndex2(currentIndex)
                     } else {
                         setFocusedItemIndex2(0)

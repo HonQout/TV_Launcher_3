@@ -45,8 +45,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_EXTRA_LARGE
 import com.github.honqout.tvlauncher3.constants.NumberConstants
-import com.github.honqout.tvlauncher3.constants.UIConstants
 
 @Composable
 fun TvInputButton(
@@ -139,7 +139,7 @@ fun TvInputButton(
             Text(
                 text = item.id,
                 color = Color.White,
-                fontSize = UIConstants.FONT_SIZE_EXTRA_LARGE,
+                fontSize = FONT_SIZE_EXTRA_LARGE,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )

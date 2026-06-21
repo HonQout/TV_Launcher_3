@@ -33,7 +33,10 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.github.honqout.tvlauncher3.constants.ColorConstants
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContainerFocused
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
+import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.constants.NumberConstants
 
 @Composable
@@ -53,13 +56,13 @@ fun IconButton(
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val containerColor by animateColorAsState(
-        targetValue = if (focusState.value || hoverState.value) ColorConstants.ButtonContainerFocused
-        else ColorConstants.OnWallpaperContainer,
+        targetValue = if (focusState.value || hoverState.value) ButtonContainerFocused
+        else OnWallpaperContainer,
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
     val contentColor by animateColorAsState(
-        targetValue = if (focusState.value || hoverState.value) ColorConstants.ButtonContentFocused
-        else ColorConstants.ButtonContentDefault,
+        targetValue = if (focusState.value || hoverState.value) ButtonContentFocused
+        else ButtonContentDefault,
         animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
     )
 

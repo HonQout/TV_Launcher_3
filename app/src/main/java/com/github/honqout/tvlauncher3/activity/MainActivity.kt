@@ -62,13 +62,18 @@ import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_MEDIUM
+import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.activity.ui.theme.TVLauncher3Theme
+import com.github.honqout.tvlauncher3.activity.ui.theme.TabContainerColorActive
+import com.github.honqout.tvlauncher3.activity.ui.theme.TabContainerColorInactive
+import com.github.honqout.tvlauncher3.activity.ui.theme.TabContentColorActive
+import com.github.honqout.tvlauncher3.activity.ui.theme.TabContentColorHovered
+import com.github.honqout.tvlauncher3.activity.ui.theme.TabContentColorInactive
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.InputViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.constants.NumberConstants
-import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.DisplayUtils
 import com.github.honqout.tvlauncher3.utils.UIUtils
 import com.github.honqout.tvlauncher3.view.button.IconButtonTv
@@ -77,6 +82,7 @@ import com.github.honqout.tvlauncher3.view.screen.AppsScreen
 import com.github.honqout.tvlauncher3.view.screen.HomeScreen
 import com.github.honqout.tvlauncher3.view.screen.InputScreen
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -123,7 +129,7 @@ class MainActivity : ComponentActivity() {
                 val focusRequester = remember { FocusRequester() }
 
                 LaunchedEffect(Unit) {
-                    delay(100)
+                    delay(100.milliseconds)
                     focusRequester.requestFocus()
                     Log.i(TAG, "Focused TabRow.")
                 }
@@ -151,7 +157,7 @@ class MainActivity : ComponentActivity() {
                             selectedTabIndex = selectedTabIndex,
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(ColorConstants.OnWallpaperContainer)
+                                .background(OnWallpaperContainer)
                                 .focusRestorer()
                                 .focusRequester(focusRequester),
                             containerColor = Color.Transparent,
@@ -161,8 +167,8 @@ class MainActivity : ComponentActivity() {
                                     currentTabPosition = tabPositions[selectedTabIndex],
                                     doesTabRowHaveFocus = doesTabRowHaveFocus,
                                     modifier = Modifier,
-                                    activeColor = ColorConstants.TabContainerColorActive,
-                                    inactiveColor = ColorConstants.TabContainerColorInactive
+                                    activeColor = TabContainerColorActive,
+                                    inactiveColor = TabContainerColorInactive
                                 )
                             }
                         ) {
@@ -172,16 +178,16 @@ class MainActivity : ComponentActivity() {
                                 val hoverState = interactionSource.collectIsHoveredAsState()
                                 val bgColor by animateColorAsState(
                                     targetValue = if (focusState.value || hoverState.value)
-                                        ColorConstants.TabContainerColorActive
+                                        TabContainerColorActive
                                     else Color.Transparent,
                                     animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
                                 )
                                 val contentColor by animateColorAsState(
                                     targetValue = if (selectedTabIndex == index)
-                                        ColorConstants.TabContentColorActive
+                                        TabContentColorActive
                                     else if (focusState.value || hoverState.value)
-                                        ColorConstants.TabContentColorHovered
-                                    else ColorConstants.TabContentColorInactive
+                                        TabContentColorHovered
+                                    else TabContentColorInactive
                                 )
 
                                 key(index) {
@@ -209,9 +215,9 @@ class MainActivity : ComponentActivity() {
                                         colors = TabDefaults.pillIndicatorTabColors(
                                             contentColor = Color.White.copy(alpha = 0.7f),
                                             inactiveContentColor = Color.White.copy(alpha = 0.5f),
-                                            selectedContentColor = ColorConstants.TabContentColorActive,
-                                            focusedContentColor = ColorConstants.TabContentColorHovered,
-                                            focusedSelectedContentColor = ColorConstants.TabContentColorActive,
+                                            selectedContentColor = TabContentColorActive,
+                                            focusedContentColor = TabContentColorHovered,
+                                            focusedSelectedContentColor = TabContentColorActive,
                                         )
                                     ) {
                                         Row(
@@ -230,7 +236,7 @@ class MainActivity : ComponentActivity() {
                                             Text(
                                                 text = stringResource(tab.second),
                                                 color = contentColor,
-                                                fontSize = UIConstants.FONT_SIZE_MEDIUM
+                                                fontSize = FONT_SIZE_MEDIUM
                                             )
                                         }
                                     }
@@ -262,7 +268,7 @@ class MainActivity : ComponentActivity() {
                             },
                             modifier = Modifier
                                 .background(
-                                    color = ColorConstants.OnWallpaperContainer,
+                                    color = OnWallpaperContainer,
                                     shape = RoundedCornerShape(16.dp)
                                 )
                                 .padding(10.dp)

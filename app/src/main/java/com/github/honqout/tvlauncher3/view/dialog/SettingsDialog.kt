@@ -31,9 +31,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_EXTRA_LARGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_DIALOG_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
-import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.view.button.SettingsActionButtonTv
 import com.github.honqout.tvlauncher3.view.text.DateAndWeekdayText
@@ -75,7 +79,7 @@ fun SettingsDialog(
                     .fillMaxWidth(0.4f)
                     .background(Color.Transparent)
                     .align(Alignment.TopEnd)
-                    .padding(20.dp)
+                    .padding(PADDING_DIALOG_EDGE)
             ) {
                 Row(
                     modifier = Modifier
@@ -96,7 +100,7 @@ fun SettingsDialog(
                         modifier = Modifier,
                         viewModel = timeViewModel,
                         color = Color.White,
-                        fontSize = UIConstants.FONT_SIZE_EXTRA_LARGE
+                        fontSize = FONT_SIZE_EXTRA_LARGE
                     )
                 }
 
@@ -104,9 +108,9 @@ fun SettingsDialog(
                     columns = GridCells.Fixed(numColumns),
                     modifier = Modifier,
                     state = lazyGridState,
-                    contentPadding = PaddingValues(all = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                    verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                    horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
                     userScrollEnabled = true
                 ) {
                     item {

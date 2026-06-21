@@ -42,9 +42,11 @@ import coil3.request.fallback
 import coil3.request.placeholder
 import coil3.size.Precision
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_SMALL
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_DIALOG_EDGE
 import com.github.honqout.tvlauncher3.bean.ActivityBean
 import com.github.honqout.tvlauncher3.coil.model.AppIconModel
-import com.github.honqout.tvlauncher3.constants.UIConstants
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.view.button.AppActionButtonTv
@@ -57,9 +59,9 @@ fun AppActionDialog(
     val context = LocalContext.current
     val defIcon = context.packageManager.defaultActivityIcon
 
-    val imageRequest = remember(item.packageName) {
+    val imageRequest = remember(item.activityRecord.packageName) {
         ImageRequest.Builder(context)
-            .data(AppIconModel(item.packageName))
+            .data(AppIconModel(item.activityRecord.packageName))
             .precision(Precision.INEXACT)
             .allowHardware(true)
             .crossfade(false)
@@ -86,7 +88,7 @@ fun AppActionDialog(
                 .fillMaxSize()
                 .background(color = Color.Black)
                 .focusable(enabled = false)
-                .padding(20.dp),
+                .padding(PADDING_DIALOG_EDGE),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -100,8 +102,8 @@ fun AppActionDialog(
                 AnimatedVisibility(
                     visible = ApplicationUtils.shouldShowBelongToHint(
                         context,
-                        item.packageName,
-                        item.activityName
+                        item.activityRecord.packageName,
+                        item.activityRecord.activityName
                     ),
                     modifier = Modifier
                         .wrapContentSize()
@@ -115,7 +117,7 @@ fun AppActionDialog(
                             modifier = Modifier
                                 .fillMaxWidth(),
                             color = Color.LightGray,
-                            fontSize = UIConstants.FONT_SIZE_SMALL,
+                            fontSize = FONT_SIZE_SMALL,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1
                         )
@@ -140,7 +142,7 @@ fun AppActionDialog(
                 Text(
                     text = ApplicationUtils.getApplicationLabel(
                         context,
-                        item.packageName
+                        item.activityRecord.packageName
                     ),
                     modifier = Modifier,
                     color = Color.White,
@@ -153,10 +155,10 @@ fun AppActionDialog(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = item.packageName,
+                    text = item.activityRecord.packageName,
                     modifier = Modifier,
                     color = Color.LightGray,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -166,11 +168,11 @@ fun AppActionDialog(
                 Text(
                     text = ApplicationUtils.getVersionNameAndVersionCode(
                         context,
-                        item.packageName
+                        item.activityRecord.packageName
                     ),
                     modifier = Modifier,
                     color = Color.LightGray,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -193,8 +195,8 @@ fun AppActionDialog(
                             context,
                             IntentUtils.launchActivity(
                                 context,
-                                item.packageName,
-                                item.activityName,
+                                item.activityRecord.packageName,
+                                item.activityRecord.activityName,
                                 true
                             )
                         )
@@ -210,7 +212,7 @@ fun AppActionDialog(
                     onShortClick = {
                         val type: ApplicationUtils.Companion.ApplicationType =
                             ApplicationUtils.getApplicationType(
-                                context, item.packageName
+                                context, item.activityRecord.packageName
                             )
                         when (type) {
                             ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
@@ -235,7 +237,7 @@ fun AppActionDialog(
                                     context,
                                     IntentUtils.requestUninstallApp(
                                         context,
-                                        item.packageName
+                                        item.activityRecord.packageName
                                     ),
                                     { onDismissRequest() }
                                 )
@@ -255,7 +257,7 @@ fun AppActionDialog(
                             context,
                             IntentUtils.launchApplicationDetailsSettings(
                                 context,
-                                item.packageName
+                                item.activityRecord.packageName
                             ),
                             { onDismissRequest() }
                         )
@@ -273,7 +275,7 @@ fun AppActionDialog(
                             context,
                             IntentUtils.openAppInMarket(
                                 context,
-                                item.packageName
+                                item.activityRecord.packageName
                             ),
                             { onDismissRequest() }
                         )

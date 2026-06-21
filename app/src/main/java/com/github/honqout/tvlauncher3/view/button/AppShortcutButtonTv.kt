@@ -20,8 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContainerDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
 import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 
 @Composable
 fun AppShortcutButtonTv(
@@ -50,9 +52,9 @@ fun AppShortcutButtonTv(
                     },
                 drawableRes = R.drawable.baseline_add_24,
                 label = stringResource(R.string.add_app),
-                backgroundColor = ColorConstants.ButtonContainerDefault,
-                contentDefaultColor = ColorConstants.ButtonContentDefault,
-                contentFocusedColor = ColorConstants.ButtonContentFocused,
+                backgroundColor = ButtonContainerDefault,
+                contentDefaultColor = ButtonContentDefault,
+                contentFocusedColor = ButtonContentFocused,
                 onShortClick = onAddItem
             )
         } else {
@@ -64,8 +66,8 @@ fun AppShortcutButtonTv(
                         }
                     },
                 item = item,
-                contentDefaultColor = ColorConstants.ButtonContentDefault,
-                contentFocusedColor = ColorConstants.ButtonContentFocused,
+                contentDefaultColor = ButtonContentDefault,
+                contentFocusedColor = ButtonContentFocused,
                 onShortClick = onStartApp,
                 onLongClick = {
                     expanded = true

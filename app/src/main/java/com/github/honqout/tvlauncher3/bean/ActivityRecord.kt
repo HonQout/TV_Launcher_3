@@ -3,7 +3,7 @@ package com.github.honqout.tvlauncher3.bean
 import android.content.pm.ResolveInfo
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 
-open class ActivityRecord {
+class ActivityRecord {
     var packageName: String = ""
     var activityName: String = ""
 

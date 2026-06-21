@@ -42,9 +42,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_DIALOG_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.view.button.ActivityButtonTv
 import kotlinx.coroutines.launch
 
@@ -61,13 +66,13 @@ fun AppListDialog(
     var focusedItemIndex by remember { mutableIntStateOf(0) }
 
     val centerFocusedItem = {
-        if (focusedItemIndex in 0 until viewModel.activityBeanList.size) {
+        if (focusedItemIndex in viewModel.activityBeanList.indices) {
             val layoutInfo = lazyGridState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
                 val firstVisibleItem = visibleItems.first()
                 val focusedItemIndexOffset = focusedItemIndex - firstVisibleItem.index
-                if (focusedItemIndexOffset in 0 until visibleItems.size) {
+                if (focusedItemIndexOffset in visibleItems.indices) {
                     val viewportCenter =
                         (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2F
                     val focusedItem =
@@ -110,7 +115,7 @@ fun AppListDialog(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
-                .padding(20.dp)
+                .padding(PADDING_DIALOG_EDGE)
         ) {
             Text(
                 text = stringResource(R.string.choose_an_app),
@@ -236,9 +241,9 @@ fun AppListDialog(
                         }
                     },
                 state = lazyGridState,
-                contentPadding = PaddingValues(all = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
@@ -256,8 +261,8 @@ fun AppListDialog(
                                 }
                             },
                         item = item,
-                        contentDefaultColor = ColorConstants.ButtonContentDefault,
-                        contentFocusedColor = ColorConstants.ButtonContentFocused,
+                        contentDefaultColor = ButtonContentDefault,
+                        contentFocusedColor = ButtonContentFocused,
                         onShortClick = {
                             onItemChosen(index, item)
                             onDismissRequest()

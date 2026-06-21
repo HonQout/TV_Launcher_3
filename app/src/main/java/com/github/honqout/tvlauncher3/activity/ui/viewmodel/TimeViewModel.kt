@@ -17,19 +17,19 @@ class TimeViewModel(application: Application) : AndroidViewModel(application) {
     val currentTime: StateFlow<Long> = _currentTime.asStateFlow()
 
     // broadcast receiver
-    private var timeBroadcastReceiver: BroadcastReceiver? = null
+    private var broadcastReceiver: BroadcastReceiver? = null
 
     init {
-        registerTimeBR(getApplication())
+        registerBroadcastReceiver(getApplication())
     }
 
     override fun onCleared() {
-        unregisterTimeBR(getApplication())
+        unregisterBroadcastReceiver(getApplication())
         super.onCleared()
     }
 
-    fun registerTimeBR(context: Context) {
-        if (timeBroadcastReceiver != null) {
+    fun registerBroadcastReceiver(context: Context) {
+        if (broadcastReceiver != null) {
             return
         }
 
@@ -42,19 +42,19 @@ class TimeViewModel(application: Application) : AndroidViewModel(application) {
 
         val receiverFlags = ContextCompat.RECEIVER_NOT_EXPORTED
 
-        timeBroadcastReceiver = object : BroadcastReceiver() {
+        broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 _currentTime.value = System.currentTimeMillis()
             }
         }
 
-        ContextCompat.registerReceiver(context, timeBroadcastReceiver, filter, receiverFlags)
+        ContextCompat.registerReceiver(context, broadcastReceiver, filter, receiverFlags)
     }
 
-    fun unregisterTimeBR(context: Context) {
-        timeBroadcastReceiver?.let {
+    fun unregisterBroadcastReceiver(context: Context) {
+        broadcastReceiver?.let {
             context.unregisterReceiver(it)
-            timeBroadcastReceiver = null
+            broadcastReceiver = null
         }
     }
 }

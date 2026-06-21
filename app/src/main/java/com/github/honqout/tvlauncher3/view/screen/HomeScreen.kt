@@ -28,8 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.view.button.AppShortcutButtonTv
 import com.github.honqout.tvlauncher3.view.dialog.AppListDialog
@@ -53,7 +57,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
+                .padding(PADDING_SCREEN_EDGE)
         ) {
             Spacer(modifier = Modifier.height(topBarHeight.dp))
 
@@ -64,7 +68,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = ColorConstants.OnWallpaperContainer,
+                        color = OnWallpaperContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .onFocusChanged { focusState ->
@@ -74,9 +78,9 @@ fun HomeScreen(
                     }
                     .focusable(false),
                 state = lazyGridState,
-                contentPadding = PaddingValues(all = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
@@ -99,8 +103,8 @@ fun HomeScreen(
                                     context,
                                     IntentUtils.launchActivity(
                                         context,
-                                        item.packageName,
-                                        item.activityName,
+                                        item.activityRecord.packageName,
+                                        item.activityRecord.activityName,
                                         true
                                     )
                                 )

@@ -11,15 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_EXTRA_SMALL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
-import com.github.honqout.tvlauncher3.constants.UIConstants
 
 @Composable
 fun TimeText(
     modifier: Modifier = Modifier,
     viewModel: TimeViewModel,
     color: Color = MaterialTheme.colorScheme.primary,
-    fontSize: TextUnit = UIConstants.FONT_SIZE_EXTRA_SMALL
+    fontSize: TextUnit = FONT_SIZE_EXTRA_SMALL
 ) {
     val context = LocalContext.current
     val currentTime by viewModel.currentTime.collectAsState()

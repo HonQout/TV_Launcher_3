@@ -20,8 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
 import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.constants.ColorConstants
 
 @Composable
 fun AppShortcutButton(
@@ -50,8 +51,8 @@ fun AppShortcutButton(
                     },
                 drawableRes = R.drawable.baseline_add_24,
                 label = stringResource(R.string.add_app),
-                contentDefaultColor = ColorConstants.ButtonContentDefault,
-                contentFocusedColor = ColorConstants.ButtonContentFocused,
+                contentDefaultColor = ButtonContentDefault,
+                contentFocusedColor = ButtonContentFocused,
                 onShortClick = onAddItem
             )
         } else {
@@ -63,8 +64,8 @@ fun AppShortcutButton(
                         }
                     },
                 item = item,
-                contentDefaultColor = ColorConstants.ButtonContentDefault,
-                contentFocusedColor = ColorConstants.ButtonContentFocused,
+                contentDefaultColor = ButtonContentDefault,
+                contentFocusedColor = ButtonContentFocused,
                 onShortClick = onStartApp,
                 onLongClick = {
                     expanded = true

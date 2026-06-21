@@ -44,7 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.honqout.tvlauncher3.constants.NumberConstants
-import com.github.honqout.tvlauncher3.constants.UIConstants
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_SMALL
 
 @Composable
 fun SettingsActionButton(
@@ -142,7 +143,7 @@ fun SettingsActionButton(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -248,7 +249,7 @@ fun SettingsActionButton(
                 Text(
                     text = stringResource(titleRes),
                     color = Color.White,
-                    fontSize = UIConstants.FONT_SIZE_LARGE,
+                    fontSize = FONT_SIZE_LARGE,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
@@ -258,7 +259,7 @@ fun SettingsActionButton(
                 Text(
                     text = stringResource(descriptionRes),
                     color = Color.LightGray,
-                    fontSize = UIConstants.FONT_SIZE_SMALL,
+                    fontSize = FONT_SIZE_SMALL,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )

@@ -32,7 +32,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.constants.UIConstants
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
 
 @Composable
 fun AppActionButtonTv(
@@ -113,7 +113,7 @@ fun AppActionButtonTv(
             Text(
                 text = stringResource(labelRes),
                 modifier = Modifier,
-                fontSize = UIConstants.FONT_SIZE_LARGE,
+                fontSize = FONT_SIZE_LARGE,
                 fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1

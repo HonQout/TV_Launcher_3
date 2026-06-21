@@ -35,7 +35,7 @@ import androidx.tv.material3.MaterialTheme.colorScheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.constants.UIConstants
+import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
 
 @Composable
 private fun RoundRectButtonTvImpl(
@@ -113,7 +113,7 @@ private fun RoundRectButtonTvImpl(
 
             Text(
                 text = label,
-                fontSize = UIConstants.FONT_SIZE_LARGE,
+                fontSize = FONT_SIZE_LARGE,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
