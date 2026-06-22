@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.dialog
+package com.github.honqout.tvlauncher3.components.dialog
 
 import android.provider.Settings
 import android.util.Log
@@ -39,9 +39,9 @@ import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTI
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.SettingsActionButtonTv
-import com.github.honqout.tvlauncher3.view.text.DateAndWeekdayText
-import com.github.honqout.tvlauncher3.view.text.TimeText
+import com.github.honqout.tvlauncher3.components.button.SettingsActionButtonTv
+import com.github.honqout.tvlauncher3.components.text.DateAndWeekdayText
+import com.github.honqout.tvlauncher3.components.text.TimeText
 
 @Composable
 fun SettingsDialog(

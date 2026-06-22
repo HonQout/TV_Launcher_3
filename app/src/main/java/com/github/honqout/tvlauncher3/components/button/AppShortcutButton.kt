@@ -1,11 +1,13 @@
-package com.github.honqout.tvlauncher3.view.button
+package com.github.honqout.tvlauncher3.components.button
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,18 +19,15 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Icon
-import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContainerDefault
 import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
 import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
-import com.github.honqout.tvlauncher3.bean.ActivityBean
+import com.github.honqout.tvlauncher3.dto.ActivityDto
 
 @Composable
-fun AppShortcutButtonTv(
+fun AppShortcutButton(
     modifier: Modifier = Modifier,
-    item: ActivityBean?,
+    item: ActivityDto?,
     onFocused: () -> Unit = {},
     onAddItem: () -> Unit = {},
     onStartApp: () -> Unit = {},
@@ -43,7 +42,7 @@ fun AppShortcutButtonTv(
         contentAlignment = Alignment.TopCenter
     ) {
         if (item == null) {
-            RoundRectButtonTv(
+            RoundRectButton(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
@@ -52,13 +51,12 @@ fun AppShortcutButtonTv(
                     },
                 drawableRes = R.drawable.baseline_add_24,
                 label = stringResource(R.string.add_app),
-                backgroundColor = ButtonContainerDefault,
                 contentDefaultColor = ButtonContentDefault,
                 contentFocusedColor = ButtonContentFocused,
                 onShortClick = onAddItem
             )
         } else {
-            ActivityButtonTv(
+            AppButton(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {

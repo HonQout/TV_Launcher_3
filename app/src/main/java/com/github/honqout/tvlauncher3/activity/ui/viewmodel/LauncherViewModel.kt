@@ -11,8 +11,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.bean.ActivityRecord
+import com.github.honqout.tvlauncher3.dto.ActivityDto
+import com.github.honqout.tvlauncher3.dto.ActivityRecord
 import com.github.honqout.tvlauncher3.datastore.SettingsRepository
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.LauncherActivityType
@@ -47,7 +47,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val fixedActivityListState: StateFlow<List<ActivityBean?>> = refreshSignal
+    val fixedActivityListState: StateFlow<List<ActivityDto?>> = refreshSignal
         .flatMapLatest {
             settingsRepository.fixedActivityRecordFlow
         }
@@ -60,7 +60,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         it.packageName,
                         it.activityName
                     )
-                    resolveInfo?.let { ActivityBean(getApplication(), resolveInfo) }
+                    resolveInfo?.let { ActivityDto.fromResolveInfo(getApplication(), resolveInfo) }
                 }
             }
         }
@@ -89,14 +89,14 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     val showAppActionDialog: StateFlow<Boolean> = _showAppActionDialog.asStateFlow()
 
     // data-related
-    private val _activityBeanList = mutableStateListOf<ActivityBean>()
-    val activityBeanList: List<ActivityBean> = _activityBeanList
+    private val _activityDtoList = mutableStateListOf<ActivityDto>()
+    val activityDtoList: List<ActivityDto> = _activityDtoList
     private val _focusedItemIndex1 = MutableStateFlow<Int>(-1)
     val focusedItemIndex1: StateFlow<Int> = _focusedItemIndex1.asStateFlow()
     private val _focusedItemIndex2 = MutableStateFlow<Int>(-1)
     val focusedItemIndex2: StateFlow<Int> = _focusedItemIndex2.asStateFlow()
-    private val _selectedActivityBean = MutableStateFlow<ActivityBean?>(null)
-    val selectedActivityBean: StateFlow<ActivityBean?> = _selectedActivityBean.asStateFlow()
+    private val _selectedActivityDto = MutableStateFlow<ActivityDto?>(null)
+    val selectedActivityDto: StateFlow<ActivityDto?> = _selectedActivityDto.asStateFlow()
 
     // broadcast receiver
     private var localeBroadcastReceiver: BroadcastReceiver? = null
@@ -232,8 +232,8 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             activityBeanListMutex.withLock {
                 withContext(Dispatchers.Default) {
-                    _activityBeanList.clear()
-                    _activityBeanList.addAll(
+                    _activityDtoList.clear()
+                    _activityDtoList.addAll(
                         ApplicationUtils.getActivityBeanList(
                             getApplication(),
                             LauncherActivityType.NORMAL,
@@ -246,7 +246,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun addItemToFixedActivityBeanList(index: Int?, item: ActivityBean?) {
+    fun addItemToFixedActivityBeanList(index: Int?, item: ActivityDto?) {
         viewModelScope.launch {
             fixedActivityListMutex.withLock {
                 withContext(Dispatchers.Default) {
@@ -256,11 +256,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         list[targetIndex] = item
                         Log.i(
                             TAG,
-                            "Set item $targetIndex of FixedItemList to "
-                                    + (item?.activityRecord?.getKey() ?: "null")
+                            "Set item $targetIndex of FixedItemList to " + (item?.getKey()
+                                ?: "null")
                         )
                         withContext(Dispatchers.IO) {
-                            settingsRepository.saveFixedActivityRecord(list.map { it?.activityRecord })
+                            settingsRepository.saveFixedActivityRecord(list.map { it?.toActivityRecord() })
                         }
                     }
                 }
@@ -277,20 +277,20 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     for (i in 0..<numFixedActivity) {
                         var item = fixedActivityListState.value[i]
                         if (item != null) {
-                            if (packageName == item.activityRecord.packageName) {
+                            if (packageName == item.packageName) {
                                 val resolveInfo = ApplicationUtils.getLauncherActivity(
                                     context,
                                     LauncherActivityType.NORMAL,
-                                    item.activityRecord.packageName,
-                                    item.activityRecord.activityName
+                                    item.packageName,
+                                    item.activityName
                                 )
                                 item = if (resolveInfo == null) {
                                     null
                                 } else {
-                                    ActivityBean(context, resolveInfo)
+                                    ActivityDto.fromResolveInfo(context, resolveInfo)
                                 }
                             }
-                            list.add(item?.activityRecord)
+                            list.add(item?.toActivityRecord())
                         } else {
                             list.add(null)
                         }
@@ -309,15 +309,15 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                 withContext(Dispatchers.Default) {
                     // Save focused item
                     val focusedItem =
-                        if (_focusedItemIndex2.value in _activityBeanList.indices) {
-                            _activityBeanList[_focusedItemIndex2.value]
+                        if (_focusedItemIndex2.value in _activityDtoList.indices) {
+                            _activityDtoList[_focusedItemIndex2.value]
                         } else {
-                            _activityBeanList[0]
+                            _activityDtoList[0]
                         }
                     // Prepare the whole list
-                    if (op == ListOp.INIT || _activityBeanList.isEmpty()) {
-                        _activityBeanList.clear()
-                        _activityBeanList.addAll(
+                    if (op == ListOp.INIT || _activityDtoList.isEmpty()) {
+                        _activityDtoList.clear()
+                        _activityDtoList.addAll(
                             ApplicationUtils.getActivityBeanList(
                                 getApplication(),
                                 LauncherActivityType.NORMAL,
@@ -329,14 +329,14 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     }
                     // Remove
                     if (op == ListOp.REMOVE || op == ListOp.REPLACE) {
-                        val removeResult = _activityBeanList.removeAll { activityBean ->
-                            activityBean.activityRecord.packageName == packageName
+                        val removeResult = _activityDtoList.removeAll { activityBean ->
+                            activityBean.packageName == packageName
                         }
                         Log.i(TAG, "Removed items from ActivityBeanList: $removeResult")
                     }
                     // Add
                     if (op == ListOp.ADD || op == ListOp.REPLACE) {
-                        val addResult = _activityBeanList.addAll(
+                        val addResult = _activityDtoList.addAll(
                             ApplicationUtils.getActivityBeanList(
                                 getApplication(),
                                 LauncherActivityType.NORMAL,
@@ -350,11 +350,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     // Restore focused item
                     val currentIndex =
                         if (op == ListOp.ADD || op == ListOp.REPLACE) {
-                            _activityBeanList.indexOf(focusedItem)
+                            _activityDtoList.indexOf(focusedItem)
                         } else {
                             _focusedItemIndex2.value
                         }
-                    if (currentIndex in _activityBeanList.indices) {
+                    if (currentIndex in _activityDtoList.indices) {
                         setFocusedItemIndex2(currentIndex)
                     } else {
                         setFocusedItemIndex2(0)
@@ -370,7 +370,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun sortActivityBeanList() {
         val collator: Collator = Collator.getInstance()
-        _activityBeanList.sortWith { a, b ->
+        _activityDtoList.sortWith { a, b ->
             collator.compare(a.label, b.label)
         }
     }
@@ -418,8 +418,8 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun setSelectedActivityBean(newValue: ActivityBean) {
-        _selectedActivityBean.update {
+    fun setSelectedActivityBean(newValue: ActivityDto) {
+        _selectedActivityDto.update {
             newValue
         }
     }

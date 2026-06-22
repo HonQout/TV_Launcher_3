@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.text
+package com.github.honqout.tvlauncher3.components.text
 
 import android.text.format.DateUtils
 import androidx.compose.material3.MaterialTheme

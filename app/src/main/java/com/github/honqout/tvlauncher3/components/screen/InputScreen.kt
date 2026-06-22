@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.screen
+package com.github.honqout.tvlauncher3.components.screen
 
 import android.media.tv.TvContract
 import android.util.Log
@@ -44,7 +44,7 @@ import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZ
 import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.InputViewModel
 import com.github.honqout.tvlauncher3.databinding.TvViewLayoutBinding
-import com.github.honqout.tvlauncher3.view.button.TvInputButton
+import com.github.honqout.tvlauncher3.components.button.TvInputButton
 import kotlinx.coroutines.launch
 
 @Composable

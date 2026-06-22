@@ -76,11 +76,11 @@ import com.github.honqout.tvlauncher3.activity.ui.viewmodel.TimeViewModel
 import com.github.honqout.tvlauncher3.constants.NumberConstants
 import com.github.honqout.tvlauncher3.utils.DisplayUtils
 import com.github.honqout.tvlauncher3.utils.UIUtils
-import com.github.honqout.tvlauncher3.view.button.IconButtonTv
-import com.github.honqout.tvlauncher3.view.dialog.SettingsDialog
-import com.github.honqout.tvlauncher3.view.screen.AppsScreen
-import com.github.honqout.tvlauncher3.view.screen.HomeScreen
-import com.github.honqout.tvlauncher3.view.screen.InputScreen
+import com.github.honqout.tvlauncher3.components.button.IconButtonTv
+import com.github.honqout.tvlauncher3.components.dialog.SettingsDialog
+import com.github.honqout.tvlauncher3.components.screen.AppsScreen
+import com.github.honqout.tvlauncher3.components.screen.HomeScreen
+import com.github.honqout.tvlauncher3.components.screen.InputScreen
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 

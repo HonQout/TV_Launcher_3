@@ -1,11 +1,19 @@
-package com.github.honqout.tvlauncher3.view.button
+package com.github.honqout.tvlauncher3.components.button
 
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,10 +22,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -25,42 +38,70 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.ClickableSurfaceDefaults
-import androidx.tv.material3.MaterialTheme.colorScheme
-import androidx.tv.material3.Surface
-import androidx.tv.material3.SurfaceDefaults
-import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.constants.NumberConstants
 
 @Composable
-private fun RoundRectButtonTvImpl(
+private fun RoundRectButtonImpl(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester = remember { FocusRequester() },
     icon: @Composable () -> Unit,
     label: String,
-    backgroundColor: Color = colorScheme.background,
+    backgroundColor: Color = colorScheme.primary,
     contentDefaultColor: Color = colorScheme.secondary,
     contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onMenuOpen: () -> Unit = {}
+    onMenuOpen: () -> Unit = onLongClick
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusState = interactionSource.collectIsFocusedAsState()
+    val hoverState = interactionSource.collectIsHoveredAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (focusState.value || hoverState.value) 1.1f else 1f,
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (focusState.value || hoverState.value) contentFocusedColor
+        else contentDefaultColor,
+        animationSpec = tween(durationMillis = NumberConstants.ANIM_DURATION_MS)
+    )
+
     Surface(
         modifier = modifier
+            .scale(scale)
             .focusRequester(focusRequester)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onShortClick() },
-                    onLongPress = { onLongClick() }
-                )
-            }
+            .focusable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .hoverable(
+                enabled = true,
+                interactionSource = interactionSource
+            )
+            .indication(
+                interactionSource = interactionSource,
+                indication = null
+            )
             .onKeyEvent { keyEvent ->
                 when (keyEvent.key) {
+                    Key.Enter -> {
+                        when (keyEvent.nativeKeyEvent.action) {
+                            KeyEvent.ACTION_UP -> {
+                                onShortClick()
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }
+
                     Key.Menu -> {
                         when (keyEvent.nativeKeyEvent.action) {
                             KeyEvent.ACTION_UP -> {
@@ -74,23 +115,26 @@ private fun RoundRectButtonTvImpl(
 
                     else -> false
                 }
-            },
-        onClick = onShortClick,
-        onLongClick = onLongClick,
-        scale = ClickableSurfaceDefaults.scale(),
-        colors = ClickableSurfaceDefaults.colors(
-            containerColor = Color.Transparent,
-            contentColor = contentDefaultColor,
-            focusedContainerColor = Color.Transparent,
-            focusedContentColor = contentFocusedColor,
-            pressedContainerColor = Color.Transparent,
-            pressedContentColor = contentFocusedColor
-        )
+            }
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = true,
+                role = Role.Button,
+                onClick = onShortClick,
+                onLongClick = onLongClick,
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Transparent
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(5.dp),
+                .padding(5.dp)
+                .indication(
+                    interactionSource = interactionSource,
+                    indication = null
+                ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -98,22 +142,18 @@ private fun RoundRectButtonTvImpl(
                 modifier = Modifier
                     .size(width = 160.dp, height = 90.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = SurfaceDefaults.colors(containerColor = backgroundColor)
+                color = backgroundColor
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    icon()
-                }
+                icon()
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = label,
-                fontSize = FONT_SIZE_LARGE,
+                modifier = Modifier,
+                color = textColor,
+                fontWeight = FontWeight.Bold,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
@@ -122,18 +162,18 @@ private fun RoundRectButtonTvImpl(
 }
 
 @Composable
-fun RoundRectButtonTv(
+fun RoundRectButton(
     modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
     label: String,
-    backgroundColor: Color = colorScheme.background,
+    backgroundColor: Color = colorScheme.primary,
     contentDefaultColor: Color = colorScheme.secondary,
     contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onMenuOpen: () -> Unit = onLongClick
 ) {
-    RoundRectButtonTvImpl(
+    RoundRectButtonImpl(
         modifier = modifier,
         icon = icon,
         label = label,
@@ -147,19 +187,19 @@ fun RoundRectButtonTv(
 }
 
 @Composable
-fun RoundRectButtonTv(
+fun RoundRectButton(
     modifier: Modifier = Modifier,
     @DrawableRes drawableRes: Int,
     label: String,
     contentDescription: String = label,
-    backgroundColor: Color = colorScheme.background,
+    backgroundColor: Color = colorScheme.primary,
     contentDefaultColor: Color = colorScheme.secondary,
     contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onMenuOpen: () -> Unit = onLongClick
 ) {
-    RoundRectButtonTvImpl(
+    RoundRectButtonImpl(
         modifier = modifier,
         icon = {
             Image(

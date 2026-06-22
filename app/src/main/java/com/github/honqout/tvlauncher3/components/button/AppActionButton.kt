@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.button
+package com.github.honqout.tvlauncher3.components.button
 
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes

@@ -16,7 +16,6 @@ import com.github.honqout.tvlauncher3.coil.keyer.ActivityIconKeyer
 import com.github.honqout.tvlauncher3.coil.keyer.AppIconKeyer
 
 class MyApplication : Application(), SingletonImageLoader.Factory {
-
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(context)
             .components {

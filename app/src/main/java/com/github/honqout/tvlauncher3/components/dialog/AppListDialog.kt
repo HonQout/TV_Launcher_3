@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.dialog
+package com.github.honqout.tvlauncher3.components.dialog
 
 import android.util.Log
 import android.view.KeyEvent
@@ -49,14 +49,14 @@ import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDG
 import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
-import com.github.honqout.tvlauncher3.bean.ActivityBean
-import com.github.honqout.tvlauncher3.view.button.ActivityButtonTv
+import com.github.honqout.tvlauncher3.dto.ActivityDto
+import com.github.honqout.tvlauncher3.components.button.ActivityButtonTv
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppListDialog(
     viewModel: LauncherViewModel = viewModel(),
-    onItemChosen: (index: Int, activityBean: ActivityBean) -> Unit = { _, _ -> },
+    onItemChosen: (index: Int, activityDto: ActivityDto) -> Unit = { _, _ -> },
     onDismissRequest: () -> Unit = {}
 ) {
     val tag = "AppListDialog"
@@ -66,7 +66,7 @@ fun AppListDialog(
     var focusedItemIndex by remember { mutableIntStateOf(0) }
 
     val centerFocusedItem = {
-        if (focusedItemIndex in viewModel.activityBeanList.indices) {
+        if (focusedItemIndex in viewModel.activityDtoList.indices) {
             val layoutInfo = lazyGridState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
@@ -182,7 +182,7 @@ fun AppListDialog(
 
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionLeft")
-                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityDtoList.size) {
                                             val layoutInfo = lazyGridState.layoutInfo
                                             val visibleItems = layoutInfo.visibleItemsInfo
                                             if (visibleItems.isNotEmpty()) {
@@ -214,7 +214,7 @@ fun AppListDialog(
 
                                     KeyEvent.ACTION_UP -> {
                                         Log.i(tag, "Released key: DirectionRight")
-                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityBeanList.size) {
+                                        if (focusedItemIndex >= 0 && focusedItemIndex < viewModel.activityDtoList.size) {
                                             val layoutInfo = lazyGridState.layoutInfo
                                             val visibleItems = layoutInfo.visibleItemsInfo
                                             if (visibleItems.isNotEmpty()) {
@@ -247,7 +247,7 @@ fun AppListDialog(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
-                    viewModel.activityBeanList
+                    viewModel.activityDtoList
                 ) { index, item ->
                     val focusRequester = remember { FocusRequester() }
 

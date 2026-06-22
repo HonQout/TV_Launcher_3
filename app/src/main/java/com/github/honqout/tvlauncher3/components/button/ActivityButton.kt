@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.button
+package com.github.honqout.tvlauncher3.components.button
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,14 +15,14 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.crossfade
 import coil3.size.Precision
-import com.github.honqout.tvlauncher3.bean.ActivityBean
+import com.github.honqout.tvlauncher3.dto.ActivityDto
 import com.github.honqout.tvlauncher3.coil.model.ActivityIconModel
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 
 @Composable
-fun ActivityButtonTv(
+fun AppButton(
     modifier: Modifier = Modifier,
-    item: ActivityBean,
+    item: ActivityDto,
     contentDefaultColor: Color = colorScheme.secondary,
     contentFocusedColor: Color = colorScheme.primary,
     onShortClick: () -> Unit = {},
@@ -30,12 +30,12 @@ fun ActivityButtonTv(
 ) {
     val context = LocalContext.current
 
-    val imageRequest = remember(item.activityRecord.packageName) {
+    val imageRequest = remember(item.packageName) {
         ImageRequest.Builder(context)
             .data(
                 ActivityIconModel(
-                    item.activityRecord.packageName,
-                    item.activityRecord.activityName
+                    item.packageName,
+                    item.activityName
                 )
             )
             .precision(Precision.INEXACT)
@@ -44,7 +44,7 @@ fun ActivityButtonTv(
             .build()
     }
 
-    RoundRectButtonTv(
+    RoundRectButton(
         modifier = modifier,
         icon = {
             AsyncImage(
@@ -57,7 +57,7 @@ fun ActivityButtonTv(
                 model = imageRequest,
                 contentDescription = item.label,
                 contentScale = if (item.iconType == ApplicationUtils.Companion.IconType.Banner)
-                    ContentScale.FillBounds else ContentScale.Fit,
+                    ContentScale.FillBounds else ContentScale.Fit
             )
         },
         label = item.label,

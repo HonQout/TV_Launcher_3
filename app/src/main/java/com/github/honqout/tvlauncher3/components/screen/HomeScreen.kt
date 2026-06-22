@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.screen
+package com.github.honqout.tvlauncher3.components.screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -35,8 +35,8 @@ import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZ
 import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.AppShortcutButtonTv
-import com.github.honqout.tvlauncher3.view.dialog.AppListDialog
+import com.github.honqout.tvlauncher3.components.button.AppShortcutButtonTv
+import com.github.honqout.tvlauncher3.components.dialog.AppListDialog
 
 @Composable
 fun HomeScreen(
@@ -103,8 +103,8 @@ fun HomeScreen(
                                     context,
                                     IntentUtils.launchActivity(
                                         context,
-                                        item.activityRecord.packageName,
-                                        item.activityRecord.activityName,
+                                        item.packageName,
+                                        item.activityName,
                                         true
                                     )
                                 )

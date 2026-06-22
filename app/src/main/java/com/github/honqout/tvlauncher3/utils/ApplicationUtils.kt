@@ -17,7 +17,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.content.pm.PackageInfoCompat
-import com.github.honqout.tvlauncher3.bean.ActivityBean
+import com.github.honqout.tvlauncher3.dto.ActivityDto
 
 class ApplicationUtils {
     companion object {
@@ -449,7 +449,7 @@ class ApplicationUtils {
         }
 
         /**
-         * Get a list of ActivityBean of all launchable activity of certain application(s).
+         * Get a list of ActivityDto of all launchable activity of certain application(s).
          *
          * @param packageName Specify which package should these ActivityBeans belong to. Passing
          *                    null or empty string ("") to get all ActivityBeans of all installed
@@ -459,14 +459,14 @@ class ApplicationUtils {
             context: Context,
             type: LauncherActivityType,
             packageName: String?
-        ): List<ActivityBean> {
+        ): List<ActivityDto> {
             val intentActivityList = getLauncherActivityList(context, type, packageName)
-            val activityBeanList: MutableList<ActivityBean> = mutableListOf()
+            val activityDtoList: MutableList<ActivityDto> = mutableListOf()
             intentActivityList.forEach { intentActivity ->
-                val activityBean = ActivityBean(context, intentActivity)
-                activityBeanList.add(activityBean)
+                val activityDto = ActivityDto.fromResolveInfo(context, intentActivity)
+                activityDtoList.add(activityDto)
             }
-            return activityBeanList
+            return activityDtoList
         }
 
         fun shouldShowBelongToHint(

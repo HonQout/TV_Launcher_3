@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.view.dialog
+package com.github.honqout.tvlauncher3.components.dialog
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -45,23 +45,23 @@ import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
 import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_SMALL
 import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_DIALOG_EDGE
-import com.github.honqout.tvlauncher3.bean.ActivityBean
+import com.github.honqout.tvlauncher3.dto.ActivityDto
 import com.github.honqout.tvlauncher3.coil.model.AppIconModel
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.view.button.AppActionButtonTv
+import com.github.honqout.tvlauncher3.components.button.AppActionButtonTv
 
 @Composable
 fun AppActionDialog(
-    item: ActivityBean,
+    item: ActivityDto,
     onDismissRequest: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val defIcon = context.packageManager.defaultActivityIcon
 
-    val imageRequest = remember(item.activityRecord.packageName) {
+    val imageRequest = remember(item.packageName) {
         ImageRequest.Builder(context)
-            .data(AppIconModel(item.activityRecord.packageName))
+            .data(AppIconModel(item.packageName))
             .precision(Precision.INEXACT)
             .allowHardware(true)
             .crossfade(false)
@@ -102,8 +102,8 @@ fun AppActionDialog(
                 AnimatedVisibility(
                     visible = ApplicationUtils.shouldShowBelongToHint(
                         context,
-                        item.activityRecord.packageName,
-                        item.activityRecord.activityName
+                        item.packageName,
+                        item.activityName
                     ),
                     modifier = Modifier
                         .wrapContentSize()
@@ -140,10 +140,7 @@ fun AppActionDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = ApplicationUtils.getApplicationLabel(
-                        context,
-                        item.activityRecord.packageName
-                    ),
+                    text = ApplicationUtils.getApplicationLabel(context, item.packageName),
                     modifier = Modifier,
                     color = Color.White,
                     fontSize = 22.sp,
@@ -155,7 +152,7 @@ fun AppActionDialog(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = item.activityRecord.packageName,
+                    text = item.packageName,
                     modifier = Modifier,
                     color = Color.LightGray,
                     fontSize = FONT_SIZE_LARGE,
@@ -168,7 +165,7 @@ fun AppActionDialog(
                 Text(
                     text = ApplicationUtils.getVersionNameAndVersionCode(
                         context,
-                        item.activityRecord.packageName
+                        item.packageName
                     ),
                     modifier = Modifier,
                     color = Color.LightGray,
@@ -195,8 +192,8 @@ fun AppActionDialog(
                             context,
                             IntentUtils.launchActivity(
                                 context,
-                                item.activityRecord.packageName,
-                                item.activityRecord.activityName,
+                                item.packageName,
+                                item.activityName,
                                 true
                             )
                         )
@@ -212,7 +209,7 @@ fun AppActionDialog(
                     onShortClick = {
                         val type: ApplicationUtils.Companion.ApplicationType =
                             ApplicationUtils.getApplicationType(
-                                context, item.activityRecord.packageName
+                                context, item.packageName
                             )
                         when (type) {
                             ApplicationUtils.Companion.ApplicationType.UNKNOWN -> {
@@ -237,7 +234,7 @@ fun AppActionDialog(
                                     context,
                                     IntentUtils.requestUninstallApp(
                                         context,
-                                        item.activityRecord.packageName
+                                        item.packageName
                                     ),
                                     { onDismissRequest() }
                                 )
@@ -257,7 +254,7 @@ fun AppActionDialog(
                             context,
                             IntentUtils.launchApplicationDetailsSettings(
                                 context,
-                                item.activityRecord.packageName
+                                item.packageName
                             ),
                             { onDismissRequest() }
                         )
@@ -273,10 +270,7 @@ fun AppActionDialog(
                     onShortClick = {
                         IntentUtils.handleLaunchIntentResult(
                             context,
-                            IntentUtils.openAppInMarket(
-                                context,
-                                item.activityRecord.packageName
-                            ),
+                            IntentUtils.openAppInMarket(context, item.packageName),
                             { onDismissRequest() }
                         )
                     },
