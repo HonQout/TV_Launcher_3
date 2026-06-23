@@ -47,7 +47,7 @@ fun HomeScreen(
     val numFixedActivity = viewModel.numFixedActivity
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppListDialog by viewModel.showAppListDialog.collectAsState()
-    val fixedActivityBeanList by viewModel.fixedActivityListState.collectAsState()
+    val fixedActivityDtoList by viewModel.fixedActivityListState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -84,7 +84,7 @@ fun HomeScreen(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
-                    items = fixedActivityBeanList,
+                    items = fixedActivityDtoList,
                     key = { index, item -> "key_${index}" }
                 ) { index, item ->
                     AppShortcutButtonTv(
@@ -111,7 +111,7 @@ fun HomeScreen(
                             }
                         },
                         onRemoveItem = {
-                            viewModel.addItemToFixedActivityBeanList(
+                            viewModel.addItemToFixedActivityDtoList(
                                 index = index,
                                 item = null
                             )
@@ -132,10 +132,10 @@ fun HomeScreen(
         ) {
             AppListDialog(
                 viewModel = viewModel,
-                onItemChosen = { _, activityBean ->
-                    viewModel.addItemToFixedActivityBeanList(
+                onItemChosen = { _, activityDto ->
+                    viewModel.addItemToFixedActivityDtoList(
                         index = null,
-                        item = activityBean
+                        item = activityDto
                     )
                 },
                 onDismissRequest = {

@@ -242,7 +242,7 @@ fun AppsScreen(
                             )
                         },
                         onLongClick = {
-                            viewModel.setSelectedActivityBean(item)
+                            viewModel.setSelectedActivityDto(item)
                             viewModel.setShowAppActionScreen(true)
                         }
                     )

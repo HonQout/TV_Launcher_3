@@ -451,11 +451,11 @@ class ApplicationUtils {
         /**
          * Get a list of ActivityDto of all launchable activity of certain application(s).
          *
-         * @param packageName Specify which package should these ActivityBeans belong to. Passing
-         *                    null or empty string ("") to get all ActivityBeans of all installed
+         * @param packageName Specify which package should these ActivityDtos belong to. Passing
+         *                    null or empty string ("") to get all ActivityDtos of all installed
          *                    packages.
          */
-        fun getActivityBeanList(
+        fun getActivityDtoList(
             context: Context,
             type: LauncherActivityType,
             packageName: String?

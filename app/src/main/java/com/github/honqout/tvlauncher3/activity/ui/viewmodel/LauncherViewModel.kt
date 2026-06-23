@@ -104,7 +104,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     // mutex
     private val fixedActivityListMutex = Mutex()
-    private val activityBeanListMutex = Mutex()
+    private val activityDtoListMutex = Mutex()
 
     companion object {
         const val TAG: String = "LauncherViewModel"
@@ -117,7 +117,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     init {
         registerLocaleBR(getApplication())
         registerPackageBR(getApplication())
-        loadActivityBeanList()
+        loadActivityDtoList()
     }
 
     override fun onCleared() {
@@ -141,7 +141,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 refreshSignal.tryEmit(Unit)
-                loadActivityBeanList()
+                loadActivityDtoList()
             }
         }
 
@@ -184,7 +184,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         if (!replacing) {
                             val packageName = intent.data?.schemeSpecificPart
                             if (packageName != null) {
-                                updateActivityBeanList(ListOp.ADD, packageName)
+                                updateActivityDtoList(ListOp.ADD, packageName)
                             } else {
                                 Log.e(TAG, "Cannot get packageName.")
                             }
@@ -199,7 +199,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         if (!replacing) {
                             val packageName = intent.data?.schemeSpecificPart
                             if (packageName != null) {
-                                updateActivityBeanList(ListOp.REMOVE, packageName)
+                                updateActivityDtoList(ListOp.REMOVE, packageName)
                             } else {
                                 Log.e(TAG, "Cannot get packageName.")
                             }
@@ -209,7 +209,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     Intent.ACTION_PACKAGE_REPLACED -> {
                         val packageName = intent.data?.schemeSpecificPart
                         if (packageName != null) {
-                            updateActivityBeanList(ListOp.REPLACE, packageName)
+                            updateActivityDtoList(ListOp.REPLACE, packageName)
                         } else {
                             Log.e(TAG, "Cannot get packageName.")
                         }
@@ -228,25 +228,25 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun loadActivityBeanList() {
+    fun loadActivityDtoList() {
         viewModelScope.launch {
-            activityBeanListMutex.withLock {
+            activityDtoListMutex.withLock {
                 withContext(Dispatchers.Default) {
                     _activityDtoList.clear()
                     _activityDtoList.addAll(
-                        ApplicationUtils.getActivityBeanList(
+                        ApplicationUtils.getActivityDtoList(
                             getApplication(),
                             LauncherActivityType.NORMAL,
                             null
                         )
                     )
-                    sortActivityBeanList()
+                    sortActivityDtoList()
                 }
             }
         }
     }
 
-    fun addItemToFixedActivityBeanList(index: Int?, item: ActivityDto?) {
+    fun addItemToFixedActivityDtoList(index: Int?, item: ActivityDto?) {
         viewModelScope.launch {
             fixedActivityListMutex.withLock {
                 withContext(Dispatchers.Default) {
@@ -268,7 +268,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun refreshItemsOfFixedActivityBeanList(packageName: String) {
+    fun refreshItemsOfFixedActivityDtoList(packageName: String) {
         viewModelScope.launch {
             val context = getApplication<Application>()
             fixedActivityListMutex.withLock {
@@ -303,9 +303,9 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateActivityBeanList(op: ListOp, packageName: String) {
+    fun updateActivityDtoList(op: ListOp, packageName: String) {
         viewModelScope.launch {
-            activityBeanListMutex.withLock {
+            activityDtoListMutex.withLock {
                 withContext(Dispatchers.Default) {
                     // Save focused item
                     val focusedItem =
@@ -318,34 +318,34 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     if (op == ListOp.INIT || _activityDtoList.isEmpty()) {
                         _activityDtoList.clear()
                         _activityDtoList.addAll(
-                            ApplicationUtils.getActivityBeanList(
+                            ApplicationUtils.getActivityDtoList(
                                 getApplication(),
                                 LauncherActivityType.NORMAL,
                                 null
                             )
                         )
-                        sortActivityBeanList()
+                        sortActivityDtoList()
                         return@withContext
                     }
                     // Remove
                     if (op == ListOp.REMOVE || op == ListOp.REPLACE) {
-                        val removeResult = _activityDtoList.removeAll { activityBean ->
-                            activityBean.packageName == packageName
+                        val removeResult = _activityDtoList.removeAll { activityDto ->
+                            activityDto.packageName == packageName
                         }
-                        Log.i(TAG, "Removed items from ActivityBeanList: $removeResult")
+                        Log.i(TAG, "Removed items from ActivityDto list: $removeResult")
                     }
                     // Add
                     if (op == ListOp.ADD || op == ListOp.REPLACE) {
                         val addResult = _activityDtoList.addAll(
-                            ApplicationUtils.getActivityBeanList(
+                            ApplicationUtils.getActivityDtoList(
                                 getApplication(),
                                 LauncherActivityType.NORMAL,
                                 packageName
                             ).toMutableList()
                         )
-                        Log.i(TAG, "Added items to ActivityBeanList: $addResult")
+                        Log.i(TAG, "Added items to ActivityDto list: $addResult")
                         // Must sort the list after adding items
-                        sortActivityBeanList()
+                        sortActivityDtoList()
                     }
                     // Restore focused item
                     val currentIndex =
@@ -361,14 +361,14 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     }
                     // Update fixed activities
                     if (op == ListOp.REMOVE || op == ListOp.REPLACE) {
-                        refreshItemsOfFixedActivityBeanList(packageName)
+                        refreshItemsOfFixedActivityDtoList(packageName)
                     }
                 }
             }
         }
     }
 
-    fun sortActivityBeanList() {
+    fun sortActivityDtoList() {
         val collator: Collator = Collator.getInstance()
         _activityDtoList.sortWith { a, b ->
             collator.compare(a.label, b.label)
@@ -418,7 +418,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun setSelectedActivityBean(newValue: ActivityDto) {
+    fun setSelectedActivityDto(newValue: ActivityDto) {
         _selectedActivityDto.update {
             newValue
         }
