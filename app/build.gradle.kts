@@ -48,7 +48,7 @@ configure<ApplicationExtension> {
             )
 
             optimization {
-                enable = true
+                enable = false
             }
         }
     }
