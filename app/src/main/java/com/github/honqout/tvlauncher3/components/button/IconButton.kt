@@ -33,10 +33,10 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContainerFocused
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
-import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContainerFocused
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContentFocused
+import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.constants.NumberConstants
 
 @Composable

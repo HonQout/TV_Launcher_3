@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.activity.ui.viewmodel
+package com.github.honqout.tvlauncher3.activity.viewmodel
 
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -44,20 +44,22 @@ class InputViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        registerLocaleBR(getApplication())
+        registerLocaleBR()
         loadTvInputList()
     }
 
     override fun onCleared() {
         viewModelScope.cancel()
-        unregisterLocaleBR(getApplication())
+        unregisterLocaleBR()
         super.onCleared()
     }
 
-    fun registerLocaleBR(context: Context) {
+    fun registerLocaleBR() {
         if (localeBroadcastReceiver != null) {
             return
         }
+
+        val context = getApplication<Application>()
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_LOCALE_CHANGED)
@@ -74,8 +76,9 @@ class InputViewModel(application: Application) : AndroidViewModel(application) {
         ContextCompat.registerReceiver(context, localeBroadcastReceiver, filter, receiverFlags)
     }
 
-    fun unregisterLocaleBR(context: Context) {
+    fun unregisterLocaleBR() {
         localeBroadcastReceiver?.let {
+            val context = getApplication<Application>()
             context.unregisterReceiver(it)
             localeBroadcastReceiver = null
         }

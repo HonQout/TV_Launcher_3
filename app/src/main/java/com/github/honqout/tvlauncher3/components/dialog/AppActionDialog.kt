@@ -42,9 +42,9 @@ import coil3.request.fallback
 import coil3.request.placeholder
 import coil3.size.Precision
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_SMALL
-import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_DIALOG_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_SMALL
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_DIALOG_EDGE
 import com.github.honqout.tvlauncher3.dto.ActivityDto
 import com.github.honqout.tvlauncher3.coil.model.AppIconModel
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
@@ -140,7 +140,7 @@ fun AppActionDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = ApplicationUtils.getApplicationLabel(context, item.packageName),
+                    text = ApplicationUtils.getApplicationLabel(context, item.packageName) ?: "",
                     modifier = Modifier,
                     color = Color.White,
                     fontSize = 22.sp,

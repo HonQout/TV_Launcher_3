@@ -44,7 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_LARGE
 import com.github.honqout.tvlauncher3.constants.NumberConstants
 
 @Composable

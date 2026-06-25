@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.activity.ui.viewmodel
+package com.github.honqout.tvlauncher3.activity.viewmodel
 
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -20,18 +20,20 @@ class TimeViewModel(application: Application) : AndroidViewModel(application) {
     private var broadcastReceiver: BroadcastReceiver? = null
 
     init {
-        registerBroadcastReceiver(getApplication())
+        registerBroadcastReceiver()
     }
 
     override fun onCleared() {
-        unregisterBroadcastReceiver(getApplication())
+        unregisterBroadcastReceiver()
         super.onCleared()
     }
 
-    fun registerBroadcastReceiver(context: Context) {
+    fun registerBroadcastReceiver() {
         if (broadcastReceiver != null) {
             return
         }
+
+        val context = getApplication<Application>()
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_TIMEZONE_CHANGED)
@@ -51,8 +53,9 @@ class TimeViewModel(application: Application) : AndroidViewModel(application) {
         ContextCompat.registerReceiver(context, broadcastReceiver, filter, receiverFlags)
     }
 
-    fun unregisterBroadcastReceiver(context: Context) {
+    fun unregisterBroadcastReceiver() {
         broadcastReceiver?.let {
+            val context = getApplication<Application>()
             context.unregisterReceiver(it)
             broadcastReceiver = null
         }

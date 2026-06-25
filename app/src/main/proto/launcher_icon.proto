@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "com.github.honqout.tvlauncher3";
+option java_multiple_files = true;
+
+message IconItem {
+    int32 index = 1;
+    string package_name = 2;
+    string activity_name = 3;
+}
+
+message IconItems {
+    repeated IconItem items = 1;
+}

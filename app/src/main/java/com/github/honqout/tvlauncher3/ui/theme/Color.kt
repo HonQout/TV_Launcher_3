@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.activity.ui.theme
+package com.github.honqout.tvlauncher3.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

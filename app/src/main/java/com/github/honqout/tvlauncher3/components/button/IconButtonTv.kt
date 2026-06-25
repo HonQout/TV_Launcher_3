@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContainerFocused
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentDefault
-import com.github.honqout.tvlauncher3.activity.ui.theme.ButtonContentFocused
-import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContainerFocused
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContentDefault
+import com.github.honqout.tvlauncher3.ui.theme.ButtonContentFocused
+import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 
 @Composable
 fun IconButtonTv(

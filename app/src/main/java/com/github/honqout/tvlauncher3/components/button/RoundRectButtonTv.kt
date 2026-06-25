@@ -35,7 +35,7 @@ import androidx.tv.material3.MaterialTheme.colorScheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_LARGE
 
 @Composable
 private fun RoundRectButtonTvImpl(

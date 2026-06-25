@@ -25,8 +25,8 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_MEDIUM
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_MEDIUM
 
 @Composable
 fun SettingsActionButtonTv(

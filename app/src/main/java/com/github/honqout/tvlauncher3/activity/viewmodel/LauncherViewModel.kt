@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.activity.ui.viewmodel
+package com.github.honqout.tvlauncher3.activity.viewmodel
 
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -9,23 +9,21 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.datastore.repository.IconItemsRepository
+import com.github.honqout.tvlauncher3.datastore.repository.SettingsRepository
+import com.github.honqout.tvlauncher3.datastore.repository.iconItemsDataStore
 import com.github.honqout.tvlauncher3.dto.ActivityDto
-import com.github.honqout.tvlauncher3.dto.ActivityRecord
-import com.github.honqout.tvlauncher3.datastore.SettingsRepository
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.LauncherActivityType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -41,30 +39,29 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     val numColumns = 5
 
     // persistence
-    val settingsRepository = SettingsRepository(getApplication())
-    private val refreshSignal = MutableSharedFlow<Unit>(replay = 1).apply {
-        tryEmit(Unit)
-    }
+    val settingsRepository = SettingsRepository(application)
+    val iconItemsRepository = IconItemsRepository(application)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val fixedActivityListState: StateFlow<List<ActivityDto?>> = refreshSignal
-        .flatMapLatest {
-            settingsRepository.fixedActivityRecordFlow
-        }
-        .map { records ->
-            records.map { record ->
-                record?.let {
-                    val resolveInfo = ApplicationUtils.getLauncherActivity(
-                        getApplication(),
-                        LauncherActivityType.NORMAL,
-                        it.packageName,
-                        it.activityName
-                    )
-                    resolveInfo?.let { ActivityDto.fromResolveInfo(getApplication(), resolveInfo) }
-                }
+    // data
+    val fixedIconItemList = application.iconItemsDataStore.data
+        .map { it.itemsList }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            List(numFixedActivity) { null }
+        )
+    val fixedIconList: StateFlow<List<ActivityDto?>> = iconItemsRepository.itemsFlow
+        .map { originalList ->
+            originalList.map { item ->
+                val resolveInfo = ApplicationUtils.getLauncherActivity(
+                    application,
+                    LauncherActivityType.NORMAL,
+                    item.packageName,
+                    item.activityName
+                )
+                resolveInfo?.let { ActivityDto.fromResolveInfo(application, resolveInfo) }
             }
         }
-        .flowOn(Dispatchers.Default)
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -115,22 +112,24 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     }
 
     init {
-        registerLocaleBR(getApplication())
-        registerPackageBR(getApplication())
+        registerLocaleBR()
+        registerPackageBR()
         loadActivityDtoList()
     }
 
     override fun onCleared() {
         viewModelScope.cancel()
-        unregisterLocaleBR(getApplication())
-        unregisterPackageBR(getApplication())
+        unregisterLocaleBR()
+        unregisterPackageBR()
         super.onCleared()
     }
 
-    fun registerLocaleBR(context: Context) {
+    fun registerLocaleBR() {
         if (localeBroadcastReceiver != null) {
             return
         }
+
+        val context = getApplication<Application>()
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_LOCALE_CHANGED)
@@ -140,7 +139,6 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
         localeBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                refreshSignal.tryEmit(Unit)
                 loadActivityDtoList()
             }
         }
@@ -148,17 +146,20 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         ContextCompat.registerReceiver(context, localeBroadcastReceiver, filter, receiverFlags)
     }
 
-    fun unregisterLocaleBR(context: Context) {
+    fun unregisterLocaleBR() {
         localeBroadcastReceiver?.let {
+            val context = getApplication<Application>()
             context.unregisterReceiver(it)
             localeBroadcastReceiver = null
         }
     }
 
-    fun registerPackageBR(context: Context) {
+    fun registerPackageBR() {
         if (packageBroadcastReceiver != null) {
             return
         }
+
+        val context = getApplication<Application>()
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_PACKAGE_ADDED)
@@ -221,8 +222,9 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         ContextCompat.registerReceiver(context, packageBroadcastReceiver, filter, receiverFlags)
     }
 
-    fun unregisterPackageBR(context: Context) {
+    fun unregisterPackageBR() {
         packageBroadcastReceiver?.let {
+            val context = getApplication<Application>()
             context.unregisterReceiver(it)
             packageBroadcastReceiver = null
         }
@@ -246,36 +248,25 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun addItemToFixedActivityDtoList(index: Int?, item: ActivityDto?) {
+    fun setItemInFixedIconList(position: Int?, item: ActivityDto?) {
         viewModelScope.launch {
-            fixedActivityListMutex.withLock {
-                withContext(Dispatchers.Default) {
-                    val targetIndex = index ?: _focusedItemIndex1.value
-                    if (targetIndex in 0..<numFixedActivity) {
-                        val list = fixedActivityListState.value.toMutableList()
-                        list[targetIndex] = item
-                        Log.i(
-                            TAG,
-                            "Set item $targetIndex of FixedItemList to " + (item?.getKey()
-                                ?: "null")
-                        )
-                        withContext(Dispatchers.IO) {
-                            settingsRepository.saveFixedActivityRecord(list.map { it?.toActivityRecord() })
-                        }
-                    }
-                }
-            }
+            val targetPosition = position ?: _focusedItemIndex1.value
+            if (targetPosition in 0..<numFixedActivity)
+                IconItemsRepository(application).setIconByIndex(
+                    targetPosition,
+                    item?.packageName ?: "",
+                    item?.activityName ?: ""
+                )
         }
     }
 
-    fun refreshItemsOfFixedActivityDtoList(packageName: String) {
+    fun refreshItemsInFixedIconList(packageName: String) {
         viewModelScope.launch {
             val context = getApplication<Application>()
             fixedActivityListMutex.withLock {
                 withContext(Dispatchers.Default) {
-                    val list = mutableListOf<ActivityRecord?>()
                     for (i in 0..<numFixedActivity) {
-                        var item = fixedActivityListState.value[i]
+                        val item = fixedIconList.value[i]
                         if (item != null) {
                             if (packageName == item.packageName) {
                                 val resolveInfo = ApplicationUtils.getLauncherActivity(
@@ -284,19 +275,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                                     item.packageName,
                                     item.activityName
                                 )
-                                item = if (resolveInfo == null) {
-                                    null
-                                } else {
-                                    ActivityDto.fromResolveInfo(context, resolveInfo)
+                                if (resolveInfo == null) {
+                                    iconItemsRepository.resetIconByIndex(i)
                                 }
                             }
-                            list.add(item?.toActivityRecord())
-                        } else {
-                            list.add(null)
                         }
-                    }
-                    withContext(Dispatchers.IO) {
-                        settingsRepository.saveFixedActivityRecord(list)
                     }
                 }
             }
@@ -314,7 +297,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                         } else {
                             _activityDtoList[0]
                         }
-                    // Prepare the whole list
+                    // Initialize the whole list
                     if (op == ListOp.INIT || _activityDtoList.isEmpty()) {
                         _activityDtoList.clear()
                         _activityDtoList.addAll(
@@ -361,7 +344,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     }
                     // Update fixed activities
                     if (op == ListOp.REMOVE || op == ListOp.REPLACE) {
-                        refreshItemsOfFixedActivityDtoList(packageName)
+                        refreshItemsInFixedIconList(packageName)
                     }
                 }
             }

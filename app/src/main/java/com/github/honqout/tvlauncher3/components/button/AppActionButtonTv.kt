@@ -32,7 +32,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
-import com.github.honqout.tvlauncher3.activity.ui.theme.FONT_SIZE_LARGE
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_LARGE
 
 @Composable
 fun AppActionButtonTv(

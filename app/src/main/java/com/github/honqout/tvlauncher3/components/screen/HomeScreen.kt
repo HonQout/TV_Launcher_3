@@ -28,12 +28,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.github.honqout.tvlauncher3.activity.ui.theme.OnWallpaperContainer
-import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_LIST_CONTENT_EDGE
-import com.github.honqout.tvlauncher3.activity.ui.theme.PADDING_SCREEN_EDGE
-import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
-import com.github.honqout.tvlauncher3.activity.ui.theme.SPACE_LIST_CONTENT_VERTICAL
-import com.github.honqout.tvlauncher3.activity.ui.viewmodel.LauncherViewModel
+import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
+import com.github.honqout.tvlauncher3.activity.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.components.button.AppShortcutButtonTv
 import com.github.honqout.tvlauncher3.components.dialog.AppListDialog
@@ -47,7 +47,7 @@ fun HomeScreen(
     val numFixedActivity = viewModel.numFixedActivity
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppListDialog by viewModel.showAppListDialog.collectAsState()
-    val fixedActivityDtoList by viewModel.fixedActivityListState.collectAsState()
+    val fixedIconList by viewModel.fixedIconList.collectAsState()
 
     Box(
         modifier = Modifier
@@ -84,7 +84,7 @@ fun HomeScreen(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
-                    items = fixedActivityDtoList,
+                    items = fixedIconList,
                     key = { index, item -> "key_${index}" }
                 ) { index, item ->
                     AppShortcutButtonTv(
@@ -111,8 +111,8 @@ fun HomeScreen(
                             }
                         },
                         onRemoveItem = {
-                            viewModel.addItemToFixedActivityDtoList(
-                                index = index,
+                            viewModel.setItemInFixedIconList(
+                                position = index,
                                 item = null
                             )
                         },
@@ -133,8 +133,8 @@ fun HomeScreen(
             AppListDialog(
                 viewModel = viewModel,
                 onItemChosen = { _, activityDto ->
-                    viewModel.addItemToFixedActivityDtoList(
-                        index = null,
+                    viewModel.setItemInFixedIconList(
+                        position = null,
                         item = activityDto
                     )
                 },

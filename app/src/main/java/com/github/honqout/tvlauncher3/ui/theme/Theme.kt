@@ -1,4 +1,4 @@
-package com.github.honqout.tvlauncher3.activity.ui.theme
+package com.github.honqout.tvlauncher3.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

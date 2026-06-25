@@ -14,8 +14,21 @@ import com.github.honqout.tvlauncher3.coil.fetcher.ActivityIconFetcher
 import com.github.honqout.tvlauncher3.coil.fetcher.AppIconFetcher
 import com.github.honqout.tvlauncher3.coil.keyer.ActivityIconKeyer
 import com.github.honqout.tvlauncher3.coil.keyer.AppIconKeyer
+import com.github.honqout.tvlauncher3.datastore.repository.IconItemsRepository
+import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@HiltAndroidApp
 class MyApplication : Application(), SingletonImageLoader.Factory {
+    override fun onCreate() {
+        super.onCreate()
+        CoroutineScope(Dispatchers.IO).launch {
+            IconItemsRepository(this@MyApplication).initializeIcons()
+        }
+    }
+
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(context)
             .components {
