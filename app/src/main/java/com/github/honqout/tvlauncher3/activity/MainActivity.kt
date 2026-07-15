@@ -81,9 +81,11 @@ import com.github.honqout.tvlauncher3.components.dialog.SettingsDialog
 import com.github.honqout.tvlauncher3.components.screen.AppsScreen
 import com.github.honqout.tvlauncher3.components.screen.HomeScreen
 import com.github.honqout.tvlauncher3.components.screen.InputScreen
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     companion object {
         private const val TAG: String = "MainActivity"

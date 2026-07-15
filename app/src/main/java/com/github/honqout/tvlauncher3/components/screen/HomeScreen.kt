@@ -27,24 +27,24 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.github.honqout.tvlauncher3.activity.viewmodel.LauncherViewModel
+import com.github.honqout.tvlauncher3.components.button.AppShortcutButtonTv
+import com.github.honqout.tvlauncher3.components.dialog.AppListDialog
+import com.github.honqout.tvlauncher3.datastore.repository.IconRepository
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
-import com.github.honqout.tvlauncher3.activity.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.utils.IntentUtils
-import com.github.honqout.tvlauncher3.components.button.AppShortcutButtonTv
-import com.github.honqout.tvlauncher3.components.dialog.AppListDialog
 
 @Composable
 fun HomeScreen(
-    viewModel: LauncherViewModel = viewModel()
+    viewModel: LauncherViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
-    val numFixedActivity = viewModel.numFixedActivity
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val showAppListDialog by viewModel.showAppListDialog.collectAsState()
     val fixedIconList by viewModel.fixedIconList.collectAsState()
@@ -64,7 +64,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(numFixedActivity),
+                columns = GridCells.Fixed(IconRepository.NUM_FIXED_ACTIVITY),
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
@@ -111,7 +111,7 @@ fun HomeScreen(
                             }
                         },
                         onRemoveItem = {
-                            viewModel.setItemInFixedIconList(
+                            viewModel.setIcon(
                                 position = index,
                                 item = null
                             )
@@ -133,7 +133,7 @@ fun HomeScreen(
             AppListDialog(
                 viewModel = viewModel,
                 onItemChosen = { _, activityDto ->
-                    viewModel.setItemInFixedIconList(
+                    viewModel.setIcon(
                         position = null,
                         item = activityDto
                     )

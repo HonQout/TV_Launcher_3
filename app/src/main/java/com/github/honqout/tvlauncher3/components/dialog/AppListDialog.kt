@@ -40,22 +40,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.activity.viewmodel.LauncherViewModel
+import com.github.honqout.tvlauncher3.components.button.ActivityButtonTv
+import com.github.honqout.tvlauncher3.dto.ActivityDto
 import com.github.honqout.tvlauncher3.ui.theme.ButtonContentDefault
 import com.github.honqout.tvlauncher3.ui.theme.ButtonContentFocused
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_DIALOG_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
-import com.github.honqout.tvlauncher3.activity.viewmodel.LauncherViewModel
-import com.github.honqout.tvlauncher3.dto.ActivityDto
-import com.github.honqout.tvlauncher3.components.button.ActivityButtonTv
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppListDialog(
-    viewModel: LauncherViewModel = viewModel(),
+    viewModel: LauncherViewModel = hiltViewModel(),
     onItemChosen: (index: Int, activityDto: ActivityDto) -> Unit = { _, _ -> },
     onDismissRequest: () -> Unit = {}
 ) {

@@ -9,15 +9,14 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.datastore.repository.IconItemsRepository
+import com.github.honqout.tvlauncher3.datastore.repository.IconRepository
 import com.github.honqout.tvlauncher3.datastore.repository.SettingsRepository
-import com.github.honqout.tvlauncher3.datastore.repository.iconItemsDataStore
 import com.github.honqout.tvlauncher3.dto.ActivityDto
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.LauncherActivityType
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,25 +31,20 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.text.Collator
+import javax.inject.Inject
+import kotlin.collections.map
 
-class LauncherViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class LauncherViewModel @Inject constructor(
+    application: Application,
+    private val iconRepository: IconRepository,
+    private val settingsRepository: SettingsRepository
+) : AndroidViewModel(application) {
     // constant
-    val numFixedActivity = 5
     val numColumns = 5
 
-    // persistence
-    val settingsRepository = SettingsRepository(application)
-    val iconItemsRepository = IconItemsRepository(application)
-
     // data
-    val fixedIconItemList = application.iconItemsDataStore.data
-        .map { it.itemsList }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            List(numFixedActivity) { null }
-        )
-    val fixedIconList: StateFlow<List<ActivityDto?>> = iconItemsRepository.itemsFlow
+    val fixedIconList: StateFlow<List<ActivityDto?>> = iconRepository.itemsFlow
         .map { originalList ->
             originalList.map { item ->
                 val resolveInfo = ApplicationUtils.getLauncherActivity(
@@ -65,7 +59,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            List(numFixedActivity) { null }
+            List(IconRepository.NUM_FIXED_ACTIVITY) { null }
         )
 
     // UI-related
@@ -114,6 +108,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     init {
         registerLocaleBR()
         registerPackageBR()
+        initializeIcons()
         loadActivityDtoList()
     }
 
@@ -230,6 +225,16 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun initializeIcons() {
+        viewModelScope.launch {
+            try {
+                iconRepository.initializeIcons()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize icons.", e)
+            }
+        }
+    }
+
     fun loadActivityDtoList() {
         viewModelScope.launch {
             activityDtoListMutex.withLock {
@@ -248,15 +253,19 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun setItemInFixedIconList(position: Int?, item: ActivityDto?) {
+    fun setIcon(position: Int?, item: ActivityDto?) {
         viewModelScope.launch {
             val targetPosition = position ?: _focusedItemIndex1.value
-            if (targetPosition in 0..<numFixedActivity)
-                IconItemsRepository(application).setIconByIndex(
-                    targetPosition,
-                    item?.packageName ?: "",
-                    item?.activityName ?: ""
-                )
+            if (targetPosition in 0..<IconRepository.NUM_FIXED_ACTIVITY)
+                try {
+                    iconRepository.setIconByIndex(
+                        targetPosition,
+                        item?.packageName ?: "",
+                        item?.activityName ?: ""
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to set icon.", e)
+                }
         }
     }
 
@@ -265,7 +274,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             val context = getApplication<Application>()
             fixedActivityListMutex.withLock {
                 withContext(Dispatchers.Default) {
-                    for (i in 0..<numFixedActivity) {
+                    for (i in 0..<IconRepository.NUM_FIXED_ACTIVITY) {
                         val item = fixedIconList.value[i]
                         if (item != null) {
                             if (packageName == item.packageName) {
@@ -276,7 +285,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                                     item.activityName
                                 )
                                 if (resolveInfo == null) {
-                                    iconItemsRepository.resetIconByIndex(i)
+                                    iconRepository.resetIconByIndex(i)
                                 }
                             }
                         }

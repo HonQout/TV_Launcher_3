@@ -1,8 +1,8 @@
 package com.github.honqout.tvlauncher3.application
 
 import android.app.Application
+import android.content.Context
 import coil3.ImageLoader
-import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.disk.directory
@@ -14,23 +14,14 @@ import com.github.honqout.tvlauncher3.coil.fetcher.ActivityIconFetcher
 import com.github.honqout.tvlauncher3.coil.fetcher.AppIconFetcher
 import com.github.honqout.tvlauncher3.coil.keyer.ActivityIconKeyer
 import com.github.honqout.tvlauncher3.coil.keyer.AppIconKeyer
-import com.github.honqout.tvlauncher3.datastore.repository.IconItemsRepository
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class MyApplication : Application(), SingletonImageLoader.Factory {
-    override fun onCreate() {
-        super.onCreate()
-        CoroutineScope(Dispatchers.IO).launch {
-            IconItemsRepository(this@MyApplication).initializeIcons()
-        }
-    }
 
-    override fun newImageLoader(context: PlatformContext): ImageLoader {
+    override fun newImageLoader(context: Context): ImageLoader {
         return ImageLoader.Builder(context)
+            .crossfade(true)
             .components {
                 add(ActivityIconFetcher.Factory(this@MyApplication))
                 add(ActivityIconKeyer())
@@ -48,13 +39,10 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve("image_cache"))
-                    .maxSizeBytes(100 * 1024 * 1024)
+                    .maxSizeBytes(100 * 1024 * 1024L)
                     .build()
             }
-            .apply {
-                crossfade(true)
-                logger(DebugLogger())
-            }
+            .logger(DebugLogger())
             .build()
     }
 }
