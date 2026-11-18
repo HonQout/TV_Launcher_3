@@ -25,7 +25,6 @@ class TimeViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         unregisterBroadcastReceiver()
-        super.onCleared()
     }
 
     fun registerBroadcastReceiver() {

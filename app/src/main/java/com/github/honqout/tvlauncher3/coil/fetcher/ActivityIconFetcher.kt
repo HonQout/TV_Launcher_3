@@ -17,13 +17,13 @@ class ActivityIconFetcher(
     private val options: Options,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult {
-        val (_, icon) = ApplicationUtils.getActivityIconPair(
+        val result = ApplicationUtils.getActivityBannerOrIcon(
             context,
             data.packageName,
             data.activityName
         )
         return ImageFetchResult(
-            image = icon.asImage(),
+            image = result.asImage(),
             isSampled = false,
             dataSource = DataSource.DISK
         )

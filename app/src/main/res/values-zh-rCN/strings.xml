@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name">TV Launcher 3</string>
 
+    <!-- Basic -->
+    <string name="cancel">取消</string>
+    <string name="confirm">确定</string>
+
     <!-- Title -->
     <string name="home">主页</string>
     <string name="apps">应用</string>
@@ -24,28 +28,37 @@
     <string name="signal_source">信号源</string>
 
     <!-- Settings item -->
-    <string name="tv_settings">电视设置</string>
-    <string name="wlan">无线局域网</string>
-    <string name="bluetooth">蓝牙</string>
-    <string name="internet">互联网</string>
-    <string name="accessory">配件</string>
-    <string name="sound">声音</string>
-    <string name="display">显示</string>
+    <string name="launcher_settings">桌面设置</string>
+    <string name="network_and_internet">网络和互联网</string>
+    <string name="display_and_sound">显示和声音</string>
+    <string name="accessibility">无障碍</string>
     <string name="screen_saver">屏保</string>
+
+    <!-- Preference header -->
+    <string name="header_system">系统</string>
+    <string name="header_about">关于</string>
+
+    <!-- Preference item -->
+    <string name="default_app">默认应用</string>
+    <string name="version">版本</string>
+    <string name="visit_github_page">访问GitHub页面</string>
+    <string name="visit_github_page_summary">获取源代码和最新的发布版本</string>
 
     <!-- Hint -->
     <string name="activity_belongs_to">“%s”属于以下应用：</string>
-    <string name="cannot_find_package">找不到应用包。</string>
     <string name="cannot_find_activity">找不到活动。</string>
     <string name="cannot_access_unexported_activity">无法访问未导出的活动。</string>
     <string name="activity_requires_extra_permission">此活动需要额外的权限来启动。</string>
-    <string name="cannot_launch_app">无法启动应用。</string>
     <string name="cannot_uninstall_unknown_type">无法卸载未知类型的应用。</string>
     <string name="cannot_uninstall_system_app">无法卸载系统应用。</string>
-    <string name="uninstall_request_failed">请求卸载失败。</string>
-    <string name="cannot_launch_settings">无法启动设置。</string>
     <string name="uri_is_empty">统一资源标识符为空。</string>
-    <string name="no_app_market_installed">未安装应用市场。</string>
     <string name="no_matching_activity">没有匹配的活动。</string>
+    <string name="no_app_market_installed">未安装应用市场。</string>
+    <string name="select_input_first">请先选择一个输入源。</string>
+    <string name="cannot_display_input_screen">无法显示来自输入源的画面。</string>
+
+    <!-- Others -->
+    <string name="visit_github_page_message">访问此项目的GitHub页面。在那里，您可以获取此应用的源代码和最新的发布版本。</string>
+    <string name="visit">访问</string>
 
 </resources>

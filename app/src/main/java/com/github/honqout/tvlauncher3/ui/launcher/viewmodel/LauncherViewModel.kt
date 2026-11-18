@@ -1,22 +1,18 @@
 package com.github.honqout.tvlauncher3.ui.launcher.viewmodel
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.ActivityInfo
+import android.content.pm.LauncherApps
 import android.content.res.Configuration
+import android.os.Process
+import android.os.UserHandle
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.data.ActivityModel
+import com.github.honqout.tvlauncher3.data.model.activity.ActivityModel
+import com.github.honqout.tvlauncher3.data.repository.AppRepository
 import com.github.honqout.tvlauncher3.datastore.repository.IconRepository
-import com.github.honqout.tvlauncher3.datastore.repository.SettingsRepository
-import com.github.honqout.tvlauncher3.utils.ApplicationUtils
-import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.LauncherActivityType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -30,13 +26,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.Collator
 import javax.inject.Inject
 
 @HiltViewModel
 class LauncherViewModel @Inject constructor(
     application: Application,
-    private val iconRepository: IconRepository,
-    private val settingsRepository: SettingsRepository
+    private val iconRepository: IconRepository
 ) : AndroidViewModel(application) {
     // constant
     val numColumns = 5
@@ -52,12 +48,6 @@ class LauncherViewModel @Inject constructor(
     val topBarHeight: StateFlow<Int> = _topBarHeight.asStateFlow()
     private val _selectedTabIndex = MutableStateFlow<Int>(0)
     val selectedTabIndex: StateFlow<Int> = _selectedTabIndex.asStateFlow()
-    private val _showSettingsDialog = MutableStateFlow<Boolean>(false)
-    val showSettingsDialog: StateFlow<Boolean> = _showSettingsDialog.asStateFlow()
-    private val _showAppListDialog = MutableStateFlow<Boolean>(false)
-    val showAppListDialog: StateFlow<Boolean> = _showAppListDialog.asStateFlow()
-    private val _showAppActionDialog = MutableStateFlow<Boolean>(false)
-    val showAppActionDialog: StateFlow<Boolean> = _showAppActionDialog.asStateFlow()
 
     // data
     private val refreshFixedIconListSignal = MutableSharedFlow<Unit>(
@@ -72,13 +62,11 @@ class LauncherViewModel @Inject constructor(
             refreshFixedIconListSignal
         ) { originalList, _ ->
             originalList.map { item ->
-                val resolveInfo = ApplicationUtils.getLauncherActivity(
-                    application,
-                    LauncherActivityType.NORMAL,
-                    item.packageName,
-                    item.activityName
+                appRepository.getActivityModel(
+                    context = application,
+                    packageName = item.packageName,
+                    activityName = item.activityName
                 )
-                resolveInfo?.let { ActivityModel.fromResolveInfo(application, resolveInfo) }
             }
         }
             .stateIn(
@@ -94,107 +82,101 @@ class LauncherViewModel @Inject constructor(
     private val _selectedActivityModel = MutableStateFlow<ActivityModel?>(null)
     val selectedActivityModel: StateFlow<ActivityModel?> = _selectedActivityModel.asStateFlow()
 
-    // broadcast receiver
-    private var packageBroadcastReceiver: BroadcastReceiver? = null
+    // repository
+    private var appRepository: AppRepository
 
     companion object {
         const val TAG: String = "LauncherViewModel"
 
         enum class IconListOp {
-            REMOVE_AFTER_UNINSTALL, REMOVE_AFTER_UPDATE
+            REMOVE_AFTER_UNINSTALL,
+            REMOVE_AFTER_UPDATE
         }
 
         enum class AppListOp {
-            INIT, ADD, REMOVE, REPLACE
+            INIT,
+            ADD,
+            REMOVE,
+            REPLACE,
+            DISABLE,
+            ENABLE
         }
     }
 
     init {
-        registerPackageBR()
-        initializeIcons()
-        updateActivityModelList(AppListOp.INIT, null)
-    }
-
-    override fun onCleared() {
-        viewModelScope.cancel()
-        unregisterPackageBR()
-        super.onCleared()
-    }
-
-    fun registerPackageBR() {
-        if (packageBroadcastReceiver != null) {
-            return
-        }
-
-        val context = getApplication<Application>()
-
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addAction(Intent.ACTION_PACKAGE_REPLACED)
-            addDataScheme("package")
-        }
-
-        val receiverFlags = ContextCompat.RECEIVER_NOT_EXPORTED
-
-        packageBroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent == null) {
-                    Log.i(TAG, "Received intent is null.")
-                    return
+        // Initialize app repository
+        appRepository = AppRepository(
+            context = getApplication(),
+            callback = object : LauncherApps.Callback() {
+                override fun onPackageAdded(packageName: String?, user: UserHandle?) {
+                    if (user == Process.myUserHandle() && !packageName.isNullOrEmpty()) {
+                        updateActivityModelList(AppListOp.ADD, packageName)
+                    }
                 }
-                val action: String = intent.action ?: return
-                Log.i(TAG, "Received intent action: $action")
-                when (action) {
-                    Intent.ACTION_PACKAGE_ADDED -> {
-                        val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                        Log.i(TAG, "Extra: replacing = $replacing")
-                        if (!replacing) {
-                            val packageName = intent.data?.schemeSpecificPart
-                            if (packageName != null) {
-                                updateActivityModelList(AppListOp.ADD, packageName)
-                            } else {
-                                Log.e(TAG, "Failed to get packageName.")
+
+                override fun onPackageChanged(packageName: String?, user: UserHandle?) {
+                    if (user == Process.myUserHandle() && !packageName.isNullOrEmpty()) {
+                        updateActivityModelList(AppListOp.REPLACE, packageName)
+                    }
+                }
+
+                override fun onPackageRemoved(packageName: String?, user: UserHandle?) {
+                    if (user == Process.myUserHandle() && !packageName.isNullOrEmpty()) {
+                        updateActivityModelList(AppListOp.REMOVE, packageName)
+                    }
+                }
+
+                override fun onPackagesAvailable(
+                    packageNames: Array<out String?>?,
+                    user: UserHandle?,
+                    replacing: Boolean
+                ) {
+
+                }
+
+                override fun onPackagesUnavailable(
+                    packageNames: Array<out String?>?,
+                    user: UserHandle?,
+                    replacing: Boolean
+                ) {
+
+                }
+
+                override fun onPackagesSuspended(
+                    packageNames: Array<out String?>?,
+                    user: UserHandle?
+                ) {
+                    if (user == Process.myUserHandle() && !packageNames.isNullOrEmpty()) {
+                        for (packageName in packageNames) {
+                            if (!packageName.isNullOrEmpty()) {
+                                updateActivityModelList(AppListOp.DISABLE, packageName)
                             }
                         }
                     }
+                }
 
-                    Intent.ACTION_PACKAGE_REMOVED -> {
-                        val replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
-                        val dataRemoved =
-                            intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false)
-                        Log.i(TAG, "Extra: replacing = $replacing, data_removed = $dataRemoved")
-                        if (!replacing) {
-                            val packageName = intent.data?.schemeSpecificPart
-                            if (packageName != null) {
-                                updateActivityModelList(AppListOp.REMOVE, packageName)
-                            } else {
-                                Log.e(TAG, "Failed to get packageName.")
+                override fun onPackagesUnsuspended(
+                    packageNames: Array<out String?>?,
+                    user: UserHandle?
+                ) {
+                    if (user == Process.myUserHandle() && !packageNames.isNullOrEmpty()) {
+                        for (packageName in packageNames) {
+                            if (!packageName.isNullOrEmpty()) {
+                                updateActivityModelList(AppListOp.ENABLE, packageName)
                             }
-                        }
-                    }
-
-                    Intent.ACTION_PACKAGE_REPLACED -> {
-                        val packageName = intent.data?.schemeSpecificPart
-                        if (packageName != null) {
-                            updateActivityModelList(AppListOp.REPLACE, packageName)
-                        } else {
-                            Log.e(TAG, "Failed to get packageName.")
                         }
                     }
                 }
             }
-        }
-
-        ContextCompat.registerReceiver(context, packageBroadcastReceiver, filter, receiverFlags)
+        )
+        appRepository.register()
+        updateActivityModelList(AppListOp.INIT, null)
+        initializeIcons()
     }
 
-    fun unregisterPackageBR() {
-        packageBroadcastReceiver?.let {
-            val context = getApplication<Application>()
-            context.unregisterReceiver(it)
-            packageBroadcastReceiver = null
-        }
+    override fun onCleared() {
+        viewModelScope.cancel()
+        appRepository.unregister()
     }
 
     fun initializeIcons() {
@@ -239,17 +221,26 @@ class LauncherViewModel @Inject constructor(
 
     fun updateActivityModelList(op: AppListOp, packageName: String?) {
         viewModelScope.launch(Dispatchers.Default) {
-            // Initialize the whole list
+            // If op is AppListOp.INIT, we do not care about packageName
             if (op == AppListOp.INIT || _activityModelList.value.isEmpty()) {
-                val list = ApplicationUtils.getActivityModelList(
+                // Initialize the whole list
+                val list = appRepository.getActivityModelList(
                     getApplication(),
-                    LauncherActivityType.NORMAL,
                     null
                 )
                 _activityModelList.value = sortActivityModelList(list)
                 return@launch
             }
-            // Save focused item
+            // Otherwise, we should check if packageName is null or empty
+            if (packageName.isNullOrEmpty()) {
+                Log.e(
+                    TAG,
+                    "Cannot perform the specified operation. " +
+                            "The given packageName is null or empty."
+                )
+                return@launch
+            }
+            // Before performing operation, we should save the focused item first
             val focusedItem =
                 if (_focusedActivityItemIndex.value in _activityModelList.value.indices) {
                     _activityModelList.value[_focusedActivityItemIndex.value]
@@ -257,7 +248,7 @@ class LauncherViewModel @Inject constructor(
                     _activityModelList.value[0]
                 }
             // Remove
-            if (op == AppListOp.REMOVE || op == AppListOp.REPLACE) {
+            if (op == AppListOp.REMOVE || op == AppListOp.REPLACE || op == AppListOp.DISABLE) {
                 _activityModelList.update { currentList ->
                     val mutableList = currentList.toMutableList()
                     val removeResult = mutableList.removeAll { activityModel ->
@@ -268,15 +259,14 @@ class LauncherViewModel @Inject constructor(
                 }
             }
             // Add
-            if (op == AppListOp.ADD || op == AppListOp.REPLACE) {
+            if (op == AppListOp.ADD || op == AppListOp.REPLACE || op == AppListOp.ENABLE) {
                 _activityModelList.update { currentList ->
                     val mutableList = currentList.toMutableList()
                     val addResult = mutableList.addAll(
-                        ApplicationUtils.getActivityModelList(
+                        appRepository.getActivityModelList(
                             getApplication(),
-                            LauncherActivityType.NORMAL,
                             packageName
-                        ).toMutableList()
+                        )
                     )
                     Log.i(TAG, "Added items to ActivityModel list: $addResult")
                     // Must sort the list after adding items
@@ -297,22 +287,17 @@ class LauncherViewModel @Inject constructor(
             }
             // Update fixed activities
             if (op == AppListOp.REMOVE) {
-                packageName?.let {
-                    updateFixedIconList(IconListOp.REMOVE_AFTER_UNINSTALL, packageName)
-                }
+                updateFixedIconList(IconListOp.REMOVE_AFTER_UNINSTALL, packageName)
             }
             if (op == AppListOp.REPLACE) {
-                packageName?.let {
-                    updateFixedIconList(IconListOp.REMOVE_AFTER_UPDATE, packageName)
-                }
+                updateFixedIconList(IconListOp.REMOVE_AFTER_UPDATE, packageName)
             }
         }
     }
 
     fun sortActivityModelList(list: List<ActivityModel>): List<ActivityModel> {
-        return list.sortedBy {
-            it.label.lowercase()
-        }
+        val collator = Collator.getInstance()
+        return list.sortedWith(compareBy(collator) { it.label.lowercase() })
     }
 
     fun onConfigChanged(newConfig: Configuration) {
@@ -338,24 +323,6 @@ class LauncherViewModel @Inject constructor(
         }
     }
 
-    fun setShowSettingsScreen(newValue: Boolean) {
-        _showSettingsDialog.update {
-            newValue
-        }
-    }
-
-    fun setShowAppListScreen(newValue: Boolean) {
-        _showAppListDialog.update {
-            newValue
-        }
-    }
-
-    fun setShowAppActionScreen(newValue: Boolean) {
-        _showAppActionDialog.update {
-            newValue
-        }
-    }
-
     fun setFocusedFixedIconIndex(newValue: Int) {
         focusedFixedIconIndex = newValue
     }
@@ -366,7 +333,7 @@ class LauncherViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedActivityModel(newValue: ActivityModel) {
+    fun setSelectedActivityModel(newValue: ActivityModel?) {
         _selectedActivityModel.update {
             newValue
         }

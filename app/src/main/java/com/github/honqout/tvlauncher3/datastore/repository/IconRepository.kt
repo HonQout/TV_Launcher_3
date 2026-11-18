@@ -8,7 +8,6 @@ import com.github.honqout.tvlauncher3.IconItem
 import com.github.honqout.tvlauncher3.IconItems
 import com.github.honqout.tvlauncher3.datastore.serializer.IconItemsSerializer
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
-import com.github.honqout.tvlauncher3.utils.ApplicationUtils.Companion.LauncherActivityType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -119,19 +118,19 @@ class IconRepository @Inject constructor(
     }
 
     /**
-     * Reset icon with the specified packageName which is invalid.
+     * Reset icons with the specified `packageName` which are invalid.
      */
     suspend fun resetIconAfterPackageReplaced(context: Context, packageName: String) {
         dataStore.updateData { currentData ->
             val updatedList = currentData.itemsList.map { item ->
                 if (item.packageName == packageName) {
-                    val resolveInfo = ApplicationUtils.getLauncherActivity(
-                        context,
-                        LauncherActivityType.NORMAL,
-                        item.packageName,
-                        item.activityName
-                    )
-                    if (resolveInfo == null) {
+                    if (
+                        ApplicationUtils.hasLauncherActivity(
+                            context,
+                            item.packageName,
+                            item.activityName
+                        )
+                    ) {
                         createEmptyIcon(item.index)
                     }
                 }

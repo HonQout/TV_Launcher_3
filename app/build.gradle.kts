@@ -23,8 +23,8 @@ configure<ApplicationExtension> {
         applicationId = "com.github.honqout.tvlauncher3"
         minSdk = 24
         targetSdk = 37
-        versionCode = 9
-        versionName = "1.1.7"
+        versionCode = 10
+        versionName = "1.2.0"
 
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -106,7 +106,7 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.36.0"
+        artifact = "com.google.protobuf:protoc:4.36.2"
     }
 
     generateProtoTasks {

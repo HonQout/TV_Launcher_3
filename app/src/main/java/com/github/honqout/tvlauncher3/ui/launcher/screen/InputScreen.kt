@@ -1,12 +1,18 @@
 package com.github.honqout.tvlauncher3.ui.launcher.screen
 
+import android.content.Context
+import android.content.Intent
 import android.media.tv.TvContract
-import android.util.Log
-import android.view.KeyEvent
+import android.media.tv.TvInputInfo
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,173 +23,132 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.databinding.TvViewLayoutBinding
+import com.github.honqout.tvlauncher3.ui.input.activity.InputActivity
+import com.github.honqout.tvlauncher3.ui.launcher.components.button.TvInputButton
+import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.InputViewModel
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
-import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_TOP_BAR
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
-import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.InputViewModel
-import com.github.honqout.tvlauncher3.databinding.TvViewLayoutBinding
-import com.github.honqout.tvlauncher3.components.button.TvInputButton
-import kotlinx.coroutines.launch
 
 @Composable
 fun InputScreen(
     viewModel: InputViewModel = viewModel()
 ) {
-    val tag = "InputScreen"
-    val numColumns = 1
-    val coroutineScope = rememberCoroutineScope()
-    val lazyGridState = rememberLazyGridState()
+    val context = LocalContext.current
+    val lazyListState = rememberLazyListState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
     val tvInputList by viewModel.tvInputList.collectAsState()
-    val focusedItemIndex by viewModel.focusedItemIndex.collectAsState()
 
-    val centerFocusedItem = {
-        if (focusedItemIndex in tvInputList.indices) {
-            val layoutInfo = lazyGridState.layoutInfo
-            val visibleItems = layoutInfo.visibleItemsInfo
-            if (visibleItems.isNotEmpty()) {
-                val firstVisibleItem = visibleItems.first()
-                val focusedItemIndexOffset = focusedItemIndex - firstVisibleItem.index
-                if (focusedItemIndexOffset in visibleItems.indices) {
-                    val viewportCenter =
-                        (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2F
-                    val focusedItem =
-                        visibleItems[focusedItemIndexOffset]
-                    val focusedItemStartOffset = focusedItem.offset.y
-                    val focusedItemHeight = focusedItem.size.height
-                    val focusedItemCenterOffset =
-                        focusedItemStartOffset + focusedItemHeight / 2F
-                    Log.i(tag, "Focused item center offset is $focusedItemCenterOffset")
-                    val scrollOffset = focusedItemCenterOffset - viewportCenter
-                    Log.i(tag, "Prepare to scroll. Offset = 0")
-                    coroutineScope.launch {
-                        lazyGridState.animateScrollBy(scrollOffset)
-                    }
-                } else {
-                    coroutineScope.launch {
-                        lazyGridState.animateScrollToItem(
-                            focusedItemIndex
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.Transparent)
+            .padding(PADDING_SCREEN_EDGE)
     ) {
-        Column(
+        Spacer(modifier = Modifier.height(topBarHeight.dp + PADDING_TOP_BAR))
+
+        Row(
             modifier = Modifier
                 .fillMaxSize()
-                .zIndex(1f)
-                .padding(PADDING_SCREEN_EDGE)
+                .background(color = Color.Transparent),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.height((topBarHeight + 10).dp))
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            val isHovered by interactionSource.collectIsHoveredAsState()
 
-            Row(
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color.Transparent),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.2f)
+                    .background(
+                        color = OnWallpaperContainer,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .focusRestorer(),
+                state = lazyListState,
+                contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                userScrollEnabled = true
             ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(numColumns),
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.2f)
-                        .background(
-                            color = OnWallpaperContainer,
-                            shape = RoundedCornerShape(16.dp)
-                        )
-                        .focusRestorer()
-                        .onKeyEvent { keyEvent ->
-                            when (keyEvent.key) {
-                                Key.DirectionUp -> {
-                                    when (keyEvent.nativeKeyEvent.action) {
-                                        KeyEvent.ACTION_DOWN -> {
-                                            Log.i(tag, "Pressed key: DirectionUp")
-                                            false
-                                        }
-
-                                        KeyEvent.ACTION_UP -> {
-                                            Log.i(tag, "Released key: DirectionUp")
-                                            centerFocusedItem()
-                                            true
-                                        }
-
-                                        else -> false
-                                    }
-                                }
-
-                                Key.DirectionDown -> {
-                                    when (keyEvent.nativeKeyEvent.action) {
-                                        KeyEvent.ACTION_DOWN -> {
-                                            Log.i(tag, "Pressed key: DirectionDown")
-                                            false
-                                        }
-
-                                        KeyEvent.ACTION_UP -> {
-                                            Log.i(tag, "Released key: DirectionDown")
-                                            centerFocusedItem()
-                                            true
-                                        }
-
-                                        else -> false
-                                    }
-                                }
-
-                                else -> false
-                            }
-                        },
-                    state = lazyGridState,
-                    contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
-                    verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
-                    horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
-                    userScrollEnabled = true
-                ) {
-                    itemsIndexed(tvInputList) { index, item ->
-                        TvInputButton(
-                            modifier = Modifier,
-                            index = index,
-                            item = item,
-                            onShortClick = {
-                                viewModel.setFocusedItemIndex3(index)
-                            }
-                        )
-                    }
+                itemsIndexed(tvInputList) { index, item ->
+                    TvInputButton(
+                        modifier = Modifier,
+                        item = item,
+                        onShortClick = {
+                            viewModel.setSelectedItemIndex(index)
+                        }
+                    )
                 }
+            }
 
-                Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
+            OutlinedCard(
+                onClick = {
+                    viewModel.getSelectedTvInputInfo()?.let { tvInputInfo ->
+                        openInputActivity(context, tvInputInfo)
+                    } ?: run {
+                        Toast.makeText(
+                            context,
+                            R.string.select_input_first,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                modifier = Modifier
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                viewModel.getSelectedTvInputInfo()?.let { tvInputInfo ->
+                                    openInputActivity(context, tvInputInfo)
+                                }
+                            }
+                        )
+                    },
+                shape = RectangleShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.DarkGray
+                ),
+                border = BorderStroke(
+                    2.dp,
+                    if (isFocused || isHovered) Color.White else Color.Transparent
+                ),
+                interactionSource = interactionSource
+            ) {
                 AndroidViewBinding(
                     factory = TvViewLayoutBinding::inflate,
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .focusable(enabled = false),
+                    onRelease = {
+                        tvView.reset()
+                    },
                     update = {
                         val tvInputInfo = viewModel.getSelectedTvInputInfo()
                         if (tvInputInfo != null) {
@@ -197,4 +162,15 @@ fun InputScreen(
             }
         }
     }
+}
+
+private fun openInputActivity(context: Context, tvInputInfo: TvInputInfo) {
+    val intent = Intent(context, InputActivity::class.java).apply {
+        putExtra(InputActivity.EXTRA_INPUT_ID, tvInputInfo.id)
+        putExtra(
+            InputActivity.EXTRA_CHANNEL_URI,
+            TvContract.buildChannelUriForPassthroughInput(tvInputInfo.id)
+        )
+    }
+    context.startActivity(intent)
 }

@@ -9,13 +9,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
@@ -38,10 +33,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,11 +48,15 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Icon
 import androidx.tv.material3.Tab
 import androidx.tv.material3.TabDefaults
@@ -63,17 +64,19 @@ import androidx.tv.material3.TabRow
 import androidx.tv.material3.TabRowDefaults
 import androidx.tv.material3.Text
 import com.github.honqout.tvlauncher3.R
-import com.github.honqout.tvlauncher3.components.button.IconButtonTv
-import com.github.honqout.tvlauncher3.components.dialog.SettingsDialog
 import com.github.honqout.tvlauncher3.constants.NumberConstants
+import com.github.honqout.tvlauncher3.ui.launcher.components.button.IconButton
+import com.github.honqout.tvlauncher3.ui.launcher.components.controlcenter.ControlCenter
 import com.github.honqout.tvlauncher3.ui.launcher.screen.AppsScreen
 import com.github.honqout.tvlauncher3.ui.launcher.screen.HomeScreen
 import com.github.honqout.tvlauncher3.ui.launcher.screen.InputScreen
 import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.InputViewModel
 import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.TimeViewModel
-import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_MEDIUM
+import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_S
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_TOP_BAR
 import com.github.honqout.tvlauncher3.ui.theme.TVLauncher3Theme
 import com.github.honqout.tvlauncher3.ui.theme.TabContainerColorActive
 import com.github.honqout.tvlauncher3.ui.theme.TabContainerColorInactive
@@ -98,6 +101,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // Hide status bar and navigation bar
         UIUtils.handleSystemBarsVisibility(window, false)
 
@@ -128,8 +132,9 @@ class MainActivity : ComponentActivity() {
                 val configuration = LocalConfiguration.current
 
                 val tabs = launcherViewModel.tabs
-                val showSettingsDialog by launcherViewModel.showSettingsDialog.collectAsState()
-                val selectedTabIndex by launcherViewModel.selectedTabIndex.collectAsState()
+                val topBarHeight by launcherViewModel.topBarHeight.collectAsStateWithLifecycle()
+                val selectedTabIndex by launcherViewModel.selectedTabIndex.collectAsStateWithLifecycle()
+                var showControlCenter by rememberSaveable { mutableStateOf(false) }
                 val focusRequester = remember { FocusRequester() }
 
                 LaunchedEffect(Unit) {
@@ -152,7 +157,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier
                             .wrapContentHeight()
                             .fillMaxWidth()
-                            .padding(20.dp)
+                            .padding(PADDING_SCREEN_EDGE)
                             .onSizeChanged { intSize ->
                                 val heightDp = DisplayUtils.pixelToDp(baseContext, intSize.height)
                                 launcherViewModel.setTopBarHeight(heightDp)
@@ -244,7 +249,7 @@ class MainActivity : ComponentActivity() {
                                             Text(
                                                 text = stringResource(tab.second),
                                                 color = contentColor,
-                                                fontSize = FONT_SIZE_MEDIUM
+                                                fontSize = FONT_SIZE_S
                                             )
                                         }
                                     }
@@ -254,11 +259,11 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        IconButtonTv(
+                        IconButton(
                             iconRes = R.drawable.baseline_settings_24,
                             contentDescriptionRes = R.string.settings,
                             onShortClick = {
-                                launcherViewModel.setShowSettingsScreen(true)
+                                showControlCenter = true
                             }
                         )
 
@@ -297,17 +302,24 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    AnimatedVisibility(
-                        visible = showSettingsDialog,
-                        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-                        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-                    ) {
-                        SettingsDialog(
-                            launcherViewModel = launcherViewModel,
-                            timeViewModel = timeViewModel,
-                            onDismissRequest = {
-                                launcherViewModel.setShowSettingsScreen(false)
-                            }
+                    if (showControlCenter) {
+                        val horizontalSpacingPx =
+                            with(LocalDensity.current) { PADDING_SCREEN_EDGE.roundToPx() }
+                        val verticalSpacingPx =
+                            with(LocalDensity.current) { (PADDING_SCREEN_EDGE + topBarHeight.dp + PADDING_TOP_BAR).roundToPx() }
+
+                        ControlCenter(
+                            alignment = Alignment.TopEnd,
+                            offset = IntOffset(
+                                x = -horizontalSpacingPx,
+                                y = verticalSpacingPx
+                            ),
+                            onDismissRequest = { showControlCenter = false },
+                            properties = PopupProperties(
+                                focusable = true,
+                                dismissOnBackPress = true,
+                                dismissOnClickOutside = true
+                            )
                         )
                     }
                 }

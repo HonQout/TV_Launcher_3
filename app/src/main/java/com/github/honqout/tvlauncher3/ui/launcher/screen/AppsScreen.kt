@@ -1,7 +1,9 @@
 package com.github.honqout.tvlauncher3.ui.launcher.screen
 
+import android.content.Context
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -28,7 +31,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -39,18 +46,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.honqout.tvlauncher3.R
+import com.github.honqout.tvlauncher3.ui.launcher.components.button.ActivityButton
+import com.github.honqout.tvlauncher3.ui.launcher.components.dialog.AppActionDialog
 import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.LauncherViewModel
-import com.github.honqout.tvlauncher3.components.button.ActivityButtonTv
-import com.github.honqout.tvlauncher3.components.dialog.AppActionDialog
-import com.github.honqout.tvlauncher3.data.ActivityModel
 import com.github.honqout.tvlauncher3.ui.theme.ButtonContentDefault
 import com.github.honqout.tvlauncher3.ui.theme.ButtonContentFocused
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_TOP_BAR
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.utils.IntentUtils
+import com.github.honqout.tvlauncher3.utils.IntentUtils.Companion.LaunchActivityResult
 import kotlinx.coroutines.launch
 
 @Composable
@@ -63,10 +72,10 @@ fun AppsScreen(
     val lazyGridState = rememberLazyGridState()
     val numColumns = viewModel.numColumns
     val topBarHeight by viewModel.topBarHeight.collectAsState()
-    val showAppActionDialog by viewModel.showAppActionDialog.collectAsState()
+    var showAppActionDialog by rememberSaveable { mutableStateOf(false) }
     val activityModelList by viewModel.activityModelList.collectAsStateWithLifecycle()
-    val focusedItemIndex by viewModel.focusedActivityItemIndex.collectAsState()
-    val activityModel: ActivityModel? by viewModel.selectedActivityModel.collectAsState()
+    val focusedItemIndex by viewModel.focusedActivityItemIndex.collectAsStateWithLifecycle()
+    val selectedActivityModel by viewModel.selectedActivityModel.collectAsStateWithLifecycle()
 
     val centerFocusedItem = {
         if (focusedItemIndex in activityModelList.indices) {
@@ -130,7 +139,7 @@ fun AppsScreen(
                 .fillMaxSize()
                 .padding(PADDING_SCREEN_EDGE)
         ) {
-            Spacer(modifier = Modifier.height((topBarHeight + 16).dp))
+            Spacer(modifier = Modifier.height(topBarHeight.dp + PADDING_TOP_BAR))
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(numColumns),
@@ -221,53 +230,100 @@ fun AppsScreen(
                 userScrollEnabled = true
             ) {
                 itemsIndexed(activityModelList) { index, item ->
-                    ActivityButtonTv(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .onFocusChanged { focusState ->
-                                if (focusState.isFocused) {
-                                    Log.i(tag, "FocusedItemIndex: $index")
-                                    viewModel.setFocusedActivityItemIndex(index)
-                                }
-                            },
-                        activityModel = item,
-                        defaultIcon = context.packageManager.defaultActivityIcon,
-                        contentDefaultColor = ButtonContentDefault,
-                        contentFocusedColor = ButtonContentFocused,
-                        onShortClick = {
-                            IntentUtils.handleLaunchActivityResult(
-                                context,
-                                IntentUtils.launchActivity(
+                            .wrapContentSize(Alignment.Center)
+                    ) {
+                        ActivityButton(
+                            modifier = Modifier
+                                .onFocusChanged { focusState ->
+                                    if (focusState.isFocused) {
+                                        Log.i(tag, "FocusedItemIndex: $index")
+                                        viewModel.setFocusedActivityItemIndex(index)
+                                    }
+                                },
+                            activityModel = item,
+                            defaultIcon = context.packageManager.defaultActivityIcon,
+                            defaultContentColor = ButtonContentDefault,
+                            focusedContentColor = ButtonContentFocused,
+                            onShortClick = {
+                                handleLaunchActivityResult(
                                     context,
-                                    item.packageName,
-                                    item.activityName,
-                                    true
+                                    IntentUtils.launchActivity(
+                                        context,
+                                        item.packageName,
+                                        item.activityName,
+                                        true
+                                    )
                                 )
-                            )
-                        },
-                        onLongClick = {
-                            viewModel.setSelectedActivityModel(item)
-                            viewModel.setShowAppActionScreen(true)
-                        }
-                    )
+                            },
+                            onLongClick = {
+                                viewModel.setSelectedActivityModel(item)
+                                showAppActionDialog = true
+                            }
+                        )
+                    }
                 }
             }
         }
 
         AnimatedVisibility(
-            visible = showAppActionDialog && activityModel != null,
+            visible = showAppActionDialog,
             enter = scaleIn(
                 initialScale = 0.8f,
                 animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy)
             ) + fadeIn(),
             exit = scaleOut(targetScale = 0.8f) + fadeOut()
         ) {
-            AppActionDialog(
-                item = activityModel!!,
-                onDismissRequest = {
-                    viewModel.setShowAppActionScreen(false)
-                },
-            )
+            selectedActivityModel?.let { item ->
+                AppActionDialog(
+                    item = item,
+                    onDismiss = {
+                        showAppActionDialog = false
+                        viewModel.setSelectedActivityModel(null)
+                    },
+                )
+            }
+        }
+    }
+}
+
+fun handleLaunchActivityResult(
+    context: Context,
+    result: LaunchActivityResult,
+    onSuccess: () -> Unit = {},
+    onFail: () -> Unit = {}
+) {
+    when (result) {
+        LaunchActivityResult.SUCCESS -> {
+            onSuccess()
+        }
+
+        LaunchActivityResult.NOT_EXPORTED -> {
+            Toast.makeText(
+                context,
+                R.string.cannot_access_unexported_activity,
+                Toast.LENGTH_SHORT
+            ).show()
+            onFail()
+        }
+
+        LaunchActivityResult.REQUIRE_EXTRA_PERMISSION -> {
+            Toast.makeText(
+                context,
+                R.string.activity_requires_extra_permission,
+                Toast.LENGTH_SHORT
+            ).show()
+            onFail()
+        }
+
+        LaunchActivityResult.NOT_FOUND -> {
+            Toast.makeText(
+                context,
+                R.string.cannot_find_activity,
+                Toast.LENGTH_SHORT
+            ).show()
+            onFail()
         }
     }
 }

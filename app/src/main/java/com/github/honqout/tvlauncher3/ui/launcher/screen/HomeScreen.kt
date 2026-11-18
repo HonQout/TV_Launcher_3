@@ -1,10 +1,10 @@
 package com.github.honqout.tvlauncher3.ui.launcher.screen
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,22 +22,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.LauncherViewModel
-import com.github.honqout.tvlauncher3.components.button.AppShortcutButtonTv
-import com.github.honqout.tvlauncher3.components.dialog.AppListDialog
+import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.datastore.repository.IconRepository
+import com.github.honqout.tvlauncher3.ui.launcher.components.button.AppShortcutButton
+import com.github.honqout.tvlauncher3.ui.launcher.components.dialog.AppListDialog
+import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.utils.IntentUtils
+import com.github.honqout.tvlauncher3.utils.IntentUtils.Companion.LaunchActivityResult
 
 @Composable
 fun HomeScreen(
@@ -46,7 +52,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
     val topBarHeight by viewModel.topBarHeight.collectAsState()
-    val showAppListDialog by viewModel.showAppListDialog.collectAsState()
+    var showAppListDialog by rememberSaveable { mutableStateOf(false) }
     val fixedIconList by viewModel.fixedIconList.collectAsState()
 
     Box(
@@ -76,37 +82,63 @@ fun HomeScreen(
                             viewModel.setFocusedFixedIconIndex(-1)
                         }
                     }
-                    .focusable(false),
+                    .focusRestorer(),
                 state = lazyGridState,
                 contentPadding = PaddingValues(PADDING_LIST_CONTENT_EDGE),
-                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
                 horizontalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_HORIZONTAL),
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
                 userScrollEnabled = true
             ) {
                 itemsIndexed(
                     items = fixedIconList,
                     key = { index, item -> "key_${index}_${item?.packageName ?: "null"}_${item?.activityName ?: "null"}" }
                 ) { index, item ->
-                    AppShortcutButtonTv(
+                    AppShortcutButton(
                         activityModel = item,
                         onFocused = {
                             viewModel.setFocusedFixedIconIndex(index)
                         },
                         onAddItem = {
                             viewModel.setFocusedFixedIconIndex(index)
-                            viewModel.setShowAppListScreen(true)
+                            showAppListDialog = true
                         },
                         onStartApp = {
-                            if (item != null) {
-                                IntentUtils.handleLaunchActivityResult(
+                            item?.let { item ->
+                                val result = IntentUtils.launchActivity(
                                     context,
-                                    IntentUtils.launchActivity(
-                                        context,
-                                        item.packageName,
-                                        item.activityName,
-                                        true
-                                    )
+                                    item.packageName,
+                                    item.activityName,
+                                    true
                                 )
+                                when (result) {
+                                    LaunchActivityResult.SUCCESS -> {
+
+                                    }
+
+                                    LaunchActivityResult.NOT_FOUND -> {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.cannot_find_activity,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    LaunchActivityResult.NOT_EXPORTED -> {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.cannot_access_unexported_activity,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    LaunchActivityResult.REQUIRE_EXTRA_PERMISSION -> {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.activity_requires_extra_permission,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
                             }
                         },
                         onRemoveItem = {
@@ -117,7 +149,7 @@ fun HomeScreen(
                         },
                         onReplaceItem = {
                             viewModel.setFocusedFixedIconIndex(index)
-                            viewModel.setShowAppListScreen(true)
+                            showAppListDialog = true
                         }
                     )
                 }
@@ -138,7 +170,7 @@ fun HomeScreen(
                     )
                 },
                 onDismissRequest = {
-                    viewModel.setShowAppListScreen(false)
+                    showAppListDialog = false
                 }
             )
         }

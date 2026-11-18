@@ -1,5 +1,6 @@
 package com.github.honqout.tvlauncher3.utils
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -19,6 +20,9 @@ class DrawableUtils {
     companion object {
         private const val TAG: String = "DrawableUtils"
 
+        /**
+         * Convert a drawable to bitmap.
+         */
         fun toBitmap(drawable: Drawable): Bitmap {
             return when (drawable) {
                 is BitmapDrawable -> drawable.bitmap
@@ -29,86 +33,123 @@ class DrawableUtils {
                     val canvas = Canvas(bitmap)
                     drawable.setBounds(0, 0, width, height)
                     drawable.draw(canvas)
-                    return bitmap
+                    bitmap
                 }
             }
         }
 
-        fun getIconForeground(drawable: Drawable): Drawable {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
-                return drawable.foreground
-            }
-            return drawable
-        }
-
+        /**
+         * Get dominant color of a drawable.
+         */
         @ColorInt
-        fun getDominantColor(drawable: Drawable, defaultColor: Int = Color.TRANSPARENT): Int {
+        fun getDominantColor(
+            drawable: Drawable,
+            defaultColor: Int = Color.TRANSPARENT
+        ): Int {
             val bitmap = toBitmap(drawable)
+            if (bitmap.width == 0 || bitmap.height == 0) {
+                return defaultColor
+            }
             val palette = Palette.from(bitmap).generate()
             return palette.getDominantColor(defaultColor)
         }
 
-        fun getBackgroundColorFromAppIcon(
+        /**
+         * Get dominant color of an application icon.
+         * @return The dominant color of the given `drawable`, or [Color.TRANSPARENT] if the
+         * drawable does not contain any color.
+         */
+        @ColorInt
+        fun getDominantColorOfAppIcon(
             drawable: Drawable,
             defaultColor: Int = Color.TRANSPARENT
         ): Int {
-            val backgroundColor = when (drawable) {
-                is LayerDrawable -> {
-                    getBackgroundColorFromLayerDrawable(drawable)
-                }
-
+            val dominantColor = when (drawable) {
                 is ColorDrawable -> {
                     drawable.color
                 }
 
                 is GradientDrawable -> {
-                    getColorFromGradientDrawable(drawable)
+                    getDominantColorOfGradientDrawable(drawable)
+                }
+
+                is LayerDrawable -> {
+                    getDominantColorOfLayerDrawable(drawable)
                 }
 
                 else -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
-                        getBackgroundColorFromAdaptiveIcon(drawable)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                        && drawable is AdaptiveIconDrawable
+                    ) {
+                        getDominantColorOfAdaptiveIcon(drawable)
                     } else {
-                        getDominantColor(drawable, defaultColor)
+                        null
                     }
                 }
             }
-            return if (backgroundColor == null || backgroundColor == Color.TRANSPARENT) {
-                getDominantColor(drawable, defaultColor)
+            return if (dominantColor != null && dominantColor != Color.TRANSPARENT) {
+                dominantColor
             } else {
-                backgroundColor
+                getDominantColor(drawable, defaultColor)
             }
         }
 
-        private fun getBackgroundColorFromLayerDrawable(layerDrawable: LayerDrawable): Int? {
+        /**
+         * Get dominant color of a gradient drawable.
+         * @return The dominant color of the given `gradientDrawable`, or [Color.TRANSPARENT] if
+         * the drawable does not contain any color.
+         */
+        @SuppressLint("ObsoleteSdkInt")
+        @ColorInt
+        private fun getDominantColorOfGradientDrawable(gradientDrawable: GradientDrawable): Int {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val color = gradientDrawable.color
+                if (color != null) {
+                    return color.getColorForState(
+                        gradientDrawable.state,
+                        color.defaultColor
+                    )
+                }
+            }
+
+            val colors = gradientDrawable.colors
+            if (colors != null && colors.isNotEmpty()) {
+                return colors[0]
+            }
+
+            return Color.TRANSPARENT
+        }
+
+        /**
+         * Get dominant color of a layer drawable.
+         * @return The dominant color of the given `layerDrawable`, or [Color.TRANSPARENT] if the
+         * drawable does not contain any color.
+         */
+        private fun getDominantColorOfLayerDrawable(layerDrawable: LayerDrawable): Int {
             for (i in 0 until layerDrawable.numberOfLayers) {
                 val color = when (val drawable = layerDrawable.getDrawable(i)) {
                     is ColorDrawable -> drawable.color
-                    is GradientDrawable -> getColorFromGradientDrawable(drawable)
-                    else -> null
+                    is GradientDrawable -> getDominantColorOfGradientDrawable(drawable)
+                    else -> Color.TRANSPARENT
                 }
-                if (color != null) {
+                if (color != Color.TRANSPARENT) {
                     return color
                 }
             }
-            return null
+            return Color.TRANSPARENT
         }
 
-        private fun getColorFromGradientDrawable(gradientDrawable: GradientDrawable): Int? {
-            val colors = gradientDrawable.colors
-            return if (colors != null && colors.size == 1) {
-                colors[0]
-            } else {
-                gradientDrawable.color?.defaultColor
-            }
-        }
-
+        /**
+         * Get dominant color of an adaptive icon.
+         * @return The dominant color of the given `icon`, or `null` if the icon does not contain
+         * any color.
+         */
         @RequiresApi(Build.VERSION_CODES.O)
-        private fun getBackgroundColorFromAdaptiveIcon(icon: AdaptiveIconDrawable): Int? {
+        private fun getDominantColorOfAdaptiveIcon(icon: AdaptiveIconDrawable): Int? {
             return when (val background = icon.background) {
                 is ColorDrawable -> background.color
-                is GradientDrawable -> getColorFromGradientDrawable(background)
-                else -> getDominantColor(background)
+                is GradientDrawable -> getDominantColorOfGradientDrawable(background)
+                else -> null
             }
         }
     }

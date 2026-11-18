@@ -7,97 +7,42 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.core.net.toUri
-import com.github.honqout.tvlauncher3.R
 
 class IntentUtils {
     companion object {
         private const val TAG: String = "IntentUtils"
 
         enum class LaunchIntentResult {
-            SUCCESS, URI_IS_EMPTY, NO_MATCHING_ACTIVITY
+            SUCCESS,
+            URI_IS_EMPTY,
+            NO_MATCHING_ACTIVITY,
+            REQUIRE_EXTRA_PERMISSION
         }
 
         enum class LaunchActivityResult {
-            SUCCESS, NOT_EXPORTED, REQUIRE_PERMISSION, NOT_FOUND
+            SUCCESS,
+            NOT_FOUND,
+            NOT_EXPORTED,
+            REQUIRE_EXTRA_PERMISSION
         }
 
-        fun handleLaunchIntentResult(
-            context: Context,
-            result: LaunchIntentResult,
-            onSuccess: () -> Unit = {},
-            onFail: () -> Unit = {}
-        ) {
-            when (result) {
-                LaunchIntentResult.SUCCESS -> {
-                    onSuccess()
-                }
-
-                LaunchIntentResult.URI_IS_EMPTY -> {
-                    Toast.makeText(
-                        context,
-                        R.string.uri_is_empty,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-
-                LaunchIntentResult.NO_MATCHING_ACTIVITY -> {
-                    Toast.makeText(
-                        context,
-                        R.string.no_matching_activity,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-            }
-        }
-
-        fun handleLaunchActivityResult(
-            context: Context,
-            result: LaunchActivityResult,
-            onSuccess: () -> Unit = {},
-            onFail: () -> Unit = {}
-        ) {
-            when (result) {
-                LaunchActivityResult.SUCCESS -> {
-                    onSuccess()
-                }
-
-                LaunchActivityResult.NOT_EXPORTED -> {
-                    Toast.makeText(
-                        context,
-                        R.string.cannot_access_unexported_activity,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-
-                LaunchActivityResult.REQUIRE_PERMISSION -> {
-                    Toast.makeText(
-                        context,
-                        R.string.activity_requires_extra_permission,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-
-                LaunchActivityResult.NOT_FOUND -> {
-                    Toast.makeText(
-                        context,
-                        R.string.cannot_find_activity,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onFail()
-                }
-            }
+        interface OnRequestUninstallApp {
+            fun uninstallThisApp()
+            fun uninstallSystemApp(packageName: String)
+            fun uninstallUpdatedSystemApp(packageName: String)
+            fun uninstallUserApp(packageName: String)
+            fun onError(packageName: String)
         }
 
         /**
          * Launch an action which is defined by system.
          */
-        fun launchAction(context: Context, action: String, newTask: Boolean): LaunchIntentResult {
+        fun launchAction(
+            context: Context,
+            action: String,
+            newTask: Boolean
+        ): LaunchIntentResult {
             if (action.isEmpty()) {
                 Log.e(TAG, "Cannot launch intent because the given action is empty.")
                 return LaunchIntentResult.URI_IS_EMPTY
@@ -119,7 +64,10 @@ class IntentUtils {
         /**
          * Launch the specified activity.
          */
-        fun launchActivity(context: Context, intent: Intent): LaunchActivityResult {
+        fun launchActivity(
+            context: Context,
+            intent: Intent
+        ): LaunchActivityResult {
             val activityInfo = intent.resolveActivityInfo(
                 context.packageManager,
                 PackageManager.MATCH_DEFAULT_ONLY
@@ -130,7 +78,7 @@ class IntentUtils {
                     return LaunchActivityResult.NOT_EXPORTED
                 } else if (!activityInfo.permission.isNullOrEmpty()) {
                     Log.e(TAG, "Activity is not exported or needs extra permission to start.")
-                    return LaunchActivityResult.REQUIRE_PERMISSION
+                    return LaunchActivityResult.REQUIRE_EXTRA_PERMISSION
                 } else {
                     try {
                         context.startActivity(intent)
@@ -195,9 +143,12 @@ class IntentUtils {
         /**
          * Request to uninstall an application.
          */
-        fun requestUninstallApp(context: Context, packageName: String): LaunchIntentResult {
+        fun requestUninstallApp(
+            context: Context,
+            packageName: String
+        ): LaunchIntentResult {
             if (packageName.isEmpty()) {
-                Log.e(TAG, "Cannot uninstall app because the given packageName is empty.")
+                Log.e(TAG, "Cannot uninstall app. The given packageName is empty.")
                 return LaunchIntentResult.URI_IS_EMPTY
             }
             val intent = Intent(Intent.ACTION_DELETE).apply {
@@ -208,7 +159,7 @@ class IntentUtils {
                 context.startActivity(intent)
                 return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Cannot uninstall app because no activity can handle it.", e)
+                Log.e(TAG, "Failed to uninstall app. No activity can handle it.", e)
                 return LaunchIntentResult.NO_MATCHING_ACTIVITY
             }
         }
@@ -223,7 +174,7 @@ class IntentUtils {
             if (packageName.isEmpty()) {
                 Log.e(
                     TAG,
-                    "Cannot launch Settings because the given packageName is null or empty."
+                    "Cannot launch Settings. The given packageName is empty."
                 )
                 return LaunchIntentResult.URI_IS_EMPTY
             }
@@ -235,21 +186,31 @@ class IntentUtils {
                 context.startActivity(intent)
                 return LaunchIntentResult.SUCCESS
             } catch (e: ActivityNotFoundException) {
-                Log.e(TAG, "Cannot launch Settings because requested package cannot be found.", e)
+                Log.e(
+                    TAG,
+                    "Failed to launch Settings. Requested package cannot be found.",
+                    e
+                )
                 return LaunchIntentResult.NO_MATCHING_ACTIVITY
             }
         }
 
-        fun openAppInMarket(context: Context, packageName: String): LaunchIntentResult {
+        fun openAppInMarket(
+            context: Context,
+            packageName: String,
+            flags: Int
+        ): LaunchIntentResult {
             if (packageName.isEmpty()) {
                 Log.e(
                     TAG,
-                    "Cannot open detail page of this app in app market because the given packageName is null or empty."
+                    "Cannot open detail page of this app in app market. " +
+                            "The given packageName is empty."
                 )
                 return LaunchIntentResult.URI_IS_EMPTY
             }
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setData(("market://details?id=$packageName").toUri())
+                setFlags(flags)
             }
             try {
                 context.startActivity(intent)
@@ -257,7 +218,37 @@ class IntentUtils {
             } catch (e: ActivityNotFoundException) {
                 Log.e(
                     TAG,
-                    "Cannot open detail page of this app in app market because no activity can open this uri.",
+                    "Failed to open detail page of this app in app market. " +
+                            "No activity can open this uri.",
+                    e
+                )
+                return LaunchIntentResult.NO_MATCHING_ACTIVITY
+            }
+        }
+
+        fun openWebsite(
+            context: Context,
+            address: String,
+            flags: Int
+        ): LaunchIntentResult {
+            if (address.isEmpty()) {
+                Log.e(
+                    TAG,
+                    "Cannot open website. The given address is empty."
+                )
+                return LaunchIntentResult.URI_IS_EMPTY
+            }
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setData(address.toUri())
+                setFlags(flags)
+            }
+            try {
+                context.startActivity(intent)
+                return LaunchIntentResult.SUCCESS
+            } catch (e: ActivityNotFoundException) {
+                Log.e(
+                    TAG,
+                    "Cannot open website. No activity can open this uri.",
                     e
                 )
                 return LaunchIntentResult.NO_MATCHING_ACTIVITY

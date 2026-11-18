@@ -13,8 +13,8 @@ class ColorUtils {
         private const val TAG: String = "ColorUtils"
 
         /**
-         * Get the color of pixel (x,y) of Bitmap bitmap.
-         * @return A ColorInt if (x,y) exists in Bitmap bitmap, -1 otherwise.
+         * Get the color of pixel (x,y) of bitmap.
+         * @return A ColorInt if (x,y) exists in bitmap, -1 otherwise.
          */
         fun getColor(bitmap: Bitmap, x: Float, y: Float): Int {
             try {

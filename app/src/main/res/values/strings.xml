@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">TV Launcher 3</string>
 
+    <!-- Basic -->
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+
     <!-- Title -->
     <string name="home">Home</string>
     <string name="apps">Apps</string>
@@ -23,28 +27,38 @@
     <string name="signal_source">Signal source</string>
 
     <!-- Settings item -->
-    <string name="tv_settings">TV settings</string>
-    <string name="wlan">WLAN</string>
-    <string name="bluetooth">Bluetooth</string>
-    <string name="internet">Internet</string>
-    <string name="accessory">Accessory</string>
-    <string name="sound">Sound</string>
-    <string name="display">Display</string>
+    <string name="launcher_settings">Launcher Settings</string>
+    <string name="network_and_internet">Network and Internet</string>
+    <string name="display_and_sound">Display and Sound</string>
+    <string name="accessibility">Accessibility</string>
     <string name="screen_saver">Screen saver</string>
+
+    <!-- Preference header -->
+    <string name="header_system">System</string>
+    <string name="header_about">About</string>
+
+    <!-- Preference item -->
+    <string name="default_app">Default app</string>
+    <string name="version">Version</string>
+    <string name="visit_github_page">Visit GitHub page</string>
+    <string name="visit_github_page_summary">Get source code and the latest release version</string>
+    <string name="github_address" translatable="false">https://github.com/HonQout/TV_Launcher_3</string>
 
     <!-- Hint -->
     <string name="activity_belongs_to">\"%s\" belongs to the following app:</string>
-    <string name="cannot_find_package">Cannot find package.</string>
     <string name="cannot_find_activity">Cannot find activity.</string>
     <string name="cannot_access_unexported_activity">Cannot access unexported activity.</string>
     <string name="activity_requires_extra_permission">This activity requires extra permission to be started.</string>
-    <string name="cannot_launch_app">Cannot launch app.</string>
     <string name="cannot_uninstall_unknown_type">Cannot uninstall an app whose type is unknown.</string>
     <string name="cannot_uninstall_system_app">Cannot uninstall system app.</string>
-    <string name="uninstall_request_failed">Failed to request uninstallation.</string>
-    <string name="cannot_launch_settings">Cannot launch settings.</string>
     <string name="uri_is_empty">Uri is empty.</string>
-    <string name="no_app_market_installed">No app market installed.</string>
     <string name="no_matching_activity">No matching activity.</string>
+    <string name="no_app_market_installed">No app market installed.</string>
+    <string name="select_input_first">Please select an input first.</string>
+    <string name="cannot_display_input_screen">Cannot display screen from input.</string>
+
+    <!-- Others -->
+    <string name="visit_github_page_message">Visit GitHub page of this project, where you can get source code and the latest release version of this app.</string>
+    <string name="visit">Visit</string>
 
 </resources>

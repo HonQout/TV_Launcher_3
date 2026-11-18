@@ -4,22 +4,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // Font size
-val FONT_SIZE_EXTRA_SMALL = 12.sp
-val FONT_SIZE_SMALL = 14.sp
-val FONT_SIZE_MEDIUM = 16.sp
-val FONT_SIZE_LARGE = 18.sp
-val FONT_SIZE_EXTRA_LARGE = 20.sp
+val FONT_SIZE_XS = 14.sp
+val FONT_SIZE_S = 16.sp
+val FONT_SIZE_M = 18.sp
+val FONT_SIZE_L = 20.sp
+val FONT_SIZE_XL = 22.sp
+val FONT_SIZE_2XL = 24.sp
+val FONT_SIZE_3XL = 26.sp
 
 // Space
 val SPACE_MEDIUM = 10.sp
 val SPACE_EXTRA_LARGE = 20.dp
 val SPACE_LIST_CONTENT_HORIZONTAL = 20.dp
 val SPACE_LIST_CONTENT_VERTICAL = 20.dp
+val SPACE_ICON_TEXT_BUTTON = 8.dp
 
 // Padding
 val PADDING_DIALOG_EDGE = 20.dp
 val PADDING_LIST_CONTENT_EDGE = 20.dp
 val PADDING_SCREEN_EDGE = 20.dp
+val PADDING_TOP_BAR = 16.dp
 
 // Others
 val SETTINGS_ACTION_BUTTON_WIDTH = 180.dp

@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.media.tv.TvInputInfo
+import android.media.tv.TvInputManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.honqout.tvlauncher3.data.repository.InputRepository
 import com.github.honqout.tvlauncher3.utils.TvUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -18,8 +20,8 @@ import kotlinx.coroutines.launch
 class InputViewModel(application: Application) : AndroidViewModel(application) {
     // UI-related
     private var oldConfig: Configuration? = null
-    private val _focusedItemIndex = MutableStateFlow<Int>(0)
-    val focusedItemIndex: StateFlow<Int> = _focusedItemIndex.asStateFlow()
+    private val _selectedItemIndex = MutableStateFlow<Int>(0)
+    val selectedItemIndex: StateFlow<Int> = _selectedItemIndex.asStateFlow()
 
     // data-related
     private val _topBarHeight = MutableStateFlow<Int>(0)
@@ -27,17 +29,52 @@ class InputViewModel(application: Application) : AndroidViewModel(application) {
     private val _tvInputList = MutableStateFlow<List<TvInputInfo>>(emptyList())
     val tvInputList: StateFlow<List<TvInputInfo>> = _tvInputList.asStateFlow()
 
+    // repository
+    private var inputRepository: InputRepository
+
     companion object {
         const val TAG: String = "InputViewModel"
+
+        enum class InputListOp {
+            INIT,
+            ADD,
+            REMOVE,
+            UPDATE
+        }
     }
 
     init {
+        inputRepository = InputRepository(
+            context = getApplication(),
+            callback = object : TvInputManager.TvInputCallback() {
+                override fun onInputAdded(inputId: String?) {
+                    loadTvInputList()
+                }
+
+                override fun onInputRemoved(inputId: String?) {
+                    loadTvInputList()
+                }
+
+                override fun onInputStateChanged(inputId: String?, state: Int) {
+                    loadTvInputList()
+                }
+
+                override fun onInputUpdated(inputId: String?) {
+                    loadTvInputList()
+                }
+
+                override fun onTvInputInfoUpdated(inputInfo: TvInputInfo?) {
+                    loadTvInputList()
+                }
+            }
+        )
+        inputRepository.register()
         loadTvInputList()
     }
 
     override fun onCleared() {
         viewModelScope.cancel()
-        super.onCleared()
+        inputRepository.unregister()
     }
 
     fun loadTvInputList() {
@@ -62,15 +99,15 @@ class InputViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setFocusedItemIndex3(newValue: Int) {
-        _focusedItemIndex.update {
+    fun setSelectedItemIndex(newValue: Int) {
+        _selectedItemIndex.update {
             newValue
         }
     }
 
     fun getSelectedTvInputInfo(): TvInputInfo? {
-        return if (_focusedItemIndex.value >= 0 && _focusedItemIndex.value < _tvInputList.value.size) {
-            _tvInputList.value[_focusedItemIndex.value]
+        return if (_selectedItemIndex.value >= 0 && _selectedItemIndex.value < _tvInputList.value.size) {
+            _tvInputList.value[_selectedItemIndex.value]
         } else {
             null
         }
