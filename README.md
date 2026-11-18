@@ -15,7 +15,9 @@ TV Launcher 3 is a launcher application designed for Android TV, programmed by u
 
 ### System requirements
 Recommended Version: Android 11 (API 30) or above
+
 Minimum version: Android 7.0 (API 24) or above
+
 Supported CPU architecture: armeabi-v7a, arm64-v8a, x86, x86_64
 
 ### Installation guide
