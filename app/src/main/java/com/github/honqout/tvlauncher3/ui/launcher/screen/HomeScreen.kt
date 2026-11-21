@@ -25,21 +25,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.datastore.repository.IconRepository
 import com.github.honqout.tvlauncher3.ui.launcher.components.button.AppShortcutButton
 import com.github.honqout.tvlauncher3.ui.launcher.components.dialog.AppListDialog
+import com.github.honqout.tvlauncher3.ui.launcher.components.text.DateAndWeekdayText
+import com.github.honqout.tvlauncher3.ui.launcher.components.text.TimeText
 import com.github.honqout.tvlauncher3.ui.launcher.viewmodel.LauncherViewModel
 import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_LIST_CONTENT_EDGE
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_SCREEN_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.PADDING_TOP_BAR
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_HORIZONTAL
 import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.utils.IntentUtils
@@ -47,7 +53,7 @@ import com.github.honqout.tvlauncher3.utils.IntentUtils.Companion.LaunchActivity
 
 @Composable
 fun HomeScreen(
-    viewModel: LauncherViewModel = hiltViewModel()
+    viewModel: LauncherViewModel = hiltViewModel(LocalContext.current as ViewModelStoreOwner)
 ) {
     val context = LocalContext.current
     val lazyGridState = rememberLazyGridState()
@@ -63,9 +69,25 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(PADDING_SCREEN_EDGE)
+                .padding(PADDING_SCREEN_EDGE),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(topBarHeight.dp))
+            Spacer(modifier = Modifier.height(topBarHeight.dp + PADDING_TOP_BAR))
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            DateAndWeekdayText(
+                color = Color.White,
+                fontSize = 30.sp
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            TimeText(
+                color = Color.White,
+                fontSize = 80.sp
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 

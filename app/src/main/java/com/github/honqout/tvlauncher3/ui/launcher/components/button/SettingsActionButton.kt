@@ -1,7 +1,6 @@
 package com.github.honqout.tvlauncher3.ui.launcher.components.button
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
@@ -52,10 +50,10 @@ fun SettingsIconFromResource(
 @Composable
 private fun SettingsActionButtonImpl(
     modifier: Modifier = Modifier,
-    @DrawableRes iconRes: Int,
-    contentDescription: String?,
     title: String,
     description: String?,
+    @DrawableRes iconRes: Int,
+    contentDescription: String? = title,
     onShortClick: () -> Unit = {}
 ) {
     Button(
@@ -125,37 +123,18 @@ private fun SettingsActionButtonImpl(
 @Composable
 fun SettingsActionButton(
     modifier: Modifier = Modifier,
-    @DrawableRes iconRes: Int,
-    contentDescription: String? = null,
     title: String,
     description: String? = null,
+    @DrawableRes iconRes: Int,
+    contentDescription: String? = title,
     onShortClick: () -> Unit = {}
 ) {
     SettingsActionButtonImpl(
         modifier = modifier,
-        iconRes = iconRes,
-        contentDescription = contentDescription,
         title = title,
         description = description,
-        onShortClick = onShortClick
-    )
-}
-
-@Composable
-fun SettingsActionButton(
-    modifier: Modifier = Modifier,
-    @DrawableRes iconRes: Int,
-    @StringRes contentDescriptionRes: Int? = null,
-    @StringRes titleRes: Int,
-    @StringRes descriptionRes: Int? = null,
-    onShortClick: () -> Unit = {}
-) {
-    SettingsActionButtonImpl(
-        modifier = modifier,
         iconRes = iconRes,
-        contentDescription = if (contentDescriptionRes != null) stringResource(contentDescriptionRes) else null,
-        title = stringResource(titleRes),
-        description = if (descriptionRes != null) stringResource(descriptionRes) else null,
+        contentDescription = contentDescription,
         onShortClick = onShortClick
     )
 }

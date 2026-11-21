@@ -45,6 +45,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.honqout.tvlauncher3.R
 import com.github.honqout.tvlauncher3.ui.launcher.components.button.ActivityButton
@@ -64,7 +65,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AppsScreen(
-    viewModel: LauncherViewModel = hiltViewModel()
+    viewModel: LauncherViewModel = hiltViewModel(LocalContext.current as ViewModelStoreOwner)
 ) {
     val tag = "AppsScreen"
     val context = LocalContext.current

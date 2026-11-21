@@ -17,18 +17,22 @@ kotlin {
 
 configure<ApplicationExtension> {
     namespace = "com.github.honqout.tvlauncher3"
-    compileSdk = 37
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
         applicationId = "com.github.honqout.tvlauncher3"
         minSdk = 24
         targetSdk = 37
-        versionCode = 10
-        versionName = "1.2.0"
+        versionCode = 11
+        versionName = "1.2.1"
 
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {

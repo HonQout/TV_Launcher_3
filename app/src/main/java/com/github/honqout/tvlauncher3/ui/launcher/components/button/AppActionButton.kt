@@ -2,7 +2,6 @@ package com.github.honqout.tvlauncher3.ui.launcher.components.button
 
 import android.view.KeyEvent
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -23,7 +22,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,9 +35,9 @@ import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_M
 @Composable
 fun AppActionButton(
     modifier: Modifier = Modifier,
+    title: String,
     @DrawableRes iconRes: Int,
-    @StringRes labelRes: Int,
-    @StringRes contentDescriptionRes: Int = labelRes,
+    contentDescription: String = title,
     onShortClick: () -> Unit = {}
 ) {
     Button(
@@ -102,7 +100,7 @@ fun AppActionButton(
         ) {
             Icon(
                 painter = painterResource(iconRes),
-                contentDescription = stringResource(contentDescriptionRes),
+                contentDescription = contentDescription,
                 modifier = Modifier
                     .size(40.dp)
                     .graphicsLayer { cameraDistance = 12f }
@@ -111,7 +109,7 @@ fun AppActionButton(
             Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
 
             Text(
-                text = stringResource(labelRes),
+                text = title,
                 modifier = Modifier,
                 fontSize = FONT_SIZE_M,
                 fontWeight = FontWeight.Bold,

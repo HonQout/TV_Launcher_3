@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
@@ -80,9 +81,8 @@ fun ControlCenter(
             ) {
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.settings),
                         iconRes = R.drawable.baseline_settings_24,
-                        contentDescriptionRes = R.string.settings,
-                        titleRes = R.string.settings,
                         onShortClick = {
                             IntentUtils.launchAction(
                                 context,
@@ -95,9 +95,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.launcher_settings),
                         iconRes = R.drawable.baseline_settings_24,
-                        contentDescriptionRes = R.string.launcher_settings,
-                        titleRes = R.string.launcher_settings,
                         onShortClick = {
                             val intent = Intent(
                                 context.applicationContext,
@@ -119,9 +118,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.network_and_internet),
                         iconRes = R.drawable.baseline_web_24,
-                        contentDescriptionRes = R.string.network_and_internet,
-                        titleRes = R.string.network_and_internet,
                         onShortClick = {
                             IntentUtils.launchAction(
                                 context,
@@ -134,9 +132,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.display_and_sound),
                         iconRes = R.drawable.baseline_tv_24,
-                        contentDescriptionRes = R.string.display_and_sound,
-                        titleRes = R.string.display_and_sound,
                         onShortClick = {
                             IntentUtils.launchAction(
                                 context,
@@ -149,9 +146,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.apps),
                         iconRes = R.drawable.baseline_apps_24,
-                        contentDescriptionRes = R.string.apps,
-                        titleRes = R.string.apps,
                         onShortClick = {
                             IntentUtils.launchAction(
                                 context,
@@ -164,9 +160,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.accessibility),
                         iconRes = R.drawable.baseline_accessibility_new_24,
-                        contentDescriptionRes = R.string.accessibility,
-                        titleRes = R.string.accessibility,
                         onShortClick = {
                             IntentUtils.launchAction(
                                 context,
@@ -179,9 +174,8 @@ fun ControlCenter(
 
                 item {
                     SettingsActionButton(
+                        title = stringResource(R.string.screen_saver),
                         iconRes = R.drawable.baseline_settings_system_daydream_24,
-                        contentDescriptionRes = R.string.screen_saver,
-                        titleRes = R.string.screen_saver,
                         onShortClick = {
                             IntentUtils.launchActivity(
                                 context,

@@ -261,7 +261,7 @@ class MainActivity : ComponentActivity() {
 
                         IconButton(
                             iconRes = R.drawable.baseline_settings_24,
-                            contentDescriptionRes = R.string.settings,
+                            contentDescription = stringResource(R.string.settings),
                             onShortClick = {
                                 showControlCenter = true
                             }

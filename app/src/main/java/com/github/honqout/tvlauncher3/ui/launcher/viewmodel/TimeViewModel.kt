@@ -7,11 +7,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-class TimeViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class TimeViewModel @Inject constructor(application: Application) : AndroidViewModel(application) {
     // data
     private val _currentTime = MutableStateFlow<Long>(System.currentTimeMillis())
     val currentTime: StateFlow<Long> = _currentTime.asStateFlow()

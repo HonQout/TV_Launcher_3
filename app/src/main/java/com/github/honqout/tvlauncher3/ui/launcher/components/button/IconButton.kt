@@ -1,7 +1,6 @@
 package com.github.honqout.tvlauncher3.ui.launcher.components.button
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
@@ -15,7 +14,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
@@ -28,9 +26,9 @@ import com.github.honqout.tvlauncher3.ui.theme.OnWallpaperContainer
 @Composable
 fun IconButton(
     modifier: Modifier = Modifier,
-    focusRequester: FocusRequester = remember { FocusRequester() },
     @DrawableRes iconRes: Int,
-    @StringRes contentDescriptionRes: Int,
+    contentDescription: String? = null,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     onShortClick: () -> Unit = {}
 ) {
     Button(
@@ -58,7 +56,7 @@ fun IconButton(
     ) {
         Icon(
             painter = painterResource(iconRes),
-            contentDescription = stringResource(contentDescriptionRes),
+            contentDescription = contentDescription,
             modifier = Modifier
                 .size(size = 20.dp)
         )

@@ -49,6 +49,7 @@ import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_M
 import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_S
 import com.github.honqout.tvlauncher3.ui.theme.FONT_SIZE_XL
 import com.github.honqout.tvlauncher3.ui.theme.PADDING_DIALOG_EDGE
+import com.github.honqout.tvlauncher3.ui.theme.SPACE_LIST_CONTENT_VERTICAL
 import com.github.honqout.tvlauncher3.utils.ApplicationUtils
 import com.github.honqout.tvlauncher3.utils.IntentUtils
 import com.github.honqout.tvlauncher3.utils.IntentUtils.Companion.LaunchActivityResult
@@ -173,16 +174,15 @@ fun AppActionDialog(
 
             Column(
                 modifier = Modifier
-                    .fillMaxHeight()
                     .fillMaxWidth(0.35f)
                     .focusGroup(),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(SPACE_LIST_CONTENT_VERTICAL),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AppActionButton(
                     modifier = Modifier,
+                    title = stringResource(R.string.run),
                     iconRes = R.drawable.baseline_play_circle_filled_24,
-                    labelRes = R.string.run,
                     onShortClick = {
                         val result = IntentUtils.launchActivity(
                             context,
@@ -222,12 +222,10 @@ fun AppActionDialog(
                     },
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
                 AppActionButton(
                     modifier = Modifier,
+                    title = stringResource(R.string.uninstall),
                     iconRes = R.drawable.baseline_delete_24,
-                    labelRes = R.string.uninstall,
                     onShortClick = {
                         val type: ApplicationUtils.Companion.ApplicationType =
                             ApplicationUtils.getApplicationType(
@@ -290,23 +288,19 @@ fun AppActionDialog(
                     },
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
                 AppActionButton(
                     modifier = Modifier,
+                    title = stringResource(R.string.info),
                     iconRes = R.drawable.baseline_info_24,
-                    labelRes = R.string.info,
                     onShortClick = {
                         IntentUtils.launchApplicationDetailsSettings(context, item.packageName)
                     },
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
-
                 AppActionButton(
                     modifier = Modifier,
+                    title = stringResource(R.string.app_market),
                     iconRes = R.drawable.baseline_store_24,
-                    labelRes = R.string.app_market,
                     onShortClick = {
                         val result = IntentUtils.openAppInMarket(
                             context,
